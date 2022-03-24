@@ -1,0 +1,136 @@
+@import 'my_variables.scss';
+@import '../../../node_modules/bootstrap/scss/bootstrap.scss';
+@import '../../../node_modules/bootstrap-vue/src/index.scss';
+// @import '../../assets/scss/video-js.css';
+
+@font-face {
+  font-family: "Poppins-Light";
+  src: url("/fonts/EAG - WEB Fonts/BODY COPY font/Poppins/Poppins-Light.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins-Medium";
+  src: url("/fonts/EAG - WEB Fonts/BODY COPY font/Poppins/Poppins-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
+html, body {
+  font-family: 'Poppins-Medium';
+  height: 100%;
+  color: #fff;
+}
+
+a {
+  color: $info;
+}
+a:hover {
+  color: $warning;
+  text-decoration: none;
+}
+
+.icon {
+  width: 100px;
+  height: 100px;
+}
+
+.collection-image {
+  border: 12px solid #fff;
+  border-radius: 4px;
+  padding: 5px;
+  width: auto;
+  height: 600px;
+}
+
+.collection-image:hover {
+  box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.center {
+  margin: auto;
+  width: 70%;
+  border: 0px solid green;
+  padding: 10px;
+}
+@media only screen and (max-width: 900px) {
+  .center {
+    width: 85%;
+  }
+}
+
+.text-900 {
+  font-weight: 900;
+}
+.text-700 {
+  font-weight: 700;
+}
+.text-300 {
+  font-weight: 300;
+}
+.text-dark {
+  color: $dark;
+}
+.text-tab {
+  color: #9e9e9e;
+  font-weight: 300;
+}
+.text-white {
+  color: #fff;
+}
+.text-small {
+  font-size: 0.8rem;
+}
+.hash1-image {
+  width: 100%;
+  border-radius: 0%;
+}
+#asset-details .hash1-image {
+  border: none;
+}
+.item-image {
+  height: auto;
+  width: 100%;
+  border: 0pt solid $danger;
+  align-items: center;
+}
+.item-image-preview {
+  height: auto;
+  width: 100%;
+  border: 0pt solid $danger;
+  align-items: center;
+}
+.pointer {
+  cursor: pointer;
+}
+
+::placeholder {
+  color: #e2e2e2 !important;
+}
+
+#purchase-modal .modal-body {
+  background-color: #fff;
+  text-align: left !important;
+}
+#purchase-modal .modal-content {
+  color: #000;
+}
+#purchase-modal .modal-dialog {
+  background-color: #fff;
+  color: #000;
+  text-align: left !important;
+}
+#purchase-modal .modal-footer {
+  display: none;
+}
+#purchase-modal .modal-header {
+  display: none;
+}

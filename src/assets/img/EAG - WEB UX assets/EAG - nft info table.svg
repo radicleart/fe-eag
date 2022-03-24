@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.3.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 600 124" style="enable-background:new 0 0 600 124;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:url(#SVGID_1_);}
+	.st1{fill:url(#SVGID_2_);}
+	.st2{fill:url(#SVGID_3_);}
+	.st3{fill:url(#SVGID_4_);}
+	.st4{fill:url(#SVGID_5_);}
+	.st5{fill:#43AFEF;}
+	.st6{fill:url(#SVGID_6_);}
+	.st7{fill:url(#SVGID_7_);}
+	.st8{fill:#2063AF;}
+	.st9{fill:url(#SVGID_8_);}
+	.st10{fill:#666666;}
+	.st11{fill:#FFFFFF;}
+	.st12{fill:#B3B3B3;}
+	.st13{font-family:'Orbitron-Regular';}
+	.st14{font-size:9px;}
+	.st15{fill:none;stroke:#FFFFFF;stroke-miterlimit:10;}
+	.st16{fill:none;stroke:#666666;stroke-width:3.24;stroke-miterlimit:10;}
+</style>
+<g>
+	<g>
+		<g>
+			<text transform="matrix(1 0 0 1 145.8462 58.6145)"><tspan x="0" y="0" class="st10 st13 st14">VOLUME</tspan><tspan x="-13.67" y="12" class="st10 st13 st14">227,982 STX</tspan></text>
+		</g>
+		<rect x="111.59" y="39.6" class="st15" width="119.2" height="44.8"/>
+	</g>
+	<g>
+		<g>
+			<text transform="matrix(1 0 0 1 243.606 58.6145)"><tspan x="0" y="0" class="st10 st13 st14">FLOOR PRICE</tspan><tspan x="17.13" y="12" class="st10 st13 st14">311 STX</tspan></text>
+		</g>
+		<rect x="230.79" y="39.6" class="st15" width="103.74" height="44.8"/>
+	</g>
+	<g>
+		<g>
+			<text transform="matrix(1 0 0 1 347.311 58.6145)"><tspan x="0" y="0" class="st10 st13 st14">OWNERS</tspan><tspan x="10.7" y="12" class="st10 st13 st14">1,224</tspan></text>
+		</g>
+		<rect x="334.79" y="39.6" class="st15" width="76.81" height="44.8"/>
+	</g>
+	<g>
+		<g>
+			<text transform="matrix(1 0 0 1 432.479 58.6145)"><tspan x="0" y="0" class="st10 st13 st14">ITEMS</tspan><tspan x="0.01" y="12" class="st10 st13 st14">5,626</tspan></text>
+		</g>
+		<rect x="411.6" y="39.6" class="st15" width="76.81" height="44.8"/>
+	</g>
+</g>
+</svg>
