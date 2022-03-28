@@ -1,11 +1,11 @@
 <template>
-<div class="d-flex justify-content-end" v-if="doPaging && numberOfItems > pageSize">
+<div v-if="doPaging && pagingData.numberOfItems > pagingData.pageSize">
   <div class="fixedElement">
   <b-pagination
     class="page-number"
     v-model="currentPage"
-    :total-rows="numberOfItems"
-    :per-page="pageSize"
+    :total-rows="pagingData.numberOfItems"
+    :per-page="pagingData.pageSize"
     aria-controls="my-table"
     @input="gotoPage"
     limit="3"
@@ -32,7 +32,7 @@ export default {
       this.currentPage = this.page
     }
   },
-  props: ['numberOfItems', 'pageSize'],
+  props: ['pagingData'],
   data () {
     return {
       page: 0,
@@ -53,30 +53,5 @@ export default {
 }
 </script>
 <style>
-.page-item .page-link {
-    background-color: #212121 !important;
-    border-color: #212121 !important;
-    color: #fff !important;
-}
-.page-item.disabled .page-link {
-  background-color: #212121 !important;
-  border-color: #212121 !important;
-  color: #fff !important;
-}
-.page-item.active .page-link {
-    color: #212121 !important;
-    background-color: #ffd54f !important;
-    border-color: #ffd54f !important;
-}
-.page-item:last-child .page-link {
-    border-color: #212121 !important;
-    background-color: #212121 !important;
-    color: #fff !important;
-}
-.page-item:first-child .page-link {
-    border-color: #212121 !important;
-    background-color: #212121 !important;
-    color: #fff !important;
-}
 
 </style>

@@ -12,7 +12,6 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@stacks/network": "^3.3.0",
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.4",
@@ -20,7 +19,7 @@
     "prismic-javascript": "^3.0.2",
     "prismic-vue": "^2.0.1",
     "register-service-worker": "^1.6.2",
-    "risidio-pay": "^0.9.31",
+    "risidio-pay": "^0.9.32",
     "video.js": "^7.18.1",
     "vue": "^2.6.14",
     "vue-horizontal": "^0.8.12",

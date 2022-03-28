@@ -1,24 +1,30 @@
 <template>
 <div :id="(isHomePage) ? 'wallet-dd-home' : 'wallet-dd'">
-<b-navbar toggleable="md" type="light" class="m-0 p-0">
+<b-navbar class="">
   <b-navbar-brand href="#" to="/">
-    <LogoNeonIcon v-if="isHomePage" class="pointer" style="width: 350px; height: auto;"/>
-    <LogoGreyIcon v-else class="pointer" style="width: 350px; height: auto;"/>
+    <LogoNeonIcon v-if="isHomePage" class="d-none d-md-block pointer" style="width: 350px; height: auto;"/>
+    <LogoGreyIcon v-else class="d-none d-md-block pointer" style="width: 350px; height: auto;"/>
+    <PlugGreyIcon class="d-md-none d-sm-block pointer icon" style="width: 100px; height: auto;"/>
   </b-navbar-brand>
-  <ExchangeRates class="no-focus-outline ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
-  <b-navbar-toggle class="" target="nav-collapse" style="width: 350px; height: auto;">
+  <!--
+  <b-navbar-toggle class="" target="nav-collapse">
     <template v-slot:default="{ expanded }">
-      <WalletNeonIcon v-if="expanded && isHomePage" class="pointer" style="width: 350px; height: auto;"/>
-      <WalletGreyIcon v-else class="pointer" style="width: 350px; height: auto;"/>
+      <WalletNeonIcon v-if="expanded && isHomePage" class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
+      <WalletNeonIcon v-if="!expanded && isHomePage" class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
+      <WalletGreyIcon v-if="expanded && !isHomePage" class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
+      <WalletGreyIcon v-if="!expanded && !isHomePage" class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
     </template>
   </b-navbar-toggle>
-  <b-collapse id="nav-collapse" is-nav>
+  -->
+  <b-collapse id="nav-collapse" is-nav class="show">
+    <b-navbar class="">
+      <ExchangeRates class="d-none d-sm-block"/>
+    </b-navbar>
     <b-navbar class="ml-auto">
-      <ExchangeRates class="mr-4 nav-text"/>
-      <b-nav-item-dropdown style="list-style: none;" class="ml-2 nav-text" right v-if="profile.loggedIn" no-caret>
+      <b-nav-item-dropdown style="list-style: none;" class="" right v-if="profile.loggedIn" no-caret>
         <template v-slot:button-content>
-          <WalletNeonIcon v-if="isHomePage" class="pointer icon"/>
-          <WalletGreyIcon v-else class="pointer icon"/>
+          <WalletNeonIcon v-if="isHomePage" class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
+          <WalletGreyIcon v-else class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
         </template>
         <b-dropdown-item>{{username}}</b-dropdown-item>
         <b-dropdown-divider />
@@ -67,6 +73,7 @@ import WalletNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - wallet icon n
 import WalletGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - wallet icon grey.svg'
 import LogoNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - logo neon.svg'
 import LogoGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - logo grey.svg'
+import PlugGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - plug icon grey.svg'
 
 export default {
   name: 'MainNavbar',
@@ -80,7 +87,8 @@ export default {
     WalletNeonIcon,
     WalletGreyIcon,
     LogoNeonIcon,
-    LogoGreyIcon
+    LogoGreyIcon,
+    PlugGreyIcon
   },
   watch: {
   },

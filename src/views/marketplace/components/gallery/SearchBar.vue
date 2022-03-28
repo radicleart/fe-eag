@@ -1,11 +1,11 @@
 <template>
-<div :class="displayClass">
+<div :class="displayClass" class="mt-2">
   <div v-if="mode.indexOf('wallet') > -1">
     <div>
       <div class="pointer" v-if="assetNames.length > 0">
         <b-nav-item-dropdown class="" no-caret>
           <template v-slot:button-content class="xg-dd">
-            <span class="text-warning">filter by asset</span>
+            <span class="text-secondary">filter by asset</span>
           </template>
           <b-dropdown-item v-for="(assetName, index) in assetNames" :key="index" class="pl-0 m-0"  @click.prevent="toggleSearching(assetName)">{{assetName}}</b-dropdown-item>
         </b-nav-item-dropdown>
@@ -27,18 +27,18 @@
         ></b-form-input>
       </div>
       <div class="pointer ml-3" v-if="showReverseDir()">
-        <span @click="reverseDir()"><span class="text-warning" v-if="query.sortDir === 'sortDown'">most recent</span><span v-else>least recent</span></span>
+        <span @click="reverseDir()"><span class="text-secondary" v-if="query.sortDir === 'sortDown'">most recent</span><span v-else>least recent</span></span>
       </div>
       <div class="pointer ml-3" v-if="showUnclaimed()">
-        <span @click="unclaimed()"><span class="text-warning" v-if="query.claims === 'claimed'">claimed</span><span v-else>unclaimed</span></span>
+        <span @click="unclaimed()"><span class="text-secondary" v-if="query.claims === 'claimed'">claimed</span><span v-else>unclaimed</span></span>
       </div>
       <div class="pointer ml-3" v-if="showEditions()">
-        <span @click="reverseEditions()"><span class="text-warning" v-if="query.editions">all editions</span><span v-else>first editions</span></span>
+        <span @click="reverseEditions()"><span class="text-secondary" v-if="query.editions">all editions</span><span v-else>first editions</span></span>
       </div>
       <div class="pointer" v-if="showSelling()">
         <b-nav-item-dropdown class="" no-caret :right="(mode !== 'search')">
           <template v-slot:button-content class="xg-dd">
-            <span class="text-warning" v-if="query.onSale">on sale</span><span v-else>on sale</span>
+            <span class="text-secondary" v-if="query.onSale">on sale</span><span v-else>on sale</span>
           </template>
           <b-dropdown-item class="pl-0 m-0"  @click.prevent="reverseOnSale('lowest')">lowest price</b-dropdown-item>
           <b-dropdown-item class="pl-0 m-0"  @click.prevent="reverseOnSale('highest')">highest price</b-dropdown-item>
@@ -56,7 +56,7 @@
           unchecked-value="one"
           @change="toggleSearching"
           >
-          <div class="text-white pointer"><b>All Collections</b></div>
+          <div class="pointer"><b>All Collections</b></div>
         </b-form-checkbox>
       </div>
     </b-form>
@@ -119,7 +119,7 @@ export default {
       this.toggleSearching()
     },
     showUnclaimed () {
-      return this.loopRun && (this.loopRun.contractId.indexOf('loopbomb') > -1 || this.loopRun.contractId.indexOf('crashpunks') > -1)
+      return false // this.loopRun && (this.loopRun.contractId.indexOf('loopbomb') > -1 || this.loopRun.contractId.indexOf('crashpunks') > -1)
     },
     showReverseDir () {
       if (this.mode === 'loopbomb') return true

@@ -20,7 +20,7 @@ import { APP_CONSTANTS } from '@/app-constants'
 import ListingInfo from '@/views/marketplace/components/gallery/common/ListingInfo'
 
 export default {
-  name: 'NftImage',
+  name: 'NftImageMy',
   components: {
     ListingInfo
   },

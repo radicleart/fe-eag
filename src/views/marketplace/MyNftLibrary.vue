@@ -1,17 +1,14 @@
 <template>
-<div v-if="loaded" class="ml-5 bg-light">
+<div class="ml-5 bg-light" :key="componentKey">
   <CollectionsNavigation :context="'my-nfts'" :loopRun="loopRun" />
-  <b-container :key="componentKey" fluid class="px-5 text-white mt-5">
+  <b-container fluid class="px-5 text-white mt-5">
     <b-row>
       <b-col cols="12">
-        <MyPageableItems/>
+        <MyPageableItems :loopRun="loopRun"/>
       </b-col>
     </b-row>
   </b-container>
 </div>
-<b-container v-else>
-  No NFTs found.
-</b-container>
 </template>
 
 <script>
@@ -27,17 +24,35 @@ export default {
   data () {
     return {
       componentKey: 0,
-      loaded: false
+      currentRunKey: null,
+      loopRun: null,
+      filter: null
     }
   },
   watch: {
     '$route' () {
-      this.componentKey++
+      this.currentRunKey = this.$route.params.collectionId
+      this.loadLoop(true)
     }
   },
   mounted () {
+    this.currentRunKey = this.$route.params.collectionId
+    this.loadLoop()
   },
   methods: {
+    loadLoop (reset) {
+      if (!this.currentRunKey) {
+        this.loopRun = null
+        this.loaded = true
+        if (reset) this.componentKey++
+      } else {
+        this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.currentRunKey).then((loopRun) => {
+          this.loopRun = loopRun
+          this.loaded = true
+          if (reset) this.componentKey++
+        })
+      }
+    }
   },
   computed: {
   }

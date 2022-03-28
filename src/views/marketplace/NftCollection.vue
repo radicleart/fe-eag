@@ -1,11 +1,11 @@
 <template>
 <div v-if="loaded && (loopRun && loopRun.status !== 'disabled')" class="ml-5 bg-light">
-  <CollectionsNavigation :loopRun="loopRun" />
-  <b-container :key="componentKey" fluid class="px-5 text-white mt-5">
+  <CollectionsNavigation @updateResults="updateResults" @changePage="gotoPage" :loopRun="loopRun" :filter="filter" :pagingData="pagingData"/>
+  <b-container fluid class="px-5 text-white mt-5">
     <b-row>
       <b-col cols="12">
         <div class="mb-4" v-if="(loopRun.status === 'unrevealed' || loopRun.status === 'active' || loopRun.status === 'inactive')">
-          <PageableItems v-on="$listeners" @updateResults="updateResults" @tokenCount="tokenCount" :defQuery="defQuery" :loopRun="loopRun"/>
+          <PageableItems :key="componentKey" v-on="$listeners" :resultSet="resultSet" :loopRun="loopRun"/>
         </div>
       </b-col>
     </b-row>
@@ -22,6 +22,9 @@ import { APP_CONSTANTS } from '@/app-constants'
 import PageableItems from '@/views/marketplace/components/gallery/PageableItems'
 import CollectionsNavigation from '@/views/marketplace/components/gallery/CollectionsNavigation'
 
+const STX_CONTRACT_ADDRESS = process.env.VUE_APP_STACKS_CONTRACT_ADDRESS
+const STX_CONTRACT_NAME = process.env.VUE_APP_STACKS_CONTRACT_NAME
+
 export default {
   name: 'NftCollection',
   components: {
@@ -30,12 +33,20 @@ export default {
   },
   watch: {
     '$route' () {
-      this.reload()
+      // this.reload()
     }
   },
   data () {
     return {
+      pagingData: {
+        pageSize: 10,
+        offset: 1,
+        numberOfItems: 0
+      },
+      resultSet: null,
+      componentKey: 0,
       loaded: false,
+      filter: 'collection',
       mintPasses: 0,
       defQuery: {
         query: null,
@@ -49,21 +60,78 @@ export default {
         sortDir: 'sortDown'
       },
       loopRun: null,
-      componentKey: 0,
       minted: false,
       numbTokens: 0
     }
   },
   mounted () {
+    if (this.$route.params.offset) this.pagingData.offset = Number(this.$route.params.offset)
+    if (this.$route.params.pageSize) this.pagingData.pageSize = Number(this.$route.params.pageSize)
+    if (this.pagingData.pageSize > 100) this.pagingData.pageSize = 50
+    const $self = this
+    let resizeTimer
+    if (this.loopRun) this.pagingData.numberOfItems = this.loopRun.tokenCount
     this.reload()
+
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(function () {
+        $self.componentKey += 1
+      }, 400)
+    })
+    window.onscroll = () => {
+      const bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
+      if (bottomOfWindow) {
+      }
+    }
   },
   methods: {
+    updateResults (data) {
+      this.defQuery = data.query
+      this.$router.push('/nft-collection/' + this.loopRun.currentRunKey + '?' + this.getQueryString(this.defQuery))
+      this.fetchPage(this.pagingData.offset - 1, true, this.defQuery)
+    },
+    gotoPage (page) {
+      this.$router.push('/nft-collection/' + this.loopRun.currentRunKey + '/' + page + '/' + this.pagingData.pageSize)
+      this.fetchPage(page - 1, true, this.defQuery)
+    },
+    fetchPage (page, reset, query) {
+      // NB adding the contract id negates the search by runKey (ie by collectionId)
+      const data = {
+        runKey: (this.loopRun) ? this.loopRun.currentRunKey : null,
+        query: this.getQueryString(query),
+        page: page,
+        pageSize: this.pagingData.pageSize
+      }
+      this.resultSet = []
+      if (query.allCollections !== 'all') {
+        data.contractId = (this.loopRun) ? this.loopRun.contractId : STX_CONTRACT_ADDRESS + '.' + STX_CONTRACT_NAME
+        this.$store.dispatch('rpayStacksContractStore/fetchTokensByContractId', data).then((result) => {
+          this.resultSet = result.gaiaAssets
+          this.tokenCount = result.tokenCount
+          this.pagingData.numberOfItems = result.tokenCount
+          this.$emit('tokenCount', { numbTokens: result.tokenCount })
+          if (reset) this.componentKey++
+          this.loaded = true
+        })
+      } else {
+        this.$store.dispatch('rpayStacksContractStore/fetchTokensByFilters', data).then((result) => {
+          this.resultSet = result.gaiaAssets
+          this.tokenCount = result.tokenCount
+          this.pagingData.numberOfItems = result.tokenCount
+          this.$emit('tokenCount', { numbTokens: result.tokenCount })
+          if (reset) this.componentKey++
+          this.loaded = true
+        })
+      }
+    },
     reload () {
       this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.$route.params.collectionId).then((loopRun) => {
         if (!loopRun) {
           this.$router.push('/')
         }
         this.loopRun = loopRun
+        this.fetchPage(this.pagingData.offset - 1, false, this.defQuery)
         if (this.profile.loggedIn) {
           const data = {
             stxAddress: this.profile.stxAddress,
@@ -77,22 +145,25 @@ export default {
             }
           })
         }
-        this.loaded = true
       })
     },
-    availableMessage () {
-      if (this.loopRun.versionLimit - this.loopRun.tokenCount > 0) {
-        return this.loopRun.versionLimit - this.loopRun.tokenCount + ' available to mint'
+    getQueryString (query) {
+      let queryStr = '?'
+      if (this.loopRun && this.loopRun.currentRunKey === 'my_first_word') {
+        queryStr += 'sortDir=sortUp&'
       } else {
-        return this.loopRun.versionLimit + ' minted'
+        queryStr += 'sortDir=' + query.sortDir + '&'
       }
+      if (query.query) queryStr += 'query=' + query.query + '&'
+      if (query.edition) queryStr += 'edition=' + query.edition + '&'
+      if (query.onSale) queryStr += 'onSale=true&'
+      if (query.claims) queryStr += 'claims=' + query.claims + '&'
+      if (query.editions) queryStr += 'editions=true&'
+      if (query.sortField) queryStr += 'sortField=' + query.sortField + '&'
+      return queryStr
     },
     tokenCount (data) {
       this.numbTokens = data.numbTokens
-    },
-    updateResults (data) {
-      this.defQuery = data.query
-      this.componentKey++
     },
     refresh (data) {
       if (data.opcode === 'show-collection') {

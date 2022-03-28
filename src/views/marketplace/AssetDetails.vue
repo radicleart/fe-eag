@@ -1,6 +1,6 @@
 <template>
 <div v-if="!loading" class="ml-5 bg-light">
-  <CollectionsNavigation :loopRun="loopRun" :gaiaAsset="gaiaAsset"/>
+  <CollectionsNavigation :loopRun="loopRun" :gaiaAsset="gaiaAsset" :filter="'asset'"/>
   <b-container fluid class="px-5 text-white mt-5">
     <div v-if="!loading && gaiaAsset && loopRun">
       <NftDisplay v-on="$listeners" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>

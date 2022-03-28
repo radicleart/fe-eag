@@ -1,12 +1,12 @@
 <template>
 <b-nav-item-dropdown class="no-focus-outline" style="list-style: none;" no-caret v-if="exchangeRate">
   <template v-slot:button-content>
-    <span :class="(isHomePage) ? 'text-info' : 'text-primary'">
-      <StxNeonIcon v-if="isHomePage" class="icon"/>
-      <StxGreyIcon v-else class="icon"/>
+    <div :class="(isHomePage) ? 'text-info' : 'text-primary'">
+      <StxNeonIcon v-if="isHomePage" class=""/>
+      <StxGreyIcon v-else class=""/>
       <span style="position: relative; left: -20px;">{{amountTrunc}}</span>
       <span style="position: relative; left: -10px;" v-html="exchangeRate.currency"></span>
-    </span>
+    </div>
   </template>
   <b-dropdown-item style="list-style: none;" class="no-focus-outline pl-0 m-0" v-for="(rate, idx) in tickerRates" :key="idx" @click.prevent="changeFiatCurrency(rate.currency)">
     <div class="d-flex justify-content-between mb-0"><div style="min-width: 60px;">{{rate.currency}}</div> <div style="min-width: 80px;">{{truncateAmount(rate.stxPrice)}} STX</div></div>

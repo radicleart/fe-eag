@@ -1,20 +1,18 @@
 <template>
 <div style="height: 100%" class="ml-5 bg-light">
-  <CollectionsNavigation />
-  <b-container fluid class="py-5">
-    <b-row>
+  <CollectionsNavigation :filter="filter"/>
+  <div class="py-5">
       <b-col cols="12" ref="gallery">
         <vue-horizontal v-if="loaded">
-          <div class="mr-5" v-for="(loopRun, index) in allLoopRuns" :key="index">
-            <CollectionImage :loopRun="loopRun"/>
+          <div class="pr-5" v-for="(loopRun, index) in allLoopRuns" :key="index">
+            <CollectionImage :loopRun="loopRun" :index="index"/>
           </div>
         </vue-horizontal>
         <b-container v-else>
           No Collections found.
         </b-container>
       </b-col>
-    </b-row>
-  </b-container>
+  </div>
 </div>
 </template>
 
@@ -35,11 +33,13 @@ export default {
   },
   watch: {
     '$route' () {
-      this.reload()
+      this.filter = this.$route.query.filter
     }
   },
   data () {
     return {
+      popoverData: {},
+      filter: null,
       loaded: false,
       rightSpace: 0
     }

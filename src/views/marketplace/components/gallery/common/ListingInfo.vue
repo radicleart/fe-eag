@@ -1,11 +1,11 @@
 <template>
-<div class="bg-white text-primary mr-5 text-small">
+<div class="bg-white text-primary mr-5 text-small" v-if="collection">
   <b-container v-if="context === 'collection'">
     <b-row class="py-2 border-bottom">
-      <b-col cols="12">{{loopRun.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
+      <b-col cols="12">{{collection.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
     </b-row>
     <b-row class="py-2 border-bottom">
-      <b-col cols="12">{{loopRun.makerName}}</b-col>
+      <b-col cols="12">{{collection.makerName}}</b-col>
     </b-row>
     <b-row class="py-2 border-bottom" v-if="asset.name">
       <b-col cols="12">{{asset.name}}</b-col>
@@ -38,9 +38,22 @@ export default {
   props: ['context', 'asset', 'loopRun'],
   data () {
     return {
+      loaded: false,
+      collection: null
     }
   },
   mounted () {
+    if (!this.loopRun) {
+      this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.asset.contractAsset.contractId).then((loopRun) => {
+        this.collection = loopRun
+        // this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex })
+        this.loaded = true
+      })
+    } else {
+      this.collection = this.loopRun
+      this.loaded = true
+    }
+
     const $self = this
     if (window.eventBus && window.eventBus.$on) {
       window.eventBus.$on('rpayEvent', function (data) {
@@ -62,7 +75,7 @@ export default {
       return false
     },
     openPurchaceDialog: function () {
-      this.$emit('openModal', { opcode: 'open-purchase', asset: this.asset, loopRun: this.loopRun })
+      this.$emit('openModal', { opcode: 'open-purchase', asset: this.asset, loopRun: this.collection })
     }
   },
   computed: {

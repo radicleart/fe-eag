@@ -1,8 +1,8 @@
 <template>
-  <div class="mx-4 text-primary d-flex justify-content-between" v-if="showFooter">
-    <div class="pt-5">
-      <span class="text-700 mr-3">Electric Art Gallery &copy; 2022</span>
-      <span class="text-300">Brighton, England, X0 0XX • UK • info@electricart.gallery</span>
+  <div :id="(isHomePage) ? 'wallet-dd-home' : 'wallet-dd'" class="mx-4 text-primary d-flex justify-content-between" v-if="showFooter">
+    <div class="d-flex pt-5">
+      <div class="text-700 mr-3">Electric Art Gallery &copy; 2022</div>
+      <div class="d-none d-md-block text-300">Brighton, England, X0 0XX • UK • info@electricart.gallery</div>
     </div>
     <div class="text-info">
       <PlugGreyIcon class="icon"/>
@@ -47,6 +47,9 @@ export default {
     }
   },
   computed: {
+    isHomePage () {
+      return this.$route.name === 'home'
+    },
     showFooter () {
       return this.$route.name !== 'home'
     },

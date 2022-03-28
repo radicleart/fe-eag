@@ -1,24 +1,5 @@
 <template>
-<div class="mb-4" v-if="!loading">
-  <div class="border-bottom d-flex justify-content-between" v-if="loopRun">
-    <div class="d-flex justify-content-start">
-      <!--
-      <svg width="50" height="50" viewBox="0 0 100 100">
-        <ellipse cx="50" cy="50" rx="50" ry="50" />
-      </svg>
-      <svg width="50" height="50" viewBox="0 0 100 100" :src="searchGrey">
-      </svg>
-      <SearchNeon viewBox="0 0 100 100" width="100px" height="auto" class="logo">
-      </SearchNeon>
-      -->
-      <SearchNeon @click="searching = !searching" v-if="!searching" class="pointer icon"/>
-      <SearchGrey @click="searching = !searching" v-else class="pointer icon"/>
-      <SearchBar v-if="searching" :displayClass="'text-small'" v-on="$listeners" :loopRun="loopRun" :mode="loopRun.type"/>
-    </div>
-    <div>
-      <Pagination @changePage="gotoPage" :pageSize="pageSize" :numberOfItems="numberOfItems" v-if="numberOfItems > 0"/>
-    </div>
-  </div>
+<div class="mb-4" v-if="resultSet">
   <vue-horizontal>
     <div v-for="(asset, index) of resultSet" :key="index">
       <NftImage v-on="$listeners" @update="update" :loopRun="loopRun" :asset="asset"/>
@@ -29,116 +10,29 @@
 
 <script>
 import NftImage from './NftImage'
-import Pagination from './common/Pagination'
 import { APP_CONSTANTS } from '@/app-constants'
 import VueHorizontal from 'vue-horizontal'
-import SearchBar from '@/views/marketplace/components/gallery/SearchBar'
-import SearchNeon from '@/assets/img/EAG - WEB UX assets/EAG - search icon neon.svg'
-import SearchGrey from '@/assets/img/EAG - WEB UX assets/EAG - search icon grey.svg'
-
-const STX_CONTRACT_ADDRESS = process.env.VUE_APP_STACKS_CONTRACT_ADDRESS
-const STX_CONTRACT_NAME = process.env.VUE_APP_STACKS_CONTRACT_NAME
 
 export default {
   name: 'PageableItems',
   components: {
-    SearchNeon,
-    SearchGrey,
-    SearchBar,
     NftImage,
-    Pagination,
     VueHorizontal
   },
-  props: ['loopRun', 'defQuery'],
+  props: ['loopRun', 'resultSet'],
   data () {
     return {
-      searching: false,
-      showMpInfo: false,
-      resultSet: [],
-      edition: null,
-      trait: '',
-      pageSize: 10,
-      offset: 1,
       loading: true,
-      doPaging: true,
-      numberOfItems: 0,
-      componentKey: 0,
       containerHeight: 0
     }
   },
   mounted () {
-    this.collection = this.$route.params.collection
-    if (this.$route.params.offset) this.offset = Number(this.$route.params.offset)
-    if (this.$route.params.pageSize) this.pageSize = Number(this.$route.params.pageSize)
-    if (this.pageSize > 100) this.pageSize = 50
-    const $self = this
-    let resizeTimer
-    if (this.loopRun) this.numberOfItems = this.loopRun.tokenCount
-    this.fetchPage(this.offset - 1, false, this.defQuery)
-    this.loading = false
-
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer)
-      resizeTimer = setTimeout(function () {
-        $self.componentKey += 1
-      }, 400)
-    })
-    window.onscroll = () => {
-      const bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
-      if (bottomOfWindow) {
-      }
-    }
+    console.log(this.resultSet)
   },
   methods: {
     update (data) {
       if (data.opcode === 'report-height') {
         this.containerHeight = Math.max(this.containerHeight, data.containerHeight)
-      }
-    },
-    gotoPage (page) {
-      this.$router.push('/nft-collection/' + this.loopRun.currentRunKey + '/' + page + '/' + this.pageSize)
-      this.fetchPage(page - 1, false, this.defQuery)
-    },
-    fetchPage (page, reset, query) {
-      let queryStr = '?'
-      if (this.loopRun && this.loopRun.currentRunKey === 'my_first_word') {
-        queryStr += 'sortDir=sortUp&'
-      } else {
-        queryStr += 'sortDir=' + query.sortDir + '&'
-      }
-      if (query.query) queryStr += 'query=' + query.query + '&'
-      if (query.edition) queryStr += 'edition=' + query.edition + '&'
-      if (query.onSale) queryStr += 'onSale=true&'
-      if (query.claims) queryStr += 'claims=' + query.claims + '&'
-      if (query.editions) queryStr += 'editions=true&'
-      if (query.sortField) queryStr += 'sortField=' + query.sortField + '&'
-      // NB adding the contract id negates the search by runKey (ie by collectionId)
-      const data = {
-        runKey: (this.loopRun) ? this.loopRun.currentRunKey : null,
-        query: queryStr,
-        page: page,
-        pageSize: this.pageSize
-      }
-      this.resultSet = []
-      if (query.allCollections !== 'all') {
-        data.contractId = (this.loopRun) ? this.loopRun.contractId : STX_CONTRACT_ADDRESS + '.' + STX_CONTRACT_NAME
-        this.$store.dispatch('rpayStacksContractStore/fetchTokensByContractId', data).then((result) => {
-          this.resultSet = result.gaiaAssets
-          this.tokenCount = result.tokenCount
-          this.numberOfItems = result.tokenCount
-          this.$emit('tokenCount', { numbTokens: result.tokenCount })
-          if (reset) this.componentKey++
-          this.loading = false
-        })
-      } else {
-        this.$store.dispatch('rpayStacksContractStore/fetchTokensByFilters', data).then((result) => {
-          this.resultSet = result.gaiaAssets
-          this.tokenCount = result.tokenCount
-          this.numberOfItems = result.tokenCount
-          this.$emit('tokenCount', { numbTokens: result.tokenCount })
-          if (reset) this.componentKey++
-          this.loading = false
-        })
       }
     }
   },

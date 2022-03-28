@@ -1,0 +1,19 @@
+{
+  "name": "StacksMate",
+  "short_name": "StacksMate",
+  "description": "StacksMate - get STX get Stacking - NFT jewelry made from the gold of Bitcoin.",
+  "start_url": "/",
+  "icons": [{
+    "src": "/img/logo/293x293.png",
+    "sizes": "293x293",
+    "type": "image/png"
+  }, {
+    "src": "/img/logo/586x586.png",
+    "sizes": "586x586",
+    "type": "image/png"
+  }],
+  "background_color": "#2E2E2E",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "theme_color": "#4B515D"
+}

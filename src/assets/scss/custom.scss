@@ -165,7 +165,7 @@ a:hover {
   color: $info;
 }
 #wallet-dd-home .dropdown-menu {
-  background-color: transparent;
+  background-color: #000;
 }
 #wallet-dd-home .dropdown-item {
   color: $info;
@@ -188,4 +188,16 @@ a:hover {
 #wallet-dd .dropdown-item:hover {
   background-color: #000;
   color: #fff !important;
+}
+
+/** paging **/
+.page-item .page-link {
+  background-color: #fff !important;
+  border-color: #fff !important;
+  color: $primary !important;
+}
+.page-item:first-child .page-link {
+  border-color: #fff !important;
+  background-color: #fff !important;
+  color: $primary !important;
 }
