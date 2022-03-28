@@ -106,7 +106,6 @@ export default {
       waitingImage: 'https://images.prismic.io/radsoc/f60d92d0-f733-46e2-9cb7-c59e33a15fc1_download.jpeg?auto=compress,format',
       mintPasses: 0,
       componentKey: 0,
-      loaded: false,
       batchOption: 1,
       mintingStatus: false,
       configuration: null,

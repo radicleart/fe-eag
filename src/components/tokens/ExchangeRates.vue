@@ -1,9 +1,14 @@
 <template>
-<b-nav-item-dropdown class="no-focus-outline " no-caret v-if="exchangeRate">
+<b-nav-item-dropdown class="no-focus-outline" style="list-style: none;" no-caret v-if="exchangeRate">
   <template v-slot:button-content>
-    <span class="text-info"><StxNeonIcon class="icon"/><span>{{amountTrunc}}</span> <span style="position: relative; left: 0px;" v-html="exchangeRate.currency"></span></span>
+    <span :class="(isHomePage) ? 'text-info' : 'text-primary'">
+      <StxNeonIcon v-if="isHomePage" class="icon"/>
+      <StxGreyIcon v-else class="icon"/>
+      <span style="position: relative; left: -20px;">{{amountTrunc}}</span>
+      <span style="position: relative; left: -10px;" v-html="exchangeRate.currency"></span>
+    </span>
   </template>
-  <b-dropdown-item class="no-focus-outline pl-0 m-0" v-for="(rate, idx) in tickerRates" :key="idx" @click.prevent="changeFiatCurrency(rate.currency)">
+  <b-dropdown-item style="list-style: none;" class="no-focus-outline pl-0 m-0" v-for="(rate, idx) in tickerRates" :key="idx" @click.prevent="changeFiatCurrency(rate.currency)">
     <div class="d-flex justify-content-between mb-0"><div style="min-width: 60px;">{{rate.currency}}</div> <div style="min-width: 80px;">{{truncateAmount(rate.stxPrice)}} STX</div></div>
   </b-dropdown-item>
 </b-nav-item-dropdown>
@@ -12,11 +17,13 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import StxNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - stax icon neon.svg'
+import StxGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - stax icon grey.svg'
 
 export default {
   name: 'ExchangeRates',
   components: {
-    StxNeonIcon
+    StxNeonIcon,
+    StxGreyIcon
   },
   data () {
     return {
@@ -49,20 +56,23 @@ export default {
     }
   },
   computed: {
+    isHomePage () {
+      return this.$route.name === 'home'
+    },
     amountTrunc () {
       const exchangeRate = this.exchangeRate
       // const tunced = Math.round(exchangeRate.amountStx * 10000)
       return (exchangeRate.stxPrice) ? (exchangeRate.stxPrice).toFixed(4) : 0
     },
     exchangeRate () {
-      const tickerRates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES_UNFILTERED]
+      const tickerRates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES]
       if (tickerRates.length > 0) {
         return tickerRates.find((o) => o.currency === this.defCur)
       }
       return null
     },
     tickerRates () {
-      const rates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES_UNFILTERED]
+      const rates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES]
       return rates
     }
   }

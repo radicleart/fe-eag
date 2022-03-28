@@ -4,7 +4,7 @@
     <div class="box">
       <b-link :to="'/nft-collection/' + loopRun.currentRunKey"><img @mouseover="showDetail()" class="pointer collection-image" :src="getCollectionImageUrl(loopRun)"/></b-link>
     </div>
-    <div class="bg-white text-tab box stack-top" v-if="showOverlay">
+    <div class="bg-white text-primary box stack-top" v-if="showOverlay">
         <div class="py-2">{{loopRun.currentRun}}</div>
         <div class="py-2 border-top">{{loopRun.makerName}}</div>
         <div class="py-2 border-top">LIMIT: {{loopRun.versionLimit}}</div>

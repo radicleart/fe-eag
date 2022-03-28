@@ -1,5 +1,5 @@
 <template>
-<div class="bg-white text-tab mr-5 text-small">
+<div class="bg-white text-primary mr-5 text-small">
   <b-container v-if="context === 'collection'">
     <b-row class="py-2 border-bottom">
       <b-col cols="12">{{loopRun.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>

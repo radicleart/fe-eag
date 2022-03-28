@@ -4,6 +4,22 @@
 // @import '../../assets/scss/video-js.css';
 
 @font-face {
+  font-family: "Orbitron-Medium";
+  src: url("/fonts/EAG - WEB Fonts/SUB MENU and NFT INFO font/Barlow/Barlow-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Orbitron-Medium";
+  src: url("/fonts/EAG - WEB Fonts/NAV and MENU font/Orbitron/Orbitron-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Poppins-Light";
   src: url("/fonts/EAG - WEB Fonts/BODY COPY font/Poppins/Poppins-Light.ttf") format("truetype");
   font-style: normal;
@@ -25,11 +41,25 @@ html, body {
   color: #fff;
 }
 
-a {
+#wallet-dd-home {
+  font-family: 'Orbitron-Medium';
+}
+#wallet-dd {
+  font-family: 'Orbitron-Medium';
+}
+
+#home-page a {
   color: $info;
 }
-a:hover {
+#home-page a:hover {
   color: $warning;
+  text-decoration: none;
+}
+a {
+  color: $gray-500;
+}
+a:hover {
+  color: $dark;
   text-decoration: none;
 }
 
@@ -43,7 +73,7 @@ a:hover {
   border-radius: 4px;
   padding: 5px;
   width: auto;
-  height: 600px;
+  height: 400px;
 }
 
 .collection-image:hover {
@@ -78,10 +108,6 @@ a:hover {
 }
 .text-dark {
   color: $dark;
-}
-.text-tab {
-  color: #9e9e9e;
-  font-weight: 300;
 }
 .text-white {
   color: #fff;
@@ -133,4 +159,33 @@ a:hover {
 }
 #purchase-modal .modal-header {
   display: none;
+}
+
+#wallet-dd-home {
+  color: $info;
+}
+#wallet-dd-home .dropdown-menu {
+  background-color: transparent;
+}
+#wallet-dd-home .dropdown-item {
+  color: $info;
+}
+#wallet-dd-home .dropdown-item:hover {
+  color: #000 !important;
+  background-color: $info;
+}
+
+#wallet-dd {
+  color: $primary;
+}
+#wallet-dd .dropdown-menu {
+  background-color: #fff;
+}
+#wallet-dd .dropdown-item {
+  color: $primary;
+  background-color: transparent;
+}
+#wallet-dd .dropdown-item:hover {
+  background-color: #000;
+  color: #fff !important;
 }

@@ -18,7 +18,7 @@ export default {
   },
   mounted () {
     this.$store.dispatch('rpayStacksContractStore/fetchBnsNames', [this.owner]).then((bnsNames) => {
-      if (bnsNames) {
+      if (bnsNames && bnsNames.length > 0) {
         this.bnsName = bnsNames[0].bnsEntry
       }
     })

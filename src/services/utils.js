@@ -1,16 +1,9 @@
 import crypto from 'crypto'
-import {
-  hexToCV,
-  intToHexString, leftPadHexToLength
-} from '@stacks/transactions'
 import dataUriToBuffer from 'data-uri-to-buffer'
 import { c32address, c32addressDecode } from 'c32check'
 import { makeECPrivateKey, publicKeyToAddress, signECDSA, verifyECDSA, encryptECIES, decryptECIES } from '@stacks/encryption'
 import { SECP256K1Client } from 'jsontokens'
-import { ec as EllipticCurve } from 'elliptic'
 import { sha256 } from 'sha.js'
-// import { TextEncoder } from 'util'
-const ecurve = new EllipticCurve('secp256k1')
 
 const precision = 1000000
 
@@ -67,24 +60,6 @@ const utils = {
     const hashFunction = new sha256()
     return hashFunction.update(encoded).digest()
     // return hashSha256(encoded)
-  },
-  signPayloadEC: function (message, privateKey) {
-    const hash = this.sha256(message)
-    const ecPrivate = ecurve.keyFromPrivate(privateKey)
-    const signature = ecPrivate.sign(hash)
-    const coordinateValueBytes = 32
-    const r = leftPadHexToLength(signature.r.toString('hex'), coordinateValueBytes * 2)
-    const s = leftPadHexToLength(signature.s.toString('hex'), coordinateValueBytes * 2)
-    if (signature.recoveryParam === undefined || signature.recoveryParam === null) {
-      throw new Error('"signature.recoveryParam" is not set')
-    }
-    const recoveryParam = intToHexString(signature.recoveryParam, 1)
-    console.log('signature.recoveryParam', signature.recoveryParam)
-    const recoverableSignatureString = r + s + recoveryParam
-    // const combined = r + s
-    // return Buffer.from(combined, 'hex')
-    // return (Buffer.from(recoverableSignatureString, 'hex'))
-    return recoverableSignatureString
   },
   makeKeys: function () {
     const privateKey = makeECPrivateKey()
@@ -346,64 +321,6 @@ const utils = {
       arr[i] = (str.charCodeAt(i).toString(16)).slice(-4)
     }
     return '0x' + arr.join('')
-  },
-  fromHex: function (method, rawResponse) {
-    const td = new TextDecoder('utf-8')
-    const res = hexToCV(rawResponse)
-    if (rawResponse.startsWith('0x08')) {
-      throw new Error('Blockchain call returned not okay with error code: ' + res.value.value.toNumber())
-    }
-    if (method === 'get-mint-price') {
-      return res.value.value.toNumber()
-    } else if (method === 'get-token-by-hash') {
-      return res.value.value.toNumber()
-    } else if (method === 'get-mint-counter') {
-      return res.value.value.toNumber()
-    } else if (method === 'get-app-counter') {
-      return res.value.value.toNumber()
-    } else if (method === 'get-app') {
-      return {
-        // owner: td.decode(res.value.data.owner.buffer),
-        contractId: td.decode(res.value.data['app-contract-id'].buffer),
-        gaiaRootPath: td.decode(res.value.data['gaia-root-path'].buffer),
-        status: res.value.data.status.value.toNumber(),
-        storageModel: res.value.data['storage-model'].value.toNumber()
-      }
-    } else if (method === 'get-token-by-index') {
-      const clarityAsset = {}
-      if (res.value.data.owner) {
-        clarityAsset.owner = res.value.data.owner.address.hash160
-      }
-      if (res.value.data['sale-data']) {
-        const saleData = res.value.data['sale-data']
-        if (saleData.value) {
-          const saleData = {}
-          saleData.biddingEndTime = saleData.value.data['bidding-end-time'].value.toNumber()
-          saleData.incrementPrice = this.fromMicroAmount(saleData.value.data['increment-stx'].value.toNumber())
-          saleData.reservePrice = this.fromMicroAmount(saleData.value.data['reserve-stx'].value.toNumber())
-          saleData.buyNowOrStartingPrice = this.fromMicroAmount(saleData.value.data['amount-stx'].value.toNumber())
-          saleData.saleType = saleData.value.data['sale-type'].value.toNumber()
-          clarityAsset.saleData = saleData
-        }
-      }
-      if (res.value.data['token-info']) {
-        clarityAsset.assetHash = res.value.data['token-info'].value.data['asset-hash'].buffer.toString('hex')
-        clarityAsset.date = res.value.data['token-info'].value.data.date.value.toNumber()
-      }
-      if (res.value.data['transfer-count']) {
-        clarityAsset.transferCount = res.value.data['transfer-count'].value.toNumber()
-      }
-      return clarityAsset
-    } else if (method === 'get-sale-data') {
-      return {
-        biddingEndTime: res.value.data['bidding-end-time'].value.toNumber(),
-        incrementPrice: this.fromMicroAmount(res.value.data['increment-stx'].value.toNumber()),
-        reservePrice: this.fromMicroAmount(res.value.data['reserve-stx'].value.toNumber()),
-        auctionId: this.fromMicroAmount(res.value.data['auction-id'].value.toNumber()),
-        buyNowOrStartingPrice: this.fromMicroAmount(res.value.data['amount-stx'].value.toNumber()),
-        saleType: res.value.data['sale-type'].value.toNumber()
-      }
-    }
   }
 }
 export default utils

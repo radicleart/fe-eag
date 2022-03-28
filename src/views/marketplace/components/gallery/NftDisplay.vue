@@ -9,7 +9,7 @@
       </b-col>
       <b-col lg="5" sm="12" style="margin-top: 200px;">
         <ListingInfo v-on="$listeners" :asset="gaiaAsset" :loopRun="loopRun" :context="'collection'"/>
-        <b-container v-if="gaiaAsset.description" class="bg-white text-tab">
+        <b-container v-if="gaiaAsset.description" class="bg-white text-primary">
           <b-row class="py-2 border-bottom">
             <b-col cols="12">
               <div v-html="preserveWhiteSpace(gaiaAsset.description)"></div>

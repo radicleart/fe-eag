@@ -3,9 +3,9 @@
   <RisidioPay :configuration="appConfig"/>
 </div>
 <div id="app" v-else :style="getBackground()">
-  <RouterView name="header" class="mx-5" />
-  <RouterView id="page" @openModal="openModal"/>
-  <footer class="ml-5 bg-light footer mt-auto">
+  <RouterView name="header" class="mx-4" />
+  <RouterView class="" id="page" @openModal="openModal"/>
+  <footer class="mt-0 ml-5 bg-light footer">
     <RouterView name="footer" />
   </footer>
   <MessageTicker :tickerId="tickerId + '-inner'"/>

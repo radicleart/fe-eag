@@ -1,27 +1,28 @@
 <template>
-<div>
+<div :id="(isHomePage) ? 'wallet-dd-home' : 'wallet-dd'">
 <b-navbar toggleable="md" type="light" class="m-0 p-0">
   <b-navbar-brand href="#" to="/">
-    <LogoNeonIcon class="pointer" style="width: 350px; height: auto;"/>
+    <LogoNeonIcon v-if="isHomePage" class="pointer" style="width: 350px; height: auto;"/>
+    <LogoGreyIcon v-else class="pointer" style="width: 350px; height: auto;"/>
   </b-navbar-brand>
   <ExchangeRates class="no-focus-outline ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
   <b-navbar-toggle class="" target="nav-collapse" style="width: 350px; height: auto;">
     <template v-slot:default="{ expanded }">
-      <WalletNeonIcon v-if="expanded" class="pointer" style="width: 350px; height: auto;"/>
-      <!-- <WalletGreyIcon v-else class="pointer" style="width: 350px; height: auto;"/> -->
+      <WalletNeonIcon v-if="expanded && isHomePage" class="pointer" style="width: 350px; height: auto;"/>
+      <WalletGreyIcon v-else class="pointer" style="width: 350px; height: auto;"/>
     </template>
   </b-navbar-toggle>
   <b-collapse id="nav-collapse" is-nav>
     <b-navbar class="ml-auto">
       <ExchangeRates class="mr-4 nav-text"/>
-      <b-nav-item-dropdown class="ml-2 nav-text" right v-if="profile.loggedIn" no-caret>
+      <b-nav-item-dropdown style="list-style: none;" class="ml-2 nav-text" right v-if="profile.loggedIn" no-caret>
         <template v-slot:button-content>
-          <WalletNeonIcon class="pointer icon"/>
+          <WalletNeonIcon v-if="isHomePage" class="pointer icon"/>
+          <WalletGreyIcon v-else class="pointer icon"/>
         </template>
         <b-dropdown-item>{{username}}</b-dropdown-item>
         <b-dropdown-divider />
-        <b-dropdown-item v-if="profile.superAdmin"><span><b-link to="/swaps">STX Swap</b-link></span></b-dropdown-item>
-        <b-dropdown-item v-if="profile.superAdmin" to="/mgmnt/registry">Marketplace Admin</b-dropdown-item>
+        <b-dropdown-item v-if="profile.superAdmin" to="/swaps">STX Swap</b-dropdown-item>
         <b-dropdown-item to="/nft-market">Marketplace</b-dropdown-item>
         <b-dropdown-item to="/my-nfts">My NFTs</b-dropdown-item>
         <b-dropdown-divider />
@@ -37,7 +38,10 @@
           <span @click="startLogout()">Logout</span>
         </b-dropdown-item>
       </b-nav-item-dropdown>
-      <b-nav-item class="nav-text" v-else><span @click="startLogin()">Connect Wallet</span></b-nav-item>
+      <b-nav-item style="list-style: none;" class="nav-text" v-else>
+        <a href="#" class="text-info" v-if="isHomePage" @click="startLogin()">Connect Wallet</a>
+        <a href="#" v-else @click="startLogin()">Connect Wallet</a>
+      </b-nav-item>
     </b-navbar>
   </b-collapse>
 </b-navbar>
@@ -60,8 +64,9 @@ import ExchangeRates from '@/components/tokens/ExchangeRates'
 // import { StacksTestnet, StacksMainnet } from '@stacks/network'
 // import HamburgerIcon from '@/assets/img/EAG - WEB UX assets/EAG - hamburger neon.svg'
 import WalletNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - wallet icon neon.svg'
-// import WalletGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - wallet icon grey.svg'
+import WalletGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - wallet icon grey.svg'
 import LogoNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - logo neon.svg'
+import LogoGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - logo grey.svg'
 
 export default {
   name: 'MainNavbar',
@@ -73,8 +78,9 @@ export default {
     ExchangeRates,
     // HamburgerIcon,
     WalletNeonIcon,
-    // WalletGreyIcon,
-    LogoNeonIcon
+    WalletGreyIcon,
+    LogoNeonIcon,
+    LogoGreyIcon
   },
   watch: {
   },

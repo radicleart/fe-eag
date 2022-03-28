@@ -1,9 +1,9 @@
 <template>
-<b-container style="height: 100%;">
+<b-container id="home-page" style="height: 100%;">
   <b-row align-v="center" align-h="center" style="height: 100%;">
-    <b-col class="text-center"><b-link to="/nft-collections">Collections</b-link></b-col>
+    <b-col class="text-center"><b-link class="text-info" to="/nft-collections">Collections</b-link></b-col>
     <b-col md="8" sm="none" class="text-center" :style="getForeground1()"><div :style="getForeground2()"></div></b-col>
-    <b-col class="text-center"><b-link to="/artists">Artists</b-link></b-col>
+    <b-col class="text-center"><b-link class="text-info" to="/artists">Artists</b-link></b-col>
   </b-row>
 </b-container>
 </template>

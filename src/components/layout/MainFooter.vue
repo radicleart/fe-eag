@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-4 text-tab d-flex justify-content-between" v-if="showFooter">
+  <div class="mx-4 text-primary d-flex justify-content-between" v-if="showFooter">
     <div class="pt-5">
       <span class="text-700 mr-3">Electric Art Gallery &copy; 2022</span>
       <span class="text-300">Brighton, England, X0 0XX • UK • info@electricart.gallery</span>

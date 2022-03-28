@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import MainNavbar from '@/components/layout/MainNavbar.vue'
 import MainFooter from '@/components/layout/MainFooter.vue'
+const MyNftLibrary = () => import('@/views/marketplace/MyNftLibrary.vue')
 const NftCollection = () => import('@/views/marketplace/NftCollection.vue')
 const NftCollections = () => import('@/views/marketplace/NftCollections.vue')
 const PunkMinter = () => import('@/views/marketplace/PunkMinter.vue')
@@ -56,6 +57,24 @@ const routes = [
       requiresAuth: false,
       requiresAdmin: false,
       title: 'NFT display'
+    }
+  },
+  {
+    path: '/my-nfts',
+    name: 'my-nfts',
+    components: { default: MyNftLibrary, header: MainNavbar, footer: MainFooter },
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false
+    }
+  },
+  {
+    path: '/my-nfts/:collectionId',
+    name: 'my-nfts',
+    components: { default: MyNftLibrary, header: MainNavbar, footer: MainFooter },
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false
     }
   }
 ]

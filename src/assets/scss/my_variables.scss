@@ -52,7 +52,7 @@ $default-color-opacity:      rgba(182, 182, 182, .6) !default;
 
 $white:    #fff !default;
 $gray-100: #f8f9fa !default;
-$gray-200: #9e9e9e !default;
+$gray-200: #e9e9eb !default;
 //#e9ecef !default;
 $gray-300: #dee2e6 !default;
 $gray-400: #ced4da !default;
@@ -125,10 +125,10 @@ $colors: map-merge(
 $primary:       $stylish !default;
 $secondary:     $indigo !default;
 $success:       $teal !default;
-$info:          #00c8ea !default; //$cyan !default;
+$info:          #42afef !default; //$cyan !default;
 $warning:       $yellow !default;
 $danger:        $red !default;
-$light:         $gray-100 !default;
+$light:         $gray-200 !default;
 $dark:          $black !default;
 
 

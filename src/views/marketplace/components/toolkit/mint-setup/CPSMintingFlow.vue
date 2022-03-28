@@ -49,40 +49,6 @@
 import { APP_CONSTANTS } from '@/app-constants'
 import CPSRoyaltyScreen from './minting-screens/CPSRoyaltyScreen'
 import ItemDisplay from './minting-screens/ItemDisplay'
-/**
-import {
-  FungibleConditionCode,
-  createAssetInfo,
-  makeStandardFungiblePostCondition
-} from '@stacks/transactions'
-import utils from '@/services/utils'
-import BigNum from 'bn.js'
-
-const getGFTMintPostConds = function (data, stxAddress) {
-  let postConditionAddress = stxAddress
-  if (process.env.VUE_APP_NETWORK === 'local' && data.sendAsSky) {
-    postConditionAddress = 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG'
-  }
-  const postConditionCode = FungibleConditionCode.LessEqual
-  const postConditionAmount = new BigNum(utils.toOnChainAmount((data.mintPrice * data.batchOption + 0.001), data.sipTenToken.decimals))
-  const fungibleAssetInfo = createAssetInfo(data.sipTenToken.contractId.split('.')[0], data.sipTenToken.contractId.split('.')[1], data.sipTenToken.contractId.split('.')[1])
-
-  const standardFungiblePostCondition = makeStandardFungiblePostCondition(
-    postConditionAddress,
-    postConditionCode,
-    postConditionAmount,
-    fungibleAssetInfo
-  )
-
-  let postConds = []
-  if (data.postConditions) {
-    postConds = data.postConditions
-  } else {
-    postConds.push(standardFungiblePostCondition)
-  }
-  return postConds
-}
-**/
 
 export default {
   name: 'CPSMintingFlow',
