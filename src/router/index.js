@@ -8,6 +8,7 @@ const NftCollection = () => import('@/views/marketplace/NftCollection.vue')
 const NftCollections = () => import('@/views/marketplace/NftCollections.vue')
 const PunkMinter = () => import('@/views/marketplace/PunkMinter.vue')
 const AssetDetails = () => import('@/views/marketplace/AssetDetails.vue')
+const ItemPreview = () => import('@/views/marketplace/ItemPreview.vue')
 
 Vue.use(VueRouter)
 
@@ -57,6 +58,16 @@ const routes = [
       requiresAuth: false,
       requiresAdmin: false,
       title: 'NFT display'
+    }
+  },
+  {
+    path: '/nft-preview/:contractId/:nftIndex',
+    name: 'nft-preview',
+    components: { default: ItemPreview, header: MainNavbar, footer: MainFooter },
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      title: 'NFT Preview'
     }
   },
   {

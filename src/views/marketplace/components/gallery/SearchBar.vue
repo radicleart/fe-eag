@@ -1,5 +1,5 @@
 <template>
-<div :class="displayClass" class="mt-2">
+<div :class="displayClass" class="mt-0">
   <div v-if="mode.indexOf('wallet') > -1">
     <div>
       <div class="pointer" v-if="assetNames.length > 0">

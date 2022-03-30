@@ -2,10 +2,10 @@
 <div v-if="!configured" :style="getBackground()">
   <RisidioPay :configuration="appConfig"/>
 </div>
-<div id="app" v-else :style="getBackground()">
+<div id="app" v-else :style="getBackground()" class="">
   <RouterView name="header" class="" />
-  <RouterView class="" id="page" @openModal="openModal"/>
-  <footer class="mt-0 ml-5 bg-light footer">
+  <RouterView :class="(isHomePage) ? '' : 'ml-5 pb-5'" id="page" style="height: 100%;" @openModal="openModal"/>
+  <footer class="mt-auto ml-5 bg-light footer">
     <RouterView name="footer" />
   </footer>
   <MessageTicker :tickerId="tickerId + '-inner'"/>
@@ -119,6 +119,9 @@ export default {
     }
   },
   computed: {
+    isHomePage () {
+      return this.$route.name === 'home'
+    },
     appConfig () {
       const appConfig = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
       return appConfig

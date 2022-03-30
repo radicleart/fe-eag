@@ -2,10 +2,10 @@
 <b-nav-item-dropdown class="no-focus-outline" style="list-style: none;" no-caret v-if="exchangeRate">
   <template v-slot:button-content>
     <div :class="(isHomePage) ? 'text-info' : 'text-primary'">
-      <StxNeonIcon v-if="isHomePage" class=""/>
-      <StxGreyIcon v-else class=""/>
-      <span style="position: relative; left: -20px;">{{amountTrunc}}</span>
-      <span style="position: relative; left: -10px;" v-html="exchangeRate.currency"></span>
+      <img :src="iconSN" v-if="isHomePage" class="icon"/>
+      <img :src="iconSG" v-else class="icon"/>
+      <span class="mx-3">{{amountTrunc}}</span>
+      <span v-html="exchangeRate.currency"></span>
     </div>
   </template>
   <b-dropdown-item style="list-style: none;" class="no-focus-outline pl-0 m-0" v-for="(rate, idx) in tickerRates" :key="idx" @click.prevent="changeFiatCurrency(rate.currency)">
@@ -16,17 +16,15 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import StxNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - stax icon neon.svg'
-import StxGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - stax icon grey.svg'
 
 export default {
   name: 'ExchangeRates',
   components: {
-    StxNeonIcon,
-    StxGreyIcon
   },
   data () {
     return {
+      iconSN: require('@/assets/img/EAG - WEB UX assets - png/EAG - stacks neon.png'),
+      iconSG: require('@/assets/img/EAG - WEB UX assets - png/EAG - stacks grey.png'),
       defCur: 'EUR'
     }
   },

@@ -7,7 +7,7 @@
         <Pagination @changePage="gotoPage" :pagingData="pagingData" v-if="pagingData.numberOfItems > 0"/>
         <b-row v-if="resultSet && resultSet.length > 0">
           <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 mx-0 p-0" v-for="(asset, index) of resultSet" :key="index">
-            <NftImage v-on="$listeners" :loopRun="loopRun" :asset="asset"/>
+            <MyNftImage v-on="$listeners" :loopRun="loopRun" :asset="asset"/>
           </div>
         </b-row>
         <div class="d-flex justify-content-start my-3 mx-4" v-else>
@@ -23,14 +23,14 @@
 </template>
 
 <script>
-import NftImage from './NftImage'
+import MyNftImage from './MyNftImage'
 import Pagination from './common/Pagination'
 import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
   name: 'MyPageableItems',
   components: {
-    NftImage,
+    MyNftImage,
     Pagination
   },
   props: ['loopRun'],
@@ -106,10 +106,6 @@ export default {
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       return profile
-    },
-    mintCounter () {
-      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](process.env.VUE_APP_STACKS_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_STACKS_CONTRACT_NAME)
-      return application.tokenContract.mintCounter
     }
   }
 }

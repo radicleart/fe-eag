@@ -1,5 +1,5 @@
 <template>
-<div style="height: 100%" class="ml-5 bg-light">
+<div style="height: 100%" class="bg-light">
   <CollectionsNavigation :filter="filter"/>
   <div class="py-5">
       <b-col cols="12" ref="gallery">

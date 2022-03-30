@@ -1,15 +1,22 @@
 <template>
-<div v-if="loaded && (loopRun && loopRun.status !== 'disabled')" class="ml-5 bg-light">
+<div v-if="loaded && (loopRun && loopRun.status !== 'disabled')" class="bg-light">
   <CollectionsNavigation @updateResults="updateResults" @changePage="gotoPage" :loopRun="loopRun" :filter="filter" :pagingData="pagingData"/>
   <b-container fluid class="px-5 text-white mt-5">
     <b-row>
-      <b-col cols="12">
+      <b-col cols="12" style="min-height: 50vh">
         <div class="mb-4" v-if="(loopRun.status === 'unrevealed' || loopRun.status === 'active' || loopRun.status === 'inactive')">
-          <PageableItems :key="componentKey" v-on="$listeners" :resultSet="resultSet" :loopRun="loopRun"/>
+          <PageableItems v-on="$listeners" :resultSet="resultSet" :loopRun="loopRun"/>
         </div>
       </b-col>
     </b-row>
   </b-container>
+  <b-container fluid class="text-primary p-3" v-if="available">
+    <div v-if="mintPasses < 0">Checking for mint passes</div>
+    <div v-else-if="canMint">{{available}} available - you have {{mintPasses}} mint passes - <b-link :to="'/minting/' + loopRun.makerUrlKey + '/' + loopRun.currentRunKey">mint here</b-link></div>
+    <div v-else-if="canMintForFiat">{{available}} available - <b-link :to="'/minting/' + loopRun.makerUrlKey + '/' + loopRun.currentRunKey">mint here</b-link></div>
+    <div v-else>No mint pass</div>
+  </b-container>
+
 </div>
 <b-container v-else>
   Collection not found.
@@ -47,7 +54,7 @@ export default {
       componentKey: 0,
       loaded: false,
       filter: 'collection',
-      mintPasses: 0,
+      mintPasses: -1,
       defQuery: {
         query: null,
         allCollections: 'one',
@@ -142,6 +149,8 @@ export default {
           this.$store.dispatch('rpayMarketStore/lookupMintPassBalance', data).then((result) => {
             if (result && result.result && result.result.value > 0) {
               this.mintPasses = Number(result.result.value)
+            } else {
+              this.mintPasses = 0
             }
           })
         }
@@ -198,6 +207,30 @@ export default {
     }
   },
   computed: {
+    available () {
+      return this.loopRun.versionLimit - this.mintCounter
+    },
+    canMint () {
+      return this.available > 0 && this.mintPasses > 0
+    },
+    canMintForFiat () {
+      return this.available > 0
+    },
+    mintCounter () {
+      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
+      const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      if (this.loopRun.offset === 0) return counter + 1
+      return counter
+    },
+    availableMessage () {
+      if (this.mintPasses > 0 && this.available > 0) {
+        return this.available + ' left - you can mint ' + this.mintPasses
+      } else if (this.available > 0) {
+        return this.available + ' available to mint - note you can only mint with a mint pass!'
+      } else {
+        return this.loopRun.versionLimit + ' minted'
+      }
+    },
     profile () {
       const profile = this.$store.getters['rpayAuthStore/getMyProfile']
       return profile

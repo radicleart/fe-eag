@@ -4,12 +4,14 @@ import axios from 'axios'
 import storeUtils from './storeUtils'
 import { APP_CONSTANTS } from '@/app-constants'
 import contentStore from './contentStore'
+import paymentStore from './paymentStore'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
-    contentStore
+    contentStore,
+    paymentStore
   },
   state: {
     configuration: {}
@@ -47,6 +49,7 @@ export default new Vuex.Store({
               config.headers.STX_ADDRESS = profile.stxAddress
               return config
             })
+            dispatch('rpayStacksContractStore/fetchFullRegistry')
             const data = { stxAddress: 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG', mine: true }
             if (process.env.VUE_APP_NETWORK !== 'local') {
               data.stxAddress = profile.stxAddress

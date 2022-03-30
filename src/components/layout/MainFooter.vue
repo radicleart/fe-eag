@@ -1,26 +1,25 @@
 <template>
-  <div :id="(isHomePage) ? 'wallet-dd-home' : 'wallet-dd'" class="mx-4 text-primary d-flex justify-content-between" v-if="showFooter">
-    <div class="d-flex pt-5">
+  <div :id="(isHomePage) ? 'wallet-dd-home' : 'wallet-dd'" class="py-4 mx-4 text-primary d-flex justify-content-between" v-if="showFooter">
+    <div class="d-flex">
       <div class="text-700 mr-3">Electric Art Gallery &copy; 2022</div>
       <div class="d-none d-md-block text-300">Brighton, England, X0 0XX • UK • info@electricart.gallery</div>
     </div>
-    <div class="text-info">
-      <PlugGreyIcon class="icon"/>
+    <div>
+      <img :src="iconPG"  class="icon"/>
     </div>
   </div>
 </template>
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import PlugGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - plug icon grey.svg'
 
 export default {
   name: 'MainFooter',
   components: {
-    PlugGreyIcon
   },
   data () {
     return {
+      iconPG: require('@/assets/img/EAG - WEB UX assets - png/EAG - plug bot grey.png'),
       webWalletNeeded: false
     }
   },

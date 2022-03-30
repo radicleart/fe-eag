@@ -4,7 +4,7 @@
 // @import '../../assets/scss/video-js.css';
 
 @font-face {
-  font-family: "Orbitron-Medium";
+  font-family: "Barlow-Medium";
   src: url("/fonts/EAG - WEB Fonts/SUB MENU and NFT INFO font/Barlow/Barlow-Medium.ttf") format("truetype");
   font-style: normal;
   font-weight: normal;
@@ -36,9 +36,9 @@
 }
 
 html, body {
-  font-family: 'Poppins-Medium';
+  font-family: 'Barlow-Medium';
   height: 100%;
-  color: #fff;
+  color: $primary;
 }
 
 #wallet-dd-home {
@@ -64,8 +64,8 @@ a:hover {
 }
 
 .icon {
-  width: 100px;
-  height: 100px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .collection-image {
@@ -74,6 +74,18 @@ a:hover {
   padding: 5px;
   width: auto;
   height: 400px;
+}
+
+.my-nft-image:hover {
+  box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+}
+
+.my-nft-image {
+  border: 12px solid #fff;
+  border-radius: 4px;
+  padding: 5px;
+  width: 100%;
+  height: auto;
 }
 
 .collection-image:hover {
@@ -115,6 +127,9 @@ a:hover {
 .text-small {
   font-size: 0.8rem;
 }
+.text-xsmall {
+  font-size: 0.7rem;
+}
 .hash1-image {
   width: 100%;
   border-radius: 0%;
@@ -142,6 +157,7 @@ a:hover {
   color: #e2e2e2 !important;
 }
 
+/** - modals ------------------------------------------------- **/
 #purchase-modal .modal-body {
   background-color: #fff;
   text-align: left !important;
@@ -160,6 +176,46 @@ a:hover {
 #purchase-modal .modal-header {
   display: none;
 }
+#minting-modal .modal-content {
+  border: none !important;
+  background-color: transparent !important;
+}
+#minting-tools  .nav-link.active {
+  color: #000;
+}
+#minting-tools .nav-link:hover {
+  color: #ccc;
+}
+#minting-modal .modal-footer {
+  display: none;
+}
+#minting-modal .modal-header {
+  display: none;
+}
+/** -------------------------------------------------- **/
+/** - Payment Modal ------------------------------------------------- **/
+#stacks-address-modal .modal-content {
+  border: none !important;
+  background-color: transparent !important;
+}
+#stacks-address-modal .modal-footer {
+  display: none;
+}
+#stacks-address-modal .modal-header {
+  display: none;
+}
+#payment-modal .modal-content {
+  border: none !important;
+  background-color: transparent !important;
+}
+#payment-modal .modal-footer {
+  display: none;
+}
+#payment-modal .modal-header {
+  display: none;
+}
+/** -------------------------------------------------- **/
+
 
 #wallet-dd-home {
   color: $info;

@@ -2,9 +2,9 @@
 <div :id="(isHomePage) ? 'wallet-dd-home' : 'wallet-dd'">
 <b-navbar class="">
   <b-navbar-brand href="#" to="/">
-    <LogoNeonIcon v-if="isHomePage" class="d-none d-md-block pointer" style="width: 350px; height: auto;"/>
-    <LogoGreyIcon v-else class="d-none d-md-block pointer" style="width: 350px; height: auto;"/>
-    <PlugGreyIcon class="d-md-none d-sm-block pointer icon" style="width: 100px; height: auto;"/>
+    <img :src="iconLN" v-if="isHomePage" class="d-none d-md-block pointer" width="350px" height="auto"/>
+    <img :src="iconLG"  v-else class="d-none d-md-block pointer" style="width: 350px; height: auto;"/>
+    <img :src="iconPG"  class="d-md-none d-sm-block pointer icon"/>
   </b-navbar-brand>
   <!--
   <b-navbar-toggle class="" target="nav-collapse">
@@ -17,19 +17,17 @@
   </b-navbar-toggle>
   -->
   <b-collapse id="nav-collapse" is-nav class="show">
-    <b-navbar class="">
-      <ExchangeRates class="d-none d-sm-block"/>
-    </b-navbar>
     <b-navbar class="ml-auto">
+      <ExchangeRates class="d-none d-sm-block"/>
       <b-nav-item-dropdown style="list-style: none;" class="" right v-if="profile.loggedIn" no-caret>
         <template v-slot:button-content>
-          <WalletNeonIcon v-if="isHomePage" class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
-          <WalletGreyIcon v-else class="pointer icon" style="max-width: 100px; max-height: 100px;"/>
+          <img :src="iconWN" v-if="isHomePage" class="pointer icon"/>
+          <img :src="iconWG" v-else class="pointer icon"/>
         </template>
         <b-dropdown-item>{{username}}</b-dropdown-item>
         <b-dropdown-divider />
         <b-dropdown-item v-if="profile.superAdmin" to="/swaps">STX Swap</b-dropdown-item>
-        <b-dropdown-item to="/nft-market">Marketplace</b-dropdown-item>
+        <b-dropdown-item to="/nft-collections">Collections</b-dropdown-item>
         <b-dropdown-item to="/my-nfts">My NFTs</b-dropdown-item>
         <b-dropdown-divider />
         <b-dropdown-item class="text-right text-small"><span>{{profile.stxAddress}}</span></b-dropdown-item>
@@ -66,14 +64,6 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import ExchangeRates from '@/components/tokens/ExchangeRates'
-// import { getNamePrice } from '@stacks/bns'
-// import { StacksTestnet, StacksMainnet } from '@stacks/network'
-// import HamburgerIcon from '@/assets/img/EAG - WEB UX assets/EAG - hamburger neon.svg'
-import WalletNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - wallet icon neon.svg'
-import WalletGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - wallet icon grey.svg'
-import LogoNeonIcon from '@/assets/img/EAG - WEB UX assets/EAG - logo neon.svg'
-import LogoGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - logo grey.svg'
-import PlugGreyIcon from '@/assets/img/EAG - WEB UX assets/EAG - plug icon grey.svg'
 
 export default {
   name: 'MainNavbar',
@@ -82,34 +72,23 @@ export default {
     colorOnScroll: Number
   },
   components: {
-    ExchangeRates,
-    // HamburgerIcon,
-    WalletNeonIcon,
-    WalletGreyIcon,
-    LogoNeonIcon,
-    LogoGreyIcon,
-    PlugGreyIcon
+    ExchangeRates
   },
   watch: {
   },
   data () {
     return {
+      iconWN: require('@/assets/img/EAG - WEB UX assets - png/EAG - wallet neon.png'),
+      iconWG: require('@/assets/img/EAG - WEB UX assets - png/EAG - wallet grey.png'),
+      iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo neon.png'),
+      iconLG: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo grey.png'),
+      iconPG: require('@/assets/img/EAG - WEB UX assets - png/EAG - plug bot grey.png'),
       localPlayMode: false
     }
   },
   methods: {
     balance () {
       const profile = this.profile
-      /**
-      let network = new StacksTestnet()
-      const fullyQualifiedName = 'name.id'
-      if (process.env.VUE_APP_NETWORK === 'mainnet') {
-        network = new StacksMainnet()
-      }
-      getNamePrice({ fullyQualifiedName, network }).then((price) => {
-        this.price = price
-      })
-      **/
       return (profile && profile.wallet) ? profile.wallet.balance : 0
     },
     stxAddress () {

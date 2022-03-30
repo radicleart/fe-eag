@@ -1,10 +1,21 @@
 <template>
 <b-container fluid class="py-0 mx-0 px-0 bg-light" v-if="context && context === 'my-nfts'">
   <div class="d-flex text-primary">
-    <div :class="(!loopRun) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link to="/my-nfts">My NFTs</b-link></div>
+    <div id="popover-my-nfts" :class="(!loopRun) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link to="/my-nfts">My NFTs</b-link></div>
+    <MyNftData/>
     <div v-for="(lr, index) in allLoopRuns" :key="index">
-      <div :class="(loopRun && loopRun.currentRunKey ===  lr.currentRunKey) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link :to="'/my-nfts/' + lr.currentRunKey">{{lr.currentRun}}</b-link></div>
+      <div :class="(loopRun && loopRun.currentRunKey ===  lr.currentRunKey) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link :id="'popover-image-' + index" :to="'/my-nfts/' + lr.currentRunKey">{{lr.currentRun}}</b-link></div>
+      <CollectionData :loopRun="lr" :index="index"/>
     </div>
+  </div>
+</b-container>
+<b-container fluid class="py-0 mx-0 px-0 bg-light" v-else-if="context && context === 'minting'">
+  <div class="d-flex text-primary">
+    <div :id="'popover-image-1'" class="bg-white py-2 px-4 border-right">Minting</div>
+    <CollectionData :loopRun="loopRun" :index="'1'"/>
+    <!--
+    <div class="py-2 px-4 border-right"><b-link :to="'/my-nfts/' + loopRun.currentRunKey">{{loopRun.currentRun}}</b-link></div>
+    -->
   </div>
 </b-container>
 <b-container fluid class="py-0 mx-0 px-0 bg-light" v-else>
@@ -25,10 +36,10 @@
     </div>
 
     <div class="border-bottom d-flex justify-content-between" v-if="loopRun">
-      <div class="d-flex justify-content-start">
+      <div class="d-flex justify-content-start mr-5 pt-1">
         <SearchBar v-if="searching" :displayClass="'text-small'" v-on="$listeners" :loopRun="loopRun" :mode="loopRun.type"/>
-        <SearchNeon style="width: 50px; height: 50px;" @click="searching = !searching" v-if="!searching" class="pointer icon"/>
-        <SearchGrey style="width: 50px; height: 50px;" @click="searching = !searching" v-else class="pointer icon"/>
+        <img :src="iconSN" @click="searching = !searching" v-if="!searching" class="pointer icon"/>
+        <img :src="iconSG" @click="searching = !searching" v-else class="pointer icon"/>
       </div>
     </div>
   </div>
@@ -43,20 +54,22 @@ import { APP_CONSTANTS } from '@/app-constants'
 import utils from '@/services/utils'
 import Pagination from './common/Pagination'
 import SearchBar from '@/views/marketplace/components/gallery/SearchBar'
-import SearchNeon from '@/assets/img/EAG - WEB UX assets/EAG - search icon neon.svg'
-import SearchGrey from '@/assets/img/EAG - WEB UX assets/EAG - search icon grey.svg'
+import CollectionData from './CollectionData'
+import MyNftData from './MyNftData'
 
 export default {
   name: 'CollectionsNavigation',
   components: {
-    SearchNeon,
-    SearchGrey,
+    CollectionData,
+    MyNftData,
     SearchBar,
     Pagination
   },
   props: ['loopRun', 'gaiaAsset', 'context', 'filter', 'pagingData'],
   data () {
     return {
+      iconSN: require('@/assets/img/EAG - WEB UX assets - png/EAG - search neon.png'),
+      iconSG: require('@/assets/img/EAG - WEB UX assets - png/EAG - search grey.png'),
       searching: false,
       currentRunKey: null
     }
