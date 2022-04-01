@@ -1,22 +1,12 @@
 <template>
-<div>
+<div style="100%" class="bg-light">
   <b-row align-v="center" align-h="center" style="height: 100%;">
     <b-col cols="12" class="text-center">
-      <b-link :to="'/nfts/' + asset.contractAsset.contractId + '/' +  asset.contractAsset.nftIndex">
-        <div ref="nftImage">
-          <img @mouseover="showDetail()" class="pointer my-nft-image" :src="getImageUrl"/>
-        </div>
-      </b-link>
-    </b-col>
-    <b-col cols="12">
-      <div class="d-flex justify-content-between">
-        <div>
-          <b-link v-if="asset.contractAsset" class="text-small text-primary" :to="'/nft-preview/' + asset.contractAsset.contractId + '/' + asset.contractAsset.nftIndex">manage</b-link>
-          <b-link v-else class="text-small text-primary" :to="'/item-preview/' + asset.assetHash + '/1'">mint now</b-link>
-        </div>
-        <div v-if="!marketplace">
-          <b-link v-if="asset.contractAsset" class="text-small text-primary" :to="'/nfts/' + asset.contractAsset.contractId + '/' + contractAsset.nftIndex">marketplace</b-link>
-        </div>
+      <div ref="nftImage">
+        <b-link :to="'/nft-preview/' + asset.contractAsset.contractId + '/' + asset.contractAsset.nftIndex">
+          <FramedImage :id="'popover-my-nft-' + asset.contractAsset.contractId + '-' + asset.contractAsset.nftIndex" :imageSrc="getImageUrl" style="height: 100%;"/>
+        </b-link>
+        <MyNftData :asset="asset"/>
       </div>
     </b-col>
   </b-row>
@@ -25,10 +15,14 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
+import FramedImage from './FramedImage'
+import MyNftData from './MyNftData'
 
 export default {
   name: 'MyNftImage',
   components: {
+    FramedImage,
+    MyNftData
   },
   props: ['loopRun', 'asset'],
   data () {
@@ -47,9 +41,6 @@ export default {
     },
     nftPage () {
       return this.$route.name.startsWith('asset-by-')
-    },
-    showDetail () {
-      this.showOverlay = true
     },
     hideDetail () {
       this.showOverlay = false

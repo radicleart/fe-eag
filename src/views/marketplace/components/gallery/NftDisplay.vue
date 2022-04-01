@@ -3,19 +3,15 @@
   <b-container class="center-section" style="min-height: 50vh;">
     <b-row align-h="center" :style="'min-height: ' + videoHeight + 'px'">
       <b-col lg="7" sm="12" class="mb-5">
-        <div id="video-column" :style="dimensions">
-          <MediaItemGeneral :classes="'hash1-image'" v-on="$listeners" :options="videoOptions" :asset="gaiaAsset"/>
-        </div>
+        <MediaItemGeneral :classes="'hash1-image'" v-on="$listeners" :options="videoOptions" :asset="gaiaAsset"/>
       </b-col>
-      <b-col lg="5" sm="12" style="margin-top: 200px;">
-        <ListingInfo v-on="$listeners" :asset="gaiaAsset" :loopRun="loopRun" :context="'collection'"/>
-        <b-container v-if="gaiaAsset.description" class="bg-white text-primary">
-          <b-row class="py-2 border-bottom">
-            <b-col cols="12">
-              <div v-html="preserveWhiteSpace(gaiaAsset.description)"></div>
-            </b-col>
-          </b-row>
-        </b-container>
+      <b-col lg="5" sm="12" class="my-5">
+        <ListingInfo class="my-5" :classes="'bg-white text-primary mr-5 text-small'" v-on="$listeners" :asset="gaiaAsset" :loopRun="loopRun" :context="'collection'"/>
+        <b-row  v-if="gaiaAsset.description" class="py-2 border-bottom text-primary">
+          <b-col cols="12">
+            <div v-html="preserveWhiteSpace(gaiaAsset.description)"></div>
+          </b-col>
+        </b-row>
         <b-row>
           <b-col md="12" align-self="end" :key="componentKey">
             <div class="w-100">

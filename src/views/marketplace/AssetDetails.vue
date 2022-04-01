@@ -1,7 +1,7 @@
 <template>
 <div v-if="!loading" class="ml-5 bg-light">
-  <CollectionsNavigation :loopRun="loopRun" :gaiaAsset="gaiaAsset" :filter="'asset'"/>
-  <b-container style="height: auto;" fluid class="px-5 text-white mt-5">
+  <CollectionNavigation :loopRun="loopRun" :asset="gaiaAsset" :filter="'asset'"/>
+  <b-container style="height: auto;" fluid class="px-5 mt-5">
     <div v-if="!loading && gaiaAsset && loopRun">
       <NftDisplay v-on="$listeners" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>
     </div>
@@ -12,13 +12,13 @@
 <script>
 import NftDisplay from '@/views/marketplace/components/gallery/NftDisplay'
 import { APP_CONSTANTS } from '@/app-constants'
-import CollectionsNavigation from '@/views/marketplace/components/gallery/CollectionsNavigation'
+import CollectionNavigation from '@/views/marketplace/components/gallery/CollectionNavigation'
 
 export default {
   name: 'AssetDetails',
   components: {
     NftDisplay,
-    CollectionsNavigation
+    CollectionNavigation
   },
   data: function () {
     return {

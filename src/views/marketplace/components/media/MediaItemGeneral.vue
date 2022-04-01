@@ -16,7 +16,8 @@
     <img :class="classes" v-on="$listeners" :src="asset.properties.animation_url" @error="setAltImg">
   </div>
   <div v-else-if="contentType === 'image'">
-    <img :class="classes" v-on="$listeners" :src="image()" @error="imageError()">
+    <!-- <img :class="classes" v-on="$listeners" :src="image()" @error="imageError()"> -->
+    <FramedDisplayImage v-on="$listeners" :imageSrc="image()"/>
   </div>
 </div>
 </template>
@@ -24,11 +25,13 @@
 <script>
 import VideoJsPlayer from './VideoJsPlayer'
 import { APP_CONSTANTS } from '@/app-constants'
+import FramedDisplayImage from '@/views/marketplace/components/gallery/FramedDisplayImage'
 
 export default {
   name: 'MediaItemGeneral',
   components: {
-    VideoJsPlayer
+    VideoJsPlayer,
+    FramedDisplayImage
   },
   props: ['classes', 'options', 'asset'],
   data () {

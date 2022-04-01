@@ -1,9 +1,9 @@
 <template>
 <div v-if="events">
-  <h6 class="text-white">NFT History</h6>
-  <b-row class="text-xsmall">
+  <h6>NFT Activity</h6>
+  <b-row class="text-xsmall bg-white">
     <b-col md="12" sm="12">
-      <b-table striped hover :items="values()" :fields="fields()" class="bg-light text-dark">
+      <b-table hover :items="values()" :fields="fields()" class="bg-transparent text-primary">
         <template #cell(status)="data">
           <span v-show="data.value === 'expired'" v-b-tooltip.hover="{ variant: 'warning' }"  :title="getTitle(data)">
             <span @click="checkTx(data)"><b-icon :animation="getAnimation(data)" :class="getClass(data)" font-scale="1.5" :icon="getIcon(data)"/></span>

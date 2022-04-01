@@ -1,7 +1,7 @@
 <template>
 <div class="mb-4" v-if="resultSet">
   <vue-horizontal>
-    <div v-for="(asset, index) of resultSet" :key="index">
+    <div class="" v-for="(asset, index) of resultSet" :key="index">
       <NftImage v-on="$listeners" @update="update" :loopRun="loopRun" :asset="asset"/>
     </div>
   </vue-horizontal>
@@ -45,6 +45,9 @@ export default {
 }
 </script>
 <style>
+.h-image {
+  max-width: 200px;
+}
 .myItemsIntroText {font-weight: 200; font-size: 1.1rem; color: #fff;}
 .grid {
   background: #fff;

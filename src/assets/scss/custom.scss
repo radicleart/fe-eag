@@ -12,8 +12,8 @@
 }
 
 @font-face {
-  font-family: "Orbitron-Medium";
-  src: url("/fonts/EAG - WEB Fonts/NAV and MENU font/Orbitron/Orbitron-Medium.ttf") format("truetype");
+  font-family: "Orbitron-Regular";
+  src: url("/fonts/EAG - WEB Fonts/NAV and MENU font/Orbitron/Orbitron-Regular.ttf") format("truetype");
   font-style: normal;
   font-weight: normal;
   font-display: swap;
@@ -41,12 +41,49 @@ html, body {
   color: $primary;
 }
 
+/** - nav bar styles ------------------------------------------------- **/
 #wallet-dd-home {
-  font-family: 'Orbitron-Medium';
+  font-family: 'Orbitron-Regular';
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  color: #666;
+}
+#wallet-dd-home {
+  color: $info;
+}
+#wallet-dd-home .dropdown-menu {
+  background-color: #000;
+}
+#wallet-dd-home .dropdown-item {
+  color: $info;
+  font-size: 0.6875rem;
+}
+#wallet-dd-home .dropdown-item:hover {
+  color: #000 !important;
+  background-color: $info;
 }
 #wallet-dd {
-  font-family: 'Orbitron-Medium';
+  font-family: 'Orbitron-Regular';
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  color: #666;
+  letter-spacing: 0.2rem;
 }
+#wallet-dd .dropdown-menu {
+  background-color: #fff;
+  font-size: 0.6875rem;
+  color: #666;
+}
+#wallet-dd .dropdown-item {
+  background-color: transparent;
+  font-size: 0.6875rem;
+  color: #666;
+}
+#wallet-dd .dropdown-item:hover {
+  background-color: #000;
+  color: #fff !important;
+}
+/** --------------------------------------------------------------- **/
 
 #home-page a {
   color: $info;
@@ -64,8 +101,8 @@ a:hover {
 }
 
 .icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: auto;
+  height: 1.1rem;
 }
 
 .collection-image {
@@ -74,10 +111,6 @@ a:hover {
   padding: 5px;
   width: auto;
   height: 400px;
-}
-
-.my-nft-image:hover {
-  box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
 }
 
 .my-nft-image {
@@ -216,36 +249,6 @@ a:hover {
 }
 /** -------------------------------------------------- **/
 
-
-#wallet-dd-home {
-  color: $info;
-}
-#wallet-dd-home .dropdown-menu {
-  background-color: #000;
-}
-#wallet-dd-home .dropdown-item {
-  color: $info;
-}
-#wallet-dd-home .dropdown-item:hover {
-  color: #000 !important;
-  background-color: $info;
-}
-
-#wallet-dd {
-  color: $primary;
-}
-#wallet-dd .dropdown-menu {
-  background-color: #fff;
-}
-#wallet-dd .dropdown-item {
-  color: $primary;
-  background-color: transparent;
-}
-#wallet-dd .dropdown-item:hover {
-  background-color: #000;
-  color: #fff !important;
-}
-
 /** paging **/
 .page-item .page-link {
   background-color: #fff !important;
@@ -256,4 +259,55 @@ a:hover {
   border-color: #fff !important;
   background-color: #fff !important;
   color: $primary !important;
+}
+
+.fake-input {
+  background-color: $light;
+  border: none;
+  width: 20px;
+  font-size: 0.1rem;
+  color: $light;
+}
+.fake-input:focus-visible {
+  border: none;
+  color: $light;
+}
+/** ---- Notification styles ------------------------------------------------------ **/
+.vue-notification-template {
+  background: none;
+}
+.r-notifs {
+  padding: 7px 5px !important;
+  margin: 1px 1px 20px 1px !important;
+  font-size: 1.2rem !important;
+  background: $success !important;
+  color: #000 !important;
+}
+.success {
+  background: $dark !important;
+  color: #fff !important;
+}
+.error {
+  background: $danger !important;
+  color: #fff !important;
+}
+.danger {
+  background: $danger !important;
+  color: #fff !important;
+}
+.warning {
+  background: $warning !important;
+}
+/** ---------------------------------------------------------- **/
+.collection-listing {
+  margin: auto 0;
+  background-color: #fff;
+}
+.collection-listing-panel {
+  position: relative;
+  bottom: 0;
+  top: 40%;
+}
+ul.pagination {
+  margin: 5 0 !important;
 }

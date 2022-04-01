@@ -4,14 +4,15 @@
 </div>
 <div id="app" v-else :style="getBackground()" class="">
   <RouterView name="header" class="" />
-  <RouterView :class="(isHomePage) ? '' : 'ml-5 pb-5'" id="page" style="height: 100%;" @openModal="openModal"/>
-  <footer class="mt-auto ml-5 bg-light footer">
+  <RouterView :class="(isHomePage) ? '' : 'ml-5 pb-5'" id="page" @openModal="openModal"/>
+  <footer class="mt-auto ml-5 bg-light">
     <RouterView name="footer" />
   </footer>
   <MessageTicker :tickerId="tickerId + '-inner'"/>
   <b-modal size="lg" id="purchase-modal" class="text-left">
     <PurchaseFlow :gaiaAsset="asset" :loopRun="loopRun"/>
   </b-modal>
+  <notifications :duration="5000" classes="r-notifs" position="bottom left" width="70%"/>
 </div>
 </template>
 <script>

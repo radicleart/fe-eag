@@ -1,24 +1,54 @@
 <template>
-<div class="bg-white text-primary mr-5 text-small" v-if="collection">
-  <b-container v-if="context === 'collection'">
-    <b-row class="py-2 border-bottom">
+<div :class="classes" style="min-width: 200px;">
+  <b-container>
+    <b-row v-if="collection" class="py-2 border-bottom">
       <b-col cols="12">{{collection.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
     </b-row>
-    <b-row class="py-2 border-bottom">
+    <b-row v-if="collection" class="py-2 border-bottom">
       <b-col cols="12">{{collection.makerName}}</b-col>
     </b-row>
-    <b-row class="py-2 border-bottom" v-if="asset.name">
-      <b-col cols="12">{{asset.name}}</b-col>
+    <b-row v-if="!collection" class="py-2 border-bottom">
+      <b-col cols="12">{{asset.contractAsset.contractId.split('.')[1]}} #{{asset.contractAsset.nftIndex}}</b-col>
     </b-row>
+    <b-row class="py-2 border-bottom">
+      <b-col cols="12">
+        <div class="d-flex justify-content-between">
+          <div v-if="asset.name">{{asset.name}}</div>
+          <div v-else>Unamed</div>
+          <div class="pointer" @click="showDetails = ! showDetails">
+            <b-icon v-if="showDetails" class="text-primary" font-scale="1.5" icon="arrow-down-right-circle"/>
+            <b-icon v-else class="text-primary" font-scale="1.5" icon="arrow-up-right-circle"/>
+          </div>
+        </div>
+      </b-col>
+    </b-row>
+  </b-container>
+  <b-container v-if="showDetails">
     <b-row class="py-2 border-bottom">
       <b-col cols="12">
         <OwnerInfo :owner="asset.contractAsset.owner" />
       </b-col>
     </b-row>
-    <b-row class="m-4 border-bottom" v-if="isListed()">
+    <b-row class="py-2 border-bottom" v-if="isListed() && $route.name !== 'my-nfts'">
       <b-col cols="6" class="py-2">{{getPriceFormatted()}}</b-col>
       <b-col cols="6" class="py-2 bg-dark text-white text-center">
         <span class="pt-3 pointer" :title="ttBiddingHelp" @click="openPurchaceDialog()">BUY NOW</span>
+      </b-col>
+    </b-row>
+    <b-row class="py-2 border-bottom" v-if="isListed() && $route.name === 'my-nfts'">
+      <b-col cols="12" class="py-2">Listed for: {{getPriceFormatted()}}</b-col>
+    </b-row>
+    <b-row class="py-2 border-bottom" v-if="$route.name === 'my-nfts' && $route.name !== 'asset-by-index'">
+      <b-col cols="12">
+        <div class="d-flex justify-content-between">
+          <b-link v-if="$route.name === 'my-nfts'" :to="'/nft-preview/' + asset.contractAsset.contractId + '/' + asset.contractAsset.nftIndex">manage</b-link>
+          <b-link v-if="$route.name !== 'asset-by-index'" :to="'/nfts/' + asset.contractAsset.contractId + '/' + asset.contractAsset.nftIndex">display</b-link>
+        </div>
+      </b-col>
+    </b-row>
+    <b-row class="py-2 border-bottom">
+      <b-col cols="12">
+        <div><a :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
       </b-col>
     </b-row>
   </b-container>
@@ -35,10 +65,11 @@ export default {
   components: {
     OwnerInfo
   },
-  props: ['context', 'asset', 'loopRun'],
+  props: ['context', 'asset', 'loopRun', 'classes'],
   data () {
     return {
       loaded: false,
+      showDetails: false,
       collection: null
     }
   },
@@ -62,6 +93,10 @@ export default {
     }
   },
   methods: {
+    transactionUrl: function (data) {
+      const stacksApiUrl = process.env.VUE_APP_STACKS_EXPLORER
+      return stacksApiUrl + '/txid/' + this.asset.contractAsset.contractId + '?chain=' + process.env.VUE_APP_NETWORK
+    },
     getPriceFormatted () {
       return formatUtils.fmtAmount(this.asset.contractAsset.listingInUstx.price, 'stx') + ' ' + this.asset.contractAsset.listingInUstx.symbol
     },

@@ -1,5 +1,5 @@
 <template>
-<b-container id="home-page" style="height: 100%;">
+<b-container id="home-page" style="height: 100vh;">
   <b-row align-v="center" align-h="center" style="height: 100%;">
     <b-col class="text-center"><b-link class="text-info" to="/nft-collections">Collections</b-link></b-col>
     <b-col md="8" sm="none" class="text-center" :style="getForeground1()"><div :style="getForeground2()"></div></b-col>

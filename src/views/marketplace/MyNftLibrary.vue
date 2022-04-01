@@ -1,7 +1,7 @@
 <template>
-<div class="ml-5 bg-light" :key="componentKey">
-  <CollectionsNavigation :context="'my-nfts'" :loopRun="loopRun" />
-  <b-container fluid class="px-5 text-white mt-5">
+<div class="ml-5 bg-light" :key="componentKey" v-if="loaded">
+  <CollectionsNavigationMyNfts :context="'my-nfts'" :loopRun="loopRun" />
+  <b-container fluid class="px-5 mt-5 bg-light" >
     <b-row>
       <b-col cols="12">
         <MyPageableItems :loopRun="loopRun"/>
@@ -13,16 +13,17 @@
 
 <script>
 import MyPageableItems from '@/views/marketplace/components/gallery/MyPageableItems'
-import CollectionsNavigation from '@/views/marketplace/components/gallery/CollectionsNavigation'
+import CollectionsNavigationMyNfts from '@/views/marketplace/components/gallery/CollectionsNavigationMyNfts'
 
 export default {
   name: 'MyNftLibrary',
   components: {
     MyPageableItems,
-    CollectionsNavigation
+    CollectionsNavigationMyNfts
   },
   data () {
     return {
+      loaded: false,
       componentKey: 0,
       currentRunKey: null,
       loopRun: null,

@@ -2,9 +2,11 @@
 <div>
   <div class="container">
     <div class="box">
-      <b-link :to="'/nft-collection/' + loopRun.currentRunKey"><img :id="'popover-image-' + index" class="pointer collection-image" :src="getCollectionImageUrl(loopRun)"/></b-link>
+      <b-link :to="'/nft-collection/' + loopRun.currentRunKey">
+      <FramedImage :options="{ 'width': '500px', 'height': '500px' }" :id="'popover-image-' + index" :imageSrc="getCollectionImageUrl(loopRun)"/>
+      <CollectionData :loopRun="loopRun" :index="index"/>
+    </b-link>
     </div>
-    <CollectionData :loopRun="loopRun" :index="index"/>
   </div>
 </div>
 </template>
@@ -12,13 +14,15 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import CollectionData from './CollectionData'
+import FramedImage from './FramedImage'
 
 export default {
   name: 'CollectionImage',
   components: {
-    CollectionData
+    CollectionData,
+    FramedImage
   },
-  props: ['loopRun', 'index'],
+  props: ['loopRun', 'index', 'options'],
   data () {
     return {
       showOverlay: false

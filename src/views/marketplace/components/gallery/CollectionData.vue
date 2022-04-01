@@ -1,11 +1,13 @@
 <template>
 <div>
-  <b-popover placement="topleft" triggers="hover" variant="light" :target="'popover-image-' + index" custom-class="my-popover-class">
-    <template #title><b-link :to="'/nft-collection/' + loopRun.currentRunKey">{{loopRun.currentRun}}</b-link></template>
-    <div class="py-2"><span class="text-secondary">by:</span> {{loopRun.makerName}}</div>
-    <div class="py-2 border-top">LIMIT: {{loopRun.versionLimit}}</div>
-    <div class="py-2 border-top">MINTED: {{mintCounter}}</div>
-    <div class="py-2 border-top"><a :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
+  <b-popover placement="topleft" triggers="hover" variant="transparent" :target="'popover-image-' + index" custom-class="my-popover-class">
+    <div class="bg-dark" style="height: 100%;">
+    <div class="p-2 mb-1 bg-white"><b-link :to="'/nft-collection/' + loopRun.currentRunKey">{{loopRun.currentRun}}</b-link></div>
+    <div class="p-2 mb-1 bg-white"><span class="text-secondary">by:</span> {{loopRun.makerName}}</div>
+    <div class="p-2 mb-1 bg-white">LIMIT: {{loopRun.versionLimit}}</div>
+    <div class="p-2 mb-1 bg-white">MINTED: {{mintCounter}}</div>
+    <div class="p-2 mb-1 bg-white"><a :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
+    </div>
   </b-popover>
 </div>
 </template>
@@ -47,9 +49,14 @@ export default {
 </script>
 <style scoped>
 .my-popover-class {
-    position: relative;
-    top: -20px;
-    left: -200px;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  border: none;
+  position: relative;
+  top: -20px;
+  left: -200px;
+  text-transform: uppercase;
 }
 
 </style>

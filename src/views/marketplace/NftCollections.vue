@@ -5,7 +5,7 @@
       <b-col cols="12" ref="gallery">
         <vue-horizontal v-if="loaded">
           <div class="pr-5" v-for="(loopRun, index) in allLoopRuns" :key="index">
-            <CollectionImage :loopRun="loopRun" :index="index"/>
+            <CollectionImage :loopRun="loopRun" :index="index" :options="{ 'min-width': '400px' }"/>
           </div>
         </vue-horizontal>
         <b-container v-else>

@@ -1,46 +1,45 @@
 <template>
 <div>
-  <b-row align-v="center" align-h="center" style="height: 100%;">
-    <b-col class="text-center">
+  <div class="d-flex justify-content-start">
+    <div class="text-center">
       <b-link :to="'/nfts/' + asset.contractAsset.contractId + '/' +  asset.contractAsset.nftIndex">
         <div ref="nftImage">
-          <img @mouseover="showDetail()" class="pointer collection-image" :src="getImageUrl"/>
+          <!-- <img class="pointer collection-image" :src="getImageUrl"/> -->
+          <FramedImage :options="{ 'width': '400px', 'min-height': '100px' }" :imageSrc="getImageUrl" :forSale="forSale"/>
         </div>
       </b-link>
-    </b-col>
-    <b-col class="text-left">
-      <ListingInfo v-on="$listeners" :asset="asset" :loopRun="loopRun" :context="'collection'"/>
-    </b-col>
-  </b-row>
+    </div>
+    <div class="text-left mr-5">
+      <ListingInfo class="mx-4 collection-listing" :classes="'collection-listing-panel'" v-on="$listeners" :asset="asset" :loopRun="loopRun" :context="'collection'"/>
+    </div>
+  </div>
 </div>
 </template>
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import ListingInfo from '@/views/marketplace/components/gallery/common/ListingInfo'
+import FramedImage from './FramedImage'
 
 export default {
   name: 'NftImage',
   components: {
-    ListingInfo
+    ListingInfo,
+    FramedImage
   },
   props: ['loopRun', 'asset'],
   data () {
     return {
-      showOverlay: false
     }
   },
   mounted () {
   },
   methods: {
-    showDetail () {
-      this.showOverlay = true
-    },
-    hideDetail () {
-      this.showOverlay = false
-    }
   },
   computed: {
+    forSale () {
+      return this.asset.contractAsset.listingInUstx && this.asset.contractAsset.listingInUstx.price > 0
+    },
     profile () {
       const profile = this.$store.getters['rpayAuthStore/getMyProfile']
       return profile

@@ -1,13 +1,13 @@
 <template>
 <div v-if="loopRun" class="bg-light">
-  <CollectionsNavigation :context="'minting'" :loopRun="loopRun" />
+  <CollectionsNavigationMinting :context="'minting'" :loopRun="loopRun" />
   <b-container fluid class="px-5 mt-5">
     <b-row :key="componentKey">
       <b-col>
         <b-row class="">
-          <b-col sm="7" xs="12">
+          <b-col sm="7" xs="12" class="text-right">
             <div>
-              <img :src="mintImage" width="100%"/>
+              <CollectionImage :loopRun="loopRun" :index="'1'"/>
             </div>
           </b-col>
           <b-col sm="5" xs="12">
@@ -37,14 +37,16 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import CollectionsNavigation from '@/views/marketplace/components/gallery/CollectionsNavigation'
+import CollectionsNavigationMinting from '@/views/marketplace/components/gallery/CollectionsNavigationMinting'
 import PunkMintHelper from '@/views/marketplace/components/minting/PunkMintHelper'
+import CollectionImage from '@/views/marketplace/components/gallery/CollectionImage'
 
 export default {
   name: 'PunkMinter',
   components: {
-    CollectionsNavigation,
-    PunkMintHelper
+    CollectionsNavigationMinting,
+    PunkMintHelper,
+    CollectionImage
   },
   data () {
     return {

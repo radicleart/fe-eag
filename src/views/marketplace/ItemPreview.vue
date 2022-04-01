@@ -1,17 +1,15 @@
 <template>
-<section class="" id="section-minting">
-  <b-container class="my-5 pt-5" v-if="!item || !loopRun">
-    <h1>{{message}}</h1>
-  </b-container>
-  <b-container class="my-3" v-else>
-    <b-row :key="componentKey" style="min-height: 40vh;" >
-      <b-col md="4" sm="12" align-self="start" class="text-center">
-        <MediaItemGeneral :classes="'item-image-preview'" :options="options" :asset="item"/>
+<div v-if="!loading" class="ml-5 bg-light">
+  <CollectionsNavigationMyNfts :context="'item-preview'" :loopRun="loopRun" :asset="item" :filter="'asset'"/>
+  <b-container style="height: auto;" fluid class="px-5 mt-5">
+    <b-row :key="componentKey" style="min-height: 50vh;" >
+      <b-col lg="7" sm="12" class="mb-5">
+        <MediaItemGeneral :classes="'hash1-image'" :options="options" :asset="item"/>
         <div class="text-left text-small mt-3">
           <b-link :to="'/my-nfts/' + loopRun.currentRunKey"><b-icon icon="chevron-left"/> Back</b-link>
         </div>
       </b-col>
-      <b-col md="8" sm="12" align-self="start" class="mb-4 text-white">
+      <b-col lg="5" sm="12" class="my-5">
         <div>
           <div class="mb-2 d-flex justify-content-between">
             <h2 class="d-block border-bottom mb-5">{{mintedMessage}}</h2>
@@ -34,7 +32,7 @@
       </b-col>
     </b-row>
   </b-container>
-</section>
+</div>
 </template>
 
 <script>
@@ -45,10 +43,12 @@ import PendingTransactionInfo from '@/views/marketplace/components/toolkit/nft-h
 import NftHistory from '@/views/marketplace/components/toolkit/nft-history/NftHistory'
 import MintInfo from '@/views/marketplace/components/toolkit/mint-setup/MintInfo'
 import MintingTools from '@/views/marketplace/components/toolkit/MintingTools'
+import CollectionsNavigationMyNfts from '@/views/marketplace/components/gallery/CollectionsNavigationMyNfts'
 
 export default {
   name: 'ItemPreview',
   components: {
+    CollectionsNavigationMyNfts,
     MediaItemGeneral,
     NftHistory,
     MintingTools,
@@ -58,6 +58,7 @@ export default {
   },
   data: function () {
     return {
+      loading: true,
       showHash: false,
       loopRun: null,
       contractId: null,
@@ -71,7 +72,6 @@ export default {
     }
   },
   mounted () {
-    this.loading = false
     this.contractId = this.$route.params.contractId
     this.state = this.$route.query.state
     this.fetchItem()

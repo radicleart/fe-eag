@@ -17,6 +17,17 @@
   </b-navbar-toggle>
   -->
   <b-collapse id="nav-collapse" is-nav class="show">
+    <b-navbar class="mx-auto">
+      <b-nav-item-dropdown style="list-style: none;" class="" left v-if="profile.loggedIn" no-caret>
+        <template v-slot:button-content>
+          <img :src="iconHN" v-if="!isHomePage" class="ml-5 pointer icon"/>
+        </template>
+        <b-dropdown-item>JOURNEY</b-dropdown-item>
+        <b-dropdown-item>MARKETPLACE</b-dropdown-item>
+        <b-dropdown-item>COMMUNITY</b-dropdown-item>
+        <b-dropdown-item>CREATE</b-dropdown-item>
+      </b-nav-item-dropdown>
+    </b-navbar>
     <b-navbar class="ml-auto">
       <ExchangeRates class="d-none d-sm-block"/>
       <b-nav-item-dropdown style="list-style: none;" class="" right v-if="profile.loggedIn" no-caret>
@@ -30,7 +41,9 @@
         <b-dropdown-item to="/nft-collections">Collections</b-dropdown-item>
         <b-dropdown-item to="/my-nfts">My NFTs</b-dropdown-item>
         <b-dropdown-divider />
-        <b-dropdown-item class="text-right text-small"><span>{{profile.stxAddress}}</span></b-dropdown-item>
+        <b-dropdown-item class="text-right text-small">
+          <OwnerInfo :owner="profile.stxAddress" />
+        </b-dropdown-item>
         <b-dropdown-item v-if="profile.accountInfo" class="text-right text-small">
           <span>Balance: {{profile.accountInfo.balance}} STX</span>
         </b-dropdown-item>
@@ -64,6 +77,7 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import ExchangeRates from '@/components/tokens/ExchangeRates'
+import OwnerInfo from '@/views/marketplace/components/gallery/common/OwnerInfo'
 
 export default {
   name: 'MainNavbar',
@@ -72,12 +86,14 @@ export default {
     colorOnScroll: Number
   },
   components: {
-    ExchangeRates
+    ExchangeRates,
+    OwnerInfo
   },
   watch: {
   },
   data () {
     return {
+      iconHN: require('@/assets/img/EAG - WEB UX assets - png/EAG - hamburger grey.png'),
       iconWN: require('@/assets/img/EAG - WEB UX assets - png/EAG - wallet neon.png'),
       iconWG: require('@/assets/img/EAG - WEB UX assets - png/EAG - wallet grey.png'),
       iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo neon.png'),
