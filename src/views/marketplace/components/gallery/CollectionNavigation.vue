@@ -1,12 +1,12 @@
 <template>
 <b-container id="col-nav" fluid class="py-0 mx-0 px-0 bg-light">
   <div class="d-flex text-primary">
-    <div :class="(!filter) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link to="/nft-collections">Collections</b-link></div>
+    <div :class="(!filter) ? 'bg-white' : ''" class="py-2 px-4 "><b-link to="/nft-collections">Collections</b-link></div>
     <div v-if="loopRun">
-      <div :class="(filter ===  'collection') ? 'bg-white' : ''" class="py-2 px-4 mx-0 border-right"><b-link :to="'/nft-collection/' + loopRun.currentRunKey">{{loopRun.currentRun}}</b-link></div>
+      <div :class="(filter ===  'collection') ? 'bg-white' : ''" class="py-2 px-4 mx-0 "><b-link :to="'/nft-collection/' + loopRun.currentRunKey">| {{loopRun.currentRun}} |</b-link></div>
     </div>
     <div v-if="asset">
-      <div :class="(filter ===  'asset') ? 'bg-white' : ''" class="py-2 px-4 mx-0 border-right"># {{asset.contractAsset.nftIndex}}</div>
+      <div :class="(filter ===  'asset') ? 'bg-white' : ''" class="py-2 px-4 mx-0 ">| # {{asset.contractAsset.nftIndex}} |</div>
     </div>
   </div>
   <div class="px-4 d-flex justify-content-between">

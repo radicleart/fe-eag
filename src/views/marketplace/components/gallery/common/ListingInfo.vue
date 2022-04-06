@@ -1,17 +1,17 @@
 <template>
-<div :class="classes" style="min-width: 200px;">
+<div :class="classes" class="sub-menu" style="min-width: 200px;">
   <b-container>
-    <b-row v-if="collection" class="py-2 border-bottom">
-      <b-col cols="12">{{collection.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
+    <b-row v-if="collection" class="border">
+      <b-col cols="12" class="py-2 bg-light border">{{collection.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
     </b-row>
-    <b-row v-if="collection" class="py-2 border-bottom">
-      <b-col cols="12">{{collection.makerName}}</b-col>
+    <b-row v-if="collection" class="border-bottom">
+      <b-col cols="12" class="py-2 text-lower">{{collection.makerName}}</b-col>
     </b-row>
-    <b-row v-if="!collection" class="py-2 border-bottom">
-      <b-col cols="12">{{asset.contractAsset.contractId.split('.')[1]}} #{{asset.contractAsset.nftIndex}}</b-col>
+    <b-row v-if="!collection" class="border-bottom">
+      <b-col cols="12" class="py-2 text-lower">{{asset.contractAsset.contractId.split('.')[1]}} #{{asset.contractAsset.nftIndex}}</b-col>
     </b-row>
-    <b-row class="py-2 border-bottom">
-      <b-col cols="12">
+    <b-row class="border-bottom">
+      <b-col cols="12" class="py-2 text-lower">
         <div class="d-flex justify-content-between">
           <div v-if="asset.name">{{asset.name}}</div>
           <div v-else>Unamed</div>
@@ -24,21 +24,21 @@
     </b-row>
   </b-container>
   <b-container v-if="showDetails">
-    <b-row class="py-2 border-bottom">
-      <b-col cols="12">
+    <b-row class="border-bottom">
+      <b-col cols="12" class="py-2 text-lower">
         <OwnerInfo :owner="asset.contractAsset.owner" />
       </b-col>
     </b-row>
-    <b-row class="py-2 border-bottom" v-if="isListed() && $route.name !== 'my-nfts'">
-      <b-col cols="6" class="py-2">{{getPriceFormatted()}}</b-col>
+    <b-row class="border-bottom" v-if="isListed() && $route.name !== 'my-nfts'">
+      <b-col cols="6" class="py-2 text-lower">{{getPriceFormatted()}}</b-col>
       <b-col cols="6" class="py-2 bg-dark text-white text-center">
         <span class="pt-3 pointer" :title="ttBiddingHelp" @click="openPurchaceDialog()">BUY NOW</span>
       </b-col>
     </b-row>
-    <b-row class="py-2 border-bottom" v-if="isListed() && $route.name === 'my-nfts'">
+    <b-row class="border-bottom" v-if="isListed() && $route.name === 'my-nfts'">
       <b-col cols="12" class="py-2">Listed for: {{getPriceFormatted()}}</b-col>
     </b-row>
-    <b-row class="py-2 border-bottom" v-if="$route.name === 'my-nfts' && $route.name !== 'asset-by-index'">
+    <b-row class="border-bottom" v-if="$route.name === 'my-nfts' && $route.name !== 'asset-by-index'">
       <b-col cols="12">
         <div class="d-flex justify-content-between">
           <b-link v-if="$route.name === 'my-nfts'" :to="'/nft-preview/' + asset.contractAsset.contractId + '/' + asset.contractAsset.nftIndex">manage</b-link>
@@ -46,9 +46,9 @@
         </div>
       </b-col>
     </b-row>
-    <b-row class="py-2 border-bottom">
-      <b-col cols="12">
-        <div><a :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
+    <b-row class="border">
+      <b-col cols="12" class="border bg-light py-2">
+        <div><a class="text-primary" :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
       </b-col>
     </b-row>
   </b-container>

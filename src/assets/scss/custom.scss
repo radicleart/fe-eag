@@ -4,13 +4,20 @@
 // @import '../../assets/scss/video-js.css';
 
 @font-face {
-  font-family: "Barlow-Medium";
-  src: url("/fonts/EAG - WEB Fonts/SUB MENU and NFT INFO font/Barlow/Barlow-Medium.ttf") format("truetype");
+  font-family: "Barlow-Regular";
+  src: url("/fonts/EAG - WEB Fonts/SUB MENU and NFT INFO font/Barlow/Barlow-Regular.ttf") format("truetype");
   font-style: normal;
   font-weight: normal;
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Barlow-Bold";
+  src: url("/fonts/EAG - WEB Fonts/SUB MENU and NFT INFO font/Barlow/Barlow-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
 @font-face {
   font-family: "Orbitron-Regular";
   src: url("/fonts/EAG - WEB Fonts/NAV and MENU font/Orbitron/Orbitron-Regular.ttf") format("truetype");
@@ -41,6 +48,20 @@ html, body {
   color: $primary;
 }
 
+/** - footer styles ------------------------------------------------- **/
+.footer1 {
+  font-family: 'Barlow-Bold';
+  text-transform: uppercase;
+  font-size: 0.625rem;
+  color: #999;
+}
+.footer2 {
+  font-family: 'Barlow-Regular';
+  text-transform: capitalise;
+  font-size: 0.625rem;
+  color: #999;
+}
+/** --------------------------------------------------------------- **/
 /** - nav bar styles ------------------------------------------------- **/
 #wallet-dd-home {
   font-family: 'Orbitron-Regular';
@@ -84,6 +105,40 @@ html, body {
   color: #fff !important;
 }
 /** --------------------------------------------------------------- **/
+/** - Collection Navs --------------------------------------------- **/
+#col-nav {
+  font-family: 'Orbitron-Regular';
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  color: #666;
+}
+#col-nav a {
+  color: #666;
+}
+#col-nav .dropdown-item {
+  background-color: transparent;
+  font-size: 0.6875rem;
+  color: #666;
+}
+/** --------------------------------------------------------------- **/
+/** - Popup menu navs --------------------------------------------- **/
+.my-popover-class {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  border: none;
+  position: relative;
+  top: -20px;
+  left: -200px;
+  text-transform: uppercase;
+}
+.sub-menu {
+  font-family: 'Barlow-Regular';
+  font-size: 0.6875rem;
+  color: #666;
+  text-transform: uppercase;
+}
+/** --------------------------------------------------------------- **/
 
 #home-page a {
   color: $info;
@@ -104,7 +159,9 @@ a:hover {
   width: auto;
   height: 1.1rem;
 }
-
+.text-lower {
+  text-transform: lowercase;
+}
 .collection-image {
   border: 12px solid #fff;
   border-radius: 4px;

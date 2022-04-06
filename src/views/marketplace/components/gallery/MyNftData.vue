@@ -1,12 +1,12 @@
 <template>
 <div v-if="asset">
-  <b-popover :container="`#${'popover-my-nft-' + asset.contractAsset.contractId + '-' + asset.contractAsset.nftIndex}`" placement="topleft" triggers="hover" variant="light" :target="'popover-my-nft-' + asset.contractAsset.contractId + '-' + asset.contractAsset.nftIndex" custom-class="my-popover-class">
+  <b-popover :container="`#${'popover-my-nft-' + asset.contractAsset.contractId + '-' + asset.contractAsset.nftIndex}`" placement="topleft" triggers="hover" variant="light" :target="'popover-my-nft-' + asset.contractAsset.contractId + '-' + asset.contractAsset.nftIndex" custom-class="my-popover-class sub-menu">
     <template #title>My NFT</template>
     <ListingInfo v-on="$listeners" :asset="asset" :classes="''"/>
   </b-popover>
 </div>
 <div v-else>
-  <b-popover placement="topleft" triggers="hover" variant="light" target="'popover-my-nft-' + loopRun.currentRunKey + '-' + asset.contractAsset.nftIndex" custom-class="my-popover-class">
+  <b-popover placement="topleft" triggers="hover" variant="light" target="'popover-my-nft-' + loopRun.currentRunKey + '-' + asset.contractAsset.nftIndex" custom-class="my-popover-class sub-menu">
     <template #title>My NFTs</template>
     <div class="py-2">All NFTs owned by your address</div>
     <div class="py-2">EAG doesn't support all the projects where these NFTs were minted.</div>
@@ -40,10 +40,5 @@ export default {
 }
 </script>
 <style scoped>
-.my-popover-class {
-    position: relative;
-    top: -100px;
-    left: -200px;
-}
 
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <div :id="(isHomePage) ? 'wallet-dd-home' : 'wallet-dd'" class="py-4 mx-4 text-primary d-flex justify-content-between" v-if="showFooter">
+  <div :id="(isHomePage) ? 'footer-nav-home' : 'footer-nav'" class="py-4 mx-4 text-primary d-flex justify-content-between" v-if="showFooter">
     <div class="d-flex">
-      <div class="text-700 mr-3">Electric Art Gallery &copy; 2022</div>
-      <div class="d-none d-md-block text-300">Brighton, England, X0 0XX • UK • info@electricart.gallery</div>
+      <div class="footer1 mr-3">Electric Art Gallery &copy; 2022</div>
+      <div class="footer2 d-none d-md-block">Brighton, England, X0 0XX • UK • info@electricart.gallery</div>
     </div>
     <div>
       <img :src="iconPG"  class="icon"/>
