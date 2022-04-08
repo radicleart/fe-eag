@@ -46,8 +46,6 @@ export default {
         $self.$store.dispatch('initApplication').then(() => {
           document.getElementById($self.tickerId).style.display = 'none'
           $self.configured = true
-          // const profile = $self.$store.getters[APP_CONSTANTS.KEY_PROFILE]
-          // $self.$store.dispatch('paymentStore/fetchStacksMateTransactions', profile.stxAddress)
         })
       }
     })

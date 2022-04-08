@@ -108,7 +108,7 @@ export default {
     },
     startMinting: function () {
       this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'minting-flow' })
-      this.$store.commit('rpayStore/setDisplayCard', 100)
+      this.$store.commit('merchantStore/setDisplayCard', 100)
       this.$bvModal.show('minting-modal')
     },
     downable: function () {

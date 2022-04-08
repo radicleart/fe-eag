@@ -1,17 +1,17 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import storeUtils from './storeUtils'
 import { APP_CONSTANTS } from '@/app-constants'
+import storeUtils from './storeUtils'
 import contentStore from './contentStore'
-import paymentStore from './paymentStore'
+import merchantStore from './merchantStore'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
     contentStore,
-    paymentStore
+    merchantStore
   },
   state: {
     configuration: {}

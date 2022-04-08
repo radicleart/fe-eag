@@ -1,10 +1,8 @@
 <template>
 <div>
-  <b-link class="text-primary" router-tag="span" v-b-tooltip.hover="{ variant: 'dark' }" :title="'Copy full stacks address'">
     <span ref="flashee" class="mr-3">{{getAddress}}</span>
-    <a v-if="owner" href="#" class="pointer" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a>
-    <input class="mr-3 fake-input" id="copy-address" readonly v-model="owner"/>
-  </b-link>
+    <a v-if="owner" href="#" class="pointer" v-b-tooltip.hover="{ variant: 'dark' }" :title="'Copy full stacks address'" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a>
+    <input class="mr-3 fake-input" id="copy-stx-address" readonly v-model="owner"/>
 </div>
 </template>
 <script>
@@ -29,7 +27,7 @@ export default {
   },
   methods: {
     copyAddress (value) {
-      const copyText = document.querySelector('#copy-address')
+      const copyText = document.querySelector('#copy-stx-address')
       copyText.select()
       document.execCommand('copy')
       this.doFlash()

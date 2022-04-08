@@ -27,6 +27,7 @@
 import QRCode from 'qrcode'
 import { APP_CONSTANTS } from '@/app-constants'
 import CryptoCountdown from './CryptoCountdown'
+import utils from '@/services/utils'
 
 export default {
   name: 'BitcoinPaymentAddress',
@@ -58,8 +59,8 @@ export default {
     paymentUri () {
       const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
       let uri = 'bitcoin:' + invoice.address
-      uri += '?amount=' + invoice.amount
-      uri += '&label=' + invoice.description
+      uri += '?amount=' + utils.fromSatoshi(invoice.amount)
+      uri += '&label=' + encodeURI(invoice.description)
       return uri
     },
     addQrCode () {

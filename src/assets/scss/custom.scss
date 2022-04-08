@@ -294,6 +294,16 @@ a:hover {
 #stacks-address-modal .modal-header {
   display: none;
 }
+#in-flight-modal .modal-content {
+  border: none !important;
+  background-color: transparent !important;
+}
+#in-flight-modal .modal-footer {
+  display: none;
+}
+#in-flight-modal .modal-header {
+  display: none;
+}
 #payment-modal .modal-content {
   border: none !important;
   background-color: transparent !important;
@@ -319,10 +329,14 @@ a:hover {
 }
 
 .fake-input {
-  background-color: $light;
+  background-color: $white;
   border: none;
-  width: 20px;
+  width: 10px;
   font-size: 0.1rem;
+  color: $light;
+}
+.fake-input:focus {
+  border: $white;
   color: $light;
 }
 .fake-input:focus-visible {
@@ -335,22 +349,19 @@ a:hover {
 }
 .r-notifs {
   padding: 7px 5px !important;
-  margin: 1px 1px 20px 1px !important;
-  font-size: 1.2rem !important;
-  background: $success !important;
-  color: #000 !important;
+  margin: 1px 1px 0px 1px !important;
+  font-size: 1.0rem !important;
+  background: $light !important;
+  color: #fff !important;
 }
 .success {
-  background: $dark !important;
-  color: #fff !important;
+  background: $success !important;
 }
 .error {
   background: $danger !important;
-  color: #fff !important;
 }
 .danger {
   background: $danger !important;
-  color: #fff !important;
 }
 .warning {
   background: $warning !important;

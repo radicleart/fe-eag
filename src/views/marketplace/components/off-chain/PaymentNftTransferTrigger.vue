@@ -1,20 +1,23 @@
 <template>
 <div>
-  <div class="w-100" v-if="transactionData.type === 'mint-with'">
-    <p class="text-small" v-html="paymentMessage"></p>
-    <b-button class="w-100" :disabled="pending" variant="outline-dark" @click="showAddress">Start</b-button>
+  <div v-if="loaded">
+    <div class="w-100" v-if="inFlightPayments">
+      <b-button class="w-100" variant="outline-dark" @click="showAddressOrInflightPayments">Show</b-button>
+    </div>
+    <div class="w-100" v-else>
+      <b-button class="w-100" variant="outline-dark" @click="showAddressOrInflightPayments">Start</b-button>
+    </div>
   </div>
-
-  <div class="w-md-75" v-else>
-    <p class="text-small" v-html="paymentMessage"></p>
-    <p class="mt-3 text-left"><b-button :disabled="pending" variant="warning" @click="showAddress">Buy Now</b-button></p>
-  </div>
+  <b-modal size="lg" id="in-flight-modal" centered>
+    <InFlightPaymentModal :payments="inFlightPayments"/>
+    <template #modal-footer class="text-center"><div class="w-100"></div></template>
+  </b-modal>
   <b-modal size="lg" id="stacks-address-modal" centered>
     <StacksAddressModal @showPayment="showPayment"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
   <b-modal size="lg" id="payment-modal" centered>
-    <PaymentFlow v-if="showRpay" :transactionData="transactionData" :configuration="configuration" :recipient="recipient" @stacksMateEvent="stacksMateEvent"/>
+    <PaymentFlow :transactionData="transactionData" :configuration="configuration" @stacksMateEvent="stacksMateEvent"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
 </div>
@@ -24,34 +27,37 @@
 import { APP_CONSTANTS } from '@/app-constants'
 import PaymentFlow from '@/views/marketplace/components/off-chain/PaymentFlow'
 import StacksAddressModal from '@/views/marketplace/components/off-chain/StacksAddressModal'
+import InFlightPaymentModal from '@/views/marketplace/components/off-chain/InFlightPaymentModal'
 import utils from '@/services/utils'
 
 export default {
   name: 'PaymentNftTransferTrigger',
   components: {
     PaymentFlow,
-    StacksAddressModal
+    StacksAddressModal,
+    InFlightPaymentModal
   },
   props: ['configuration', 'transactionData'],
   data () {
     return {
-      componentKey: 0,
-      recipient: null,
-      showSMWallet: false,
-      showRpay: false,
-      showUserTransactions: false,
-      transactions: null
+      loaded: false,
+      inFlightPayments: null,
+      recipient: null
     }
   },
   mounted () {
-    // const configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
-    // if (this.getAmounts) configuration.payment = Object.assign(configuration.payment, this.getAmounts.fiatAmounts)
-    // configuration.payment.paymentOption = ''
-    // configuration.risidioCardMode = 'purchase-flow'
-    // this.configuration = configuration
-    const data = { stxAddress: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS }
+    const data = {
+      stxAddress: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
+    }
     this.recipient = this.profile.stxAddress
     this.$store.dispatch('rpayAuthStore/fetchAccountInfo', data)
+    data.stxAddress = this.profile.stxAddress
+    this.$store.dispatch('merchantStore/fetchPayments', data).then((payments) => {
+      this.loaded = true
+      if (payments && payments.opennode.filter((o) => o.status !== 'unpaid').length > 0) {
+        this.inFlightPayments = payments.opennode.filter((o) => o.status !== 'unpaid')
+      }
+    })
     if (this.$route.query && this.$route.query.stxAddress) {
       this.recipient = this.$route.query.stxAddress
     }
@@ -60,26 +66,15 @@ export default {
     }
   },
   methods: {
-    stacksMateEvent (transaction) {
-      this.$store.dispatch('paymentStore/fetchStacksMateTransactions', this.profile.stxAddress).then((transactions) => {
-        this.transactions = transactions
-      })
-      if (transaction.error !== 'TX_PREV_SAVED') {
-        this.$notify({ type: 'success', title: 'Stacks Transfer', text: 'Your STX tokens are on their way!' })
-      }
-      this.$bvModal.hide('payment-modal')
-      this.showUserTransactions = true
-      this.componentKey++
+    stacksMateEvent (data) {
+      this.$notify({ type: 'warning', title: 'Pending', text: 'Event data: ' + data })
     },
-    useMyAddress: function () {
-      this.recipient = this.profile.stxAddress
-    },
-    showAddress () {
-      if (this.pending) {
-        this.$notify({ type: 'warning', title: 'Pending', text: 'Please wait for current transactions to confirm' })
-        return
+    showAddressOrInflightPayments () {
+      if (this.inFlightPayments) {
+        this.$bvModal.show('in-flight-modal')
+      } else {
+        this.$bvModal.show('stacks-address-modal')
       }
-      this.$bvModal.show('stacks-address-modal')
     },
     showPayment (data) {
       this.recipient = data.recipient
@@ -102,14 +97,13 @@ export default {
         return
       }
       this.transactionData.recipient = this.recipient
-      this.showRpay = true
       this.$bvModal.show('payment-modal')
       this.$bvModal.hide('stacks-address-modal')
     }
   },
   computed: {
     paymentMessage () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
+      const configuration = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONFIG]
       if (!configuration) return ''
 
       const amounts = this.getAmounts
@@ -117,23 +111,12 @@ export default {
       if (this.transactionData) {
         return ''
       }
-      // return '<div>Swap <span class="text-warning">' + configuration.payment.amountFiat + '</span> ' + configuration.payment.currency + ' for <span class="text-warning">' + configuration.payment.amountStx + '</span> STX</div><div class="mt-3">Send the STX to:</span> <span class="text-warning">' + this.recipient + '</div>'
       const baseMessage = '<h3 class="mb-4">' + amounts.baseAmounts.currency + ' <span class="text-warning">' + amounts.baseAmounts.amountFiatFormatted + '</span> Swap</h3>'
       return baseMessage + '<div>Swap <span class="text-warning">' + amounts.fiatAmounts.amountFiatFormatted + '</span> ' + amounts.fiatAmounts.currency + ' for <span class="text-warning">' + amounts.baseAmounts.amountStx + '</span> STX</div>'
-      // <div class="mt-3">Send the STX to:</span> <span class="text-warning">' + this.recipient + '</div>'
     },
     getAmounts () {
       const amounts = this.$store.getters[APP_CONSTANTS.KEY_AMOUNTS]
       return amounts
-    },
-    pending () {
-      const pending = this.$store.getters[APP_CONSTANTS.KEY_MY_PENDING](this.profile.stxAddress)
-      return pending
-    },
-    smWallet () {
-      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
-      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
-      return wallet
     },
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]

@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     backToCredits () {
-      this.$store.commit('rpayStore/setDisplayCard', 100)
+      this.$store.commit('merchantStore/setDisplayCard', 100)
     }
   },
   computed: {

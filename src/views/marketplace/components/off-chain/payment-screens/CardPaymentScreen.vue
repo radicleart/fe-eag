@@ -129,7 +129,7 @@ export default {
         data.opcode = 'fiat-payment-success'
         data.numbCredits = configuration.payment.creditAttributes.start
         data.status = 'paid'
-        this.$store.commit('rpayStore/setInvoice', data)
+        this.$store.commit('merchantStore/setInvoice', data)
         this.$emit('rpayEvent', data)
       }).catch(err => {
         // console.error(err)

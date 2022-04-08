@@ -52,7 +52,7 @@ export default {
       this.$emit('rpayEvent', { opcode: configuration.payment.paymentOption + '-payment-end' })
     },
     rangeEvent (displayCard) {
-      this.$store.commit('rpayStore/setDisplayCard', displayCard)
+      this.$store.commit('merchantStore/setDisplayCard', displayCard)
     },
     getRangeValue () {
       const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]

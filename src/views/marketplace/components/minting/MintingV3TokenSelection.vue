@@ -51,6 +51,7 @@ export default {
     }
     this.$store.dispatch('rpayMarketGenFungStore/getCommissionTokensByContract', data).then((commissions) => {
       if (commissions) {
+        commissions = commissions.filter((o) => o.sipTenToken)
         this.tokenContractId = commissions[0].tokenContractId
         this.commissions = commissions
         this.commission = commissions[0]
@@ -74,7 +75,7 @@ export default {
     commissionTokens () {
       const options = []
       this.commissions.forEach((o) => {
-        options.push({ text: o.sipTenToken.symbol, value: o.tokenContractId })
+        if (o.sipTenToken) options.push({ text: o.sipTenToken.name, value: o.tokenContractId })
       })
       return options
     }

@@ -1,7 +1,6 @@
 <template>
-<div v-if="loopRun">
-  <b-row style="height: 100%;">
-    <b-col cols="12" align-self="start">
+  <b-row style="height: 100%;" v-if="commissions">
+    <b-col cols="12" align-self="end">
       <p v-if="mintPasses > 0">MINT PASSES: {{mintPasses}}</p>
       <p class="">EDITION: {{loopRun.versionLimit}}</p>
       <p class="">AVAILABLE: {{available}}</p>
@@ -24,7 +23,7 @@
               Purchase options
             </b-col>
             <b-col cols="6" class="text-center">
-              <PaymentNftTransferTrigger class="w-100 text-white" :configuration="configuration" :transactionData="transactionData()"/>
+              <PaymentNftTransferTrigger class="w-100 text-white" :transactionData="transactionData()"/>
             </b-col>
           </b-row>
         </div>
@@ -34,12 +33,11 @@
       </div>
       <div class="mt-4 pt-4 border-top text-right"><img width="100%" :src="iconLN" /></div>
     </b-col>
+    <b-modal size="lg" id="minting-modal">
+      <MintingV3Flow v-if="loopRun.marketplaceVersion === 3" @update="update" :commissions="commissions" :loopRun="loopRun" :batchOption="batchOption"/>
+      <template #modal-footer class="text-center"><div class="w-100"></div></template>
+    </b-modal>
   </b-row>
-  <b-modal size="lg" id="minting-modal">
-    <MintingV3Flow v-if="loopRun.marketplaceVersion === 3" @update="update" :loopRun="loopRun" :batchOption="batchOption"/>
-    <template #modal-footer class="text-center"><div class="w-100"></div></template>
-  </b-modal>
-</div>
 </template>
 
 <script>
@@ -58,7 +56,7 @@ export default {
     return {
       iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo neon.png'),
       batchOption: 1,
-      configuration: null
+      commissions: null
     }
   },
   watch: {
@@ -66,17 +64,33 @@ export default {
     }
   },
   mounted () {
-    this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, priceInStx: 0.50 })
-    this.configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
+    const data = {
+      contractId: this.loopRun.contractId
+    }
+    this.$store.dispatch('rpayMarketGenFungStore/getCommissionTokensByContract', data).then((commissions) => {
+      if (commissions) {
+        this.tokenContractId = commissions[0].tokenContractId
+        this.commissions = commissions
+        this.commission = commissions[0]
+        this.$store.commit(APP_CONSTANTS.SET_PURCHASE_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, commission: this.commission })
+        this.$notify({ type: 'success', title: 'Mint Commission', text: 'Mint commission: ' + commissions.length })
+      }
+      this.loading = false
+    })
   },
   methods: {
     transactionData () {
+      const comm = this.commissions.find((o) => o.tokenContractId.indexOf('unwrapped-stx-token') > -1)
       return {
         type: 'mint-with',
+        price: comm.price,
+        batchOption: 1,
         contractId: this.loopRun.contractId,
+        tokenContractAddress: comm.tokenContractId.split('.')[0],
+        tokenContractName: comm.tokenContractId.split('.')[1],
         nftIndex: null,
         recipient: null,
-        owner: null,
+        sender: this.profile.stxAddress,
         assetName: this.loopRun.assetName
       }
     },
@@ -105,7 +119,7 @@ export default {
       this.$store.dispatch('rpayCategoryStore/checkGuestList', data).then((result) => {
         if (result) {
           this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'minting-flow' })
-          this.$store.commit('rpayStore/setDisplayCard', 100)
+          this.$store.commit('merchantStore/setDisplayCard', 100)
           this.$bvModal.show('minting-modal')
         } else {
           this.$notify({ type: 'warning', title: 'Mint Pass Expired', text: 'New allow list in operation' })

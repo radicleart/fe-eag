@@ -6,8 +6,16 @@ import { SECP256K1Client } from 'jsontokens'
 import { sha256 } from 'sha.js'
 
 const precision = 1000000
+const btcPrecision = 100000000
 
 const utils = {
+  fromSatoshi: function (amount) {
+    try {
+      return Math.round(amount) / btcPrecision
+    } catch {
+      return 0
+    }
+  },
   fromOnChainAmount: function (amountMicroStx, gftPrecision) {
     try {
       amountMicroStx = parseInt(amountMicroStx, 16)

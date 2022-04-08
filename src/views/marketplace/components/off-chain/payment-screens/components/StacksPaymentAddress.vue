@@ -99,17 +99,17 @@ export default {
         this.loading = false
         if (result && result.result) data.txId = result.result.txId
         this.$emit('rpayEvent', data)
-        this.$store.commit('rpayStore/setDisplayCard', 104)
+        this.$store.commit('merchantStore/setDisplayCard', 104)
       }).catch((e) => {
         this.$store.dispatch('rpayStacksStore/makeTransferRisidio', { amountStx: configuration.payment.amountStx, recipient: configuration.payment.stxPaymentAddress }).then((result) => {
           this.waitingMessage = 'Processed Payment'
           this.loading = false
           data.txId = result.txId
           this.$emit('rpayEvent', data)
-          this.$store.commit('rpayStore/setDisplayCard', 104)
+          this.$store.commit('merchantStore/setDisplayCard', 104)
         }).catch((e) => {
           this.errorMessage = 'Unable to transfer funds at the moment - please try later or choose an alternate payment method'
-          this.$store.commit('rpayStore/setDisplayCard', 104)
+          this.$store.commit('merchantStore/setDisplayCard', 104)
           this.loading = false
         })
       })

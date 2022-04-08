@@ -21,7 +21,7 @@
             <b-row>
               <b-col>
                 <div v-if="mintPasses <  0">Checking for mint passes</div>
-                <div v-else-if="walletTx">
+                <div v-else-if="transaction && transaction.txStatus === 'pending'">
                   <a :href="transactionUrl()" target="_blank"><b-icon class="text-warning" font-scale="1.2" icon="arrow-up-right-circle"/> view on explorer</a>
                 </div>
                 <PunkMintHelper v-else :loopRun="loopRun" :mintPasses="mintPasses"/>
@@ -53,12 +53,11 @@ export default {
       mintPasses: -1,
       componentKey: 0,
       batchOption: 1,
-      configuration: null,
       result: null,
       loopRun: null,
       makerUrlKey: null,
       currentRunKey: null,
-      walletTx: false,
+      transaction: false,
       mintImage: null
     }
   },
@@ -69,8 +68,6 @@ export default {
     this.currentRunKey = this.$route.params.collection
     this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.currentRunKey).then((loopRun) => {
       this.loopRun = loopRun
-      this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, priceInStx: 0.50 })
-      this.configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
       this.mintImage = loopRun.mintImage1 || loopRun.image
       if (!this.profile.loggedIn) {
         this.$router.push('/')
@@ -78,10 +75,23 @@ export default {
       }
       const data = {
         stxAddress: this.profile.stxAddress,
+        contractId: loopRun.contractId,
         contractAddress: loopRun.contractId.split('.')[0],
         contractName: loopRun.contractId.split('.')[1],
         currentRunKey: this.$route.params.collection
       }
+      this.$store.dispatch('rpayTransactionStore/fetchByContractIdAndFrom', data).then((transactions) => {
+        if (transactions) {
+          transactions = transactions.filter((o) => o.functionName === 'mint-with')
+          if (transactions) this.transaction = transactions.reverse()[0]
+          if (this.transaction.txStatus === 'pending') {
+            this.$store.dispatch('rpayTransactionStore/fetchTransactionFromChainByTxId', this.transaction.txId).then((result) => {
+              this.transaction = result
+              this.$notify({ type: 'warning', title: 'Check Status', text: 'Transaction status is ' + result.txStatus })
+            })
+          }
+        }
+      })
       this.$store.dispatch('rpayMarketStore/lookupMintPassBalance', data).then((result) => {
         if (result && result.result.value > 0) {
           this.mintPasses = Number(result.result.value)
@@ -97,12 +107,11 @@ export default {
           $self.$bvModal.hide('minting-modal')
         } else if (data.opcode === 'stx-transaction-sent') {
           $self.$bvModal.hide('minting-modal')
+          $self.transaction = data
           if (data.txStatus === 'success') {
-            $self.walletTx = false
             $self.$store.dispatch('rpayCategoryStore/fetchLoopRun', $self.currentRunKey).then((loopRun) => {
               $self.loopRun = loopRun
               $self.mintImage = $self.loopRun.mintImage1 || $self.loopRun.image
-              $self.result = ' status: ' + data.txStatus
               $self.componentKey++
             })
             if (data.functionName === 'mint-token' || data.functionName === 'collection-mint-token') {
@@ -115,11 +124,8 @@ export default {
               })
             }
           } else if (data.txStatus === 'pending') {
-            $self.walletTx = data
-            $self.result = ' status: ' + data.txStatus
             $self.mintImage = $self.loopRun.mintImage2 || $self.loopRun.image
           } else {
-            $self.result = ' status: ' + data.txStatus
             $self.mintImage = $self.loopRun.image
           }
         }
@@ -127,6 +133,10 @@ export default {
     }
   },
   methods: {
+    transactionUrl: function () {
+      if (!this.transaction) return
+      return 'https://explorer.stacks.co/txid/' + this.transaction.txId + '?chain=' + process.env.VUE_APP_NETWORK
+    },
     saveMintingInfo (item, data) {
       item.mintInfo = {
         txId: data.txId,

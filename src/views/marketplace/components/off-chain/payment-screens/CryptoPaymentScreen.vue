@@ -74,11 +74,11 @@ export default {
     doCheckChain () {
       this.checkingChain = true
       const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
-      this.$store.dispatch('rpayStore/checkPayment', invoice.id).then((invoice) => {
+      this.$store.dispatch('merchantStore/checkPayment', invoice.id).then((invoice) => {
         const expired = this.$store.getters[APP_CONSTANTS.KEY_INVOICE_EXPIRED]
         this.checkingChain = false
         if (invoice && invoice.opcode === 'btc-crypto-payment-success') {
-          this.$store.commit('rpayStore/setDisplayCard', 104)
+          this.$store.commit('merchantStore/setDisplayCard', 104)
           this.$notify({ type: 'success', title: 'Payment Detected', text: 'Redirecting to NFT transfer' })
         } else {
           this.$notify({ type: 'warning', title: 'Payment Not Detected', text: 'Scan the qr code or paste the info into your btc wallet.' })

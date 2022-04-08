@@ -41,7 +41,7 @@
         <b-dropdown-item to="/nft-collections">Collections</b-dropdown-item>
         <b-dropdown-item to="/my-nfts">My NFTs</b-dropdown-item>
         <b-dropdown-divider />
-        <b-dropdown-item class="text-right text-small">
+        <b-dropdown-item class="text-left text-small">
           <OwnerInfo :owner="profile.stxAddress" />
         </b-dropdown-item>
         <b-dropdown-item v-if="profile.accountInfo" class="text-right text-small">

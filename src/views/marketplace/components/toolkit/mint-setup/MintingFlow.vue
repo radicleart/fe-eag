@@ -66,18 +66,7 @@ export default {
       this.beneficiaries = royalties.saleRoyalties
       this.beneficiaries[1].chainAddress = profile.stxAddress
       this.beneficiaries[1].username = profile.username
-
       this.$store.commit(APP_CONSTANTS.SET_DISPLAY_CARD, 100)
-
-      // const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](this.items[0].assetHash)
-      // const configuration = this.$store.getters['rpayStore/getConfiguration']
-      // configuration.minter.beneficiaries[1].chainAddress = profile.stxAddress
-      // configuration.minter.beneficiaries[1].username = profile.username
-      // item.beneficiaries = configuration.minter.beneficiaries
-      // this.beneficiaries = item.beneficiaries
-      // if (!item.beneficiaries) {
-      // this.beneficiaries = item.beneficiaries
-      // }
       this.setPage()
     })
   },

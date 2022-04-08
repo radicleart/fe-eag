@@ -101,7 +101,7 @@ export default {
         // this.$notify({ type: 'warn', title: 'Number of Credits', text: 'Credits must be a number between ' + config.payment.creditAttributes.min + ' and ' + config.payment.creditAttributes.max + '!' })
         this.localCredits = config.payment.creditAttributes.start
       }
-      this.$store.dispatch('rpayStore/updateAmount', { numbCredits: this.localCredits })
+      this.$store.dispatch('merchantStore/updateAmount', { numbCredits: this.localCredits })
     }
   },
   computed: {

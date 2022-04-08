@@ -27,9 +27,6 @@
                 <b-icon icon="circle" animation="throb" font-scale="1"></b-icon> Payment in Progress
                 <br/><span class="text-danger text-small">Please leave this tab open until we get the response</span>
               </p>
-              <p v-if="nonceBlocked" class="mt-2 mx-4 text-center text-message">
-                <b-icon icon="circle" animation="throb" font-scale="1"></b-icon> Waiting for previous transaction to confirm
-              </p>
               <CryptoPaymentScreen :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
             </div>
           </div>
@@ -64,7 +61,7 @@ export default {
     CryptoOptions,
     ResultPage
   },
-  props: ['configuration', 'recipient', 'transactionData'],
+  props: ['transactionData'],
   data () {
     return {
       paymentStage: 0,
@@ -90,12 +87,11 @@ export default {
     })
   },
   beforeDestroy () {
-    this.$store.dispatch('rpayStore/stopCheckPayment')
+    this.$store.dispatch('merchantStore/stopCheckPayment')
   },
   methods: {
     initPayment: function () {
-      this.configuration.transactionData = this.transactionData
-      this.$store.dispatch('rpayStore/initialisePaymentFlow', this.configuration).then((invoice) => {
+      this.$store.dispatch('merchantStore/initialisePaymentFlow', this.transactionData).then((invoice) => {
         this.page = 'payment-page'
         if (invoice) {
           if (invoice && (invoice.status === 'paid' || invoice.status === 'processing')) {
@@ -128,27 +124,11 @@ export default {
         this.paymentStage = 1
         this.componentKey++
       } else if (data.opcode.indexOf('-payment-success') > -1) {
-        this.doTransfer(data)
+        // this.doTransfer(data)
       }
     },
-    doTransfer (data) {
-      data.recipient = this.recipient
-      const payment = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONVERT](data)
-      this.$store.dispatch('paymentStore/fetchNoncesForStacksMateWallet', payment.stxAddress).then((nonces) => {
-        if (nonces) {
-          payment.nonce = nonces.possible_next_nonce
-        } else {
-          payment.nonce = -1
-        }
-        this.$store.dispatch('paymentStore/sendStacksMateTransaction', payment).then((transaction) => {
-          this.$emit('stacksMateEvent', transaction)
-        }).catch(() => {
-          this.$notify({ type: 'danger', title: 'Payments', text: 'Waiting for the previous stacks transaction to confirm...' })
-        })
-      })
-    },
     paymentExpired () {
-      this.$store.dispatch('rpayStore/initialisePaymentFlow', this.configuration).then(() => {
+      this.$store.dispatch('merchantStore/initialisePaymentFlow').then(() => {
         this.componentKey += 1
         this.loading = false
       })
@@ -168,7 +148,7 @@ export default {
         sm += this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' to us. '
       }
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') {
-        sm += '<br/>We send <span class="text-xsmall text-danger">#' + this.configuration.asset.contractAsset.nftIndex + '</span> to ' + this.recipient
+        sm += '<br/>We send <span class="text-xsmall text-danger">#' + this.configuration.asset.contractAsset.nftIndex + '</span> to ' + this.configuration.transactionData.recipient
       } else if (this.configuration.risidioCardMode === 'nft-mint-flow') {
         sm += '<br/>We send your NFT to <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>. '
       } else {
@@ -176,11 +156,8 @@ export default {
       }
       return sm
     },
-    nonceBlocked () {
-      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
-      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
-      const lastNonce = this.$store.getters[APP_CONSTANTS.KEY_LAST_NONCE] || -1
-      return wallet.accountInfo.nonce <= lastNonce
+    configuration () {
+      return this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONFIG]
     },
     sufficientFunds () {
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') return true
@@ -190,11 +167,11 @@ export default {
     },
     paymentMessage () {
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') {
-        return 'Purchasing <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.configuration.asset.contractAsset.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.recipient + '</span>'
+        return 'Purchasing <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.configuration.asset.contractAsset.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
       } else if (this.configuration.risidioCardMode === 'nft-mint-flow') {
-        return 'Mint <span class="text-danger">' + this.configuration.loopRun.currentRun + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.recipient + '</span>'
+        return 'Mint <span class="text-danger">' + this.configuration.loopRun.currentRun + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
       }
-      return 'Swap <span class="text-danger">' + this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' for <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX<br/><span>to:</span> <span class="text-danger">' + this.recipient + '</span>'
+      return 'Swap <span class="text-danger">' + this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' for <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX<br/><span>to:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
     },
     displayCard () {
       const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]
