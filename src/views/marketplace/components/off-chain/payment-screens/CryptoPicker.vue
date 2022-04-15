@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="text-center mx-auto border-radius w-75">
-        <b-button class="cp-btn-order" style="width: 100%;" variant="warning" @click.prevent="continueToPayment()">Place Your Order</b-button>
+        <b-button class="cp-btn-order" style="width: 100%;" variant="payments" @click.prevent="continueToPayment()">Place Your Order</b-button>
       </div>
     </div>
 </template>

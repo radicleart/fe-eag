@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="mb-4">
-      <b-button class="cp-btn-order" variant="warning" @click.prevent="doFinish()">Done</b-button>
+      <b-button class="cp-btn-order" variant="payments" @click.prevent="doFinish()">Done</b-button>
     </div>
   </b-card-text>
   <template v-if="!result" v-slot:footer>

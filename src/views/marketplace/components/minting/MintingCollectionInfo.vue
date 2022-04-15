@@ -1,14 +1,9 @@
 <template>
-<div class="text-whiter mt-2 text-small">
-  <b-row>
-    <b-col cols="6"><img @contextmenu="handler($event)" style="" width="100%" :src="getCollectionImageUrl(loopRun)"/></b-col>
-    <b-col cols="6">
-      <b-row>
-        <b-col cols="12">{{loopRun.currentRun}}</b-col>
-        <b-col cols="12">
-          by <span class="text-warning text-xsmall" v-b-tooltip.hover="{ variant: 'warning' }"  :title="'Collection key: ' + loopRun.currentRunKey">{{loopRun.makerName}}</span>
-        </b-col>
-      </b-row>
+<div class="">
+  <b-row style="height: 95%;">
+    <b-col cols="6" align-self="start"><img @contextmenu="handler($event)" style="" width="100%" :src="getCollectionImageUrl(loopRun)"/></b-col>
+    <b-col cols="6" align-self="center">
+      <CollectionDataMinting :commissions="commissions" :loopRun="loopRun" />
     </b-col>
   </b-row>
 </div>
@@ -16,12 +11,14 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
+import CollectionDataMinting from '@/views/marketplace/components/gallery/CollectionDataMinting'
 
 export default {
-  name: 'MintingCollectionData',
+  name: 'MintingCollectionInfo',
   components: {
+    CollectionDataMinting
   },
-  props: ['item', 'loopRun'],
+  props: ['item', 'loopRun', 'commissions'],
   data () {
     return {
       hashone: require('@/assets/img/marketplace/STX_icon.svg')

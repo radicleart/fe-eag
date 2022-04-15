@@ -4,11 +4,35 @@ import { c32address, c32addressDecode } from 'c32check'
 import { makeECPrivateKey, publicKeyToAddress, signECDSA, verifyECDSA, encryptECIES, decryptECIES } from '@stacks/encryption'
 import { SECP256K1Client } from 'jsontokens'
 import { sha256 } from 'sha.js'
+import {
+  hexToCV, cvToJSON
+} from '@stacks/transactions'
 
 const precision = 1000000
 const btcPrecision = 100000000
 
 const utils = {
+  jsonFromTxResult: function (tx) {
+    if (!tx) return null
+    try {
+      if (typeof tx === 'string' && tx.startsWith('0x')) {
+        const cvVer = hexToCV(tx)
+        return cvToJSON(cvVer)
+      } else {
+        const cvVer = hexToCV(tx.tx_result.hex)
+        return cvToJSON(cvVer)
+      }
+    } catch (e) {
+      return null
+    }
+  },
+  stringToHex: function (str) {
+    const arr = []
+    for (let i = 0; i < str.length; i++) {
+      arr[i] = (str.charCodeAt(i).toString(16)).slice(-4)
+    }
+    return '0x' + arr.join('')
+  },
   fromSatoshi: function (amount) {
     try {
       return Math.round(amount) / btcPrecision
@@ -322,13 +346,6 @@ const utils = {
       }
       request.send()
     })
-  },
-  stringToHex: function (str) {
-    const arr = []
-    for (let i = 0; i < str.length; i++) {
-      arr[i] = (str.charCodeAt(i).toString(16)).slice(-4)
-    }
-    return '0x' + arr.join('')
   }
 }
 export default utils

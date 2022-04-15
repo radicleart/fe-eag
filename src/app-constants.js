@@ -24,9 +24,8 @@ export const APP_CONSTANTS = {
   KEY_BREAK_LINE: 'contentStore/getBreakLine',
   KEY_PIXEL_BACKGROUND: 'contentStore/getPixelBackground',
 
-  KEY_PAYMENT_CONFIG: 'merchantStore/getConfiguration',
-  KEY_PURCHASE_CONFIGURATION: 'merchantStore/getRpayConfiguration',
-  SET_PURCHASE_FLOW: 'merchantStore/setRpayFlow',
+  KEY_PURCHASE_CONFIGURATION: 'merchantStore/getPurchaseConfiguration',
+  SET_PURCHASE_FLOW: 'merchantStore/setPurchaseConfiguration',
   KEY_TICKER_RATES: 'merchantStore/getTickerRates',
   KEY_TICKER_RATES_UNFILTERED: 'merchantStore/getUnfilteredTickerRates',
   KEY_DISPLAY_CARD: 'merchantStore/getDisplayCard',

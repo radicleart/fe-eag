@@ -13,12 +13,14 @@
   -->
 
   <div class="d-flex justify-content-center">
+    <p><a href="#" class="pointer" @click.prevent="copyAmount()">COPY PAYMENT AMOUNT</a></p>
     <input class="fake-input" id="copy-amount" readonly v-model="paymentAmount"/>
-    <a href="#" class="pointer" @click.prevent="copyAmount()"><b-icon icon="file-earmark"/></a>
+    <!-- <p>{{paymentAmount}} <a href="#" class="pointer" @click.prevent="copyAmount()"><b-icon icon="file-earmark"/></a></p> -->
   </div>
   <div class="d-flex justify-content-center">
+    <p><a href="#" class="pointer" @click.prevent="copyAddress()">COPY PAYMENT ADDRESS</a></p>
+    <!-- <p>{{paymentAddress}} <a href="#" class="pointer" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a></p> -->
     <input class="fake-input" id="copy-address" readonly v-model="paymentAddress"/>
-    <a href="#" class="pointer" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a>
   </div>
 </div>
 </template>

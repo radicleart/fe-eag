@@ -9,11 +9,11 @@
     </div>
   </div>
   <div class="" v-else>
-    <p v-if="!checkingChain && paymentOption === 'bitcoin' || paymentOption === 'lightning'" class="mt-4 text-center text-message">Scan the QR code <b-icon icon="arrow-right"/> <a v-if="paymentOption === 'lightning' || paymentOption === 'bitcoin'" href="#" class="text-warning" @click.prevent="doCheckChain()">check payment</a></p>
+    <p v-if="!checkingChain && paymentOption === 'bitcoin' || paymentOption === 'lightning'" class="mt-4 text-center text-message">Scan the QR code <b-icon icon="arrow-right"/> <a v-if="paymentOption === 'lightning' || paymentOption === 'bitcoin'" href="#" class="text-payments" @click.prevent="doCheckChain()">check payment</a></p>
     <p v-if="checkingChain" class="mt-4 text-center text-message"><b-icon icon="circle" animation="throb"/> Checking for paid invoice</p>
     <p class="mt-4 text-center text-message text-center" v-if="paymentOption === 'fiat'">Enter your card details</p>
     <div class="d-flex justify-content-center">
-      <CardPaymentScreen :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'fiat'"/>
+      <SquareWebFormPaymentScreen :transactionData="transactionData" :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'fiat'"/>
       <LightningPaymentAddress :configuration="configuration" @rpayEvent="handleEvent" v-if="paymentOption === 'lightning'"/>
       <BitcoinPaymentAddress :configuration="configuration" @rpayEvent="handleEvent" v-if="paymentOption === 'bitcoin'"/>
       <StacksPaymentAddress :configuration="configuration" v-on="$listeners" :desktopWalletSupported="desktopWalletSupported" v-if="paymentOption === 'stacks'"/>
@@ -29,7 +29,7 @@ import LightningPaymentAddress from './components/LightningPaymentAddress'
 import BitcoinPaymentAddress from './components/BitcoinPaymentAddress'
 import StacksPaymentAddress from './components/StacksPaymentAddress'
 import EthereumPaymentAddress from './components/EthereumPaymentAddress'
-import CardPaymentScreen from './CardPaymentScreen'
+import SquareWebFormPaymentScreen from './SquareWebFormPaymentScreen'
 
 export default {
   name: 'CryptoPaymentScreen',
@@ -38,9 +38,9 @@ export default {
     BitcoinPaymentAddress,
     EthereumPaymentAddress,
     StacksPaymentAddress,
-    CardPaymentScreen
+    SquareWebFormPaymentScreen
   },
-  props: ['configuration'],
+  props: ['configuration', 'transactionData'],
   data () {
     return {
       expired: false,
@@ -62,6 +62,8 @@ export default {
     handleEvent (data) {
       if (data.opcode === 'crypto-payment-expired') {
         this.expired = true
+      } else {
+        this.$emit('rpayEvent', data)
       }
     },
     checkChain () {

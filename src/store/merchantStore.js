@@ -17,6 +17,7 @@ const setAmounts = function (tickerRates, configuration) {
       amountFiat = amountFiat * configuration.payment.creditAttributes.start
     }
     const amountBtc = amountFiat / rate.last
+    configuration.payment.amountFiat = Math.round(amountFiat * 100) / 100
     configuration.payment.amountBtc = amountBtc
     configuration.payment.amountBtc = Math.round(amountBtc * precision) / precision
     configuration.payment.amountSat = Math.round(amountBtc * precision)
@@ -120,7 +121,7 @@ const payment = {
     { allowLightning: true, disabled: false },
     { allowStacks: false, disabled: true },
     { allowLSAT: false, disabled: true },
-    { allowEthereum: true, disabled: false }
+    { allowEthereum: true, disabled: true }
   ],
   creditAttributes: {
     start: 2,
@@ -169,7 +170,7 @@ const merchantStore = {
     getDisplayCard: (state) => {
       return state.displayCard
     },
-    getRpayConfiguration: state => {
+    getPurchaseConfiguration: state => {
       return state.configuration
     },
     getPreferredNetwork: (state) => {
@@ -195,9 +196,6 @@ const merchantStore = {
     },
     getHeaders: state => {
       return state.configuration.authHeaders
-    },
-    getConfiguration: state => {
-      return state.configuration
     },
     getInvoice: state => {
       return state.invoice
@@ -248,12 +246,15 @@ const merchantStore = {
     }
   },
   mutations: {
-    setRpayFlow (state, data) {
+    setPurchaseConfiguration (state, data) {
       const config = state.configuration
       config.risidioCardMode = data.flow
       config.loopRun = data.loopRun
       config.commission = data.commission
       state.configuration = config
+    },
+    updateConfiguration (state, configuration) {
+      state.configuration = configuration
     },
     setDisplayCard (state, val) {
       if (val !== 100 && val !== 102 && val !== 104 && val !== 106) {
@@ -268,21 +269,6 @@ const merchantStore = {
     },
     setEditBeneficiary (state, beneficiary) {
       state.beneficiary = beneficiary
-    },
-    addConfiguration (state, configuration) {
-      if (configuration.risidioCardMode === 'purchase-flow') {
-        if (configuration.payment.allowMultiples) {
-          if (!configuration.payment.creditAttributes) {
-            configuration.payment.creditAttributes = {
-              start: 1,
-              min: 1,
-              max: 10,
-              step: 1
-            }
-          }
-        }
-      }
-      state.configuration = configuration
     },
     setPreferredNetwork (state, o) {
       if (state.configuration.minter) state.configuration.minter.preferredNetwork = o
@@ -314,14 +300,14 @@ const merchantStore = {
   actions: {
     fetchPayments ({ state }, data) {
       return new Promise((resolve) => {
-        let url = process.env.VUE_APP_RISIDIO_API + '/mesh/v2/purchases/' + data.stxAddress
+        let url = process.env.VUE_APP_RISIDIO_API + '/mesh/v2/purchases/' + data.contractId + '/' + data.stxAddress
         if (data.status) url += '/' + data.status
         axios.get(url).then(response => {
           resolve(response.data)
         })
       })
     },
-    initialiseRates ({ state, commit }) {
+    initialiseRates ({ commit }) {
       return new Promise(() => {
         try {
           axios.get(process.env.VUE_APP_RISIDIO_API + '/mesh/v1/rates/ticker').then(response => {
@@ -335,78 +321,87 @@ const merchantStore = {
     initialisePaymentFlow ({ dispatch, state, commit, rootGetters }, transactionData) {
       return new Promise((resolve) => {
         const configuration = state.configuration
-        if (transactionData) {
-          configuration.transactionData = transactionData
-          commit('addConfiguration', configuration)
-        }
-        dispatch('initialiseRates')
-        const profile = rootGetters['rpayAuthStore/getMyProfile']
-        dispatch('fetchPayments', { stxAddress: profile.stxAddress }).then((payments) => {
-          if (payments && payments.opennode.filter((o) => o.status !== 'unpaid').length > 0) {
-            resolve({ status: 'processing', payments: payments })
-            return null
-          } else {
-            dispatch('continueOrCreatePayment').then((result) => {
-              resolve(result)
-            })
+        axios.get(process.env.VUE_APP_RISIDIO_API + '/mesh/v1/rates/ticker').then(response => {
+          commit('setTickerRates', response.data)
+          setAmounts(state.tickerRates, configuration)
+          commit('updateConfiguration', configuration)
+          if (transactionData) {
+            configuration.transactionData = transactionData
+            commit('updateConfiguration', configuration)
           }
+          dispatch('initialiseRates')
+          const profile = rootGetters['rpayAuthStore/getMyProfile']
+          dispatch('fetchPayments', { stxAddress: profile.stxAddress }).then((payments) => {
+            if (payments && payments.opennode.filter((o) => o.status === 'unpaid').length > 0) {
+              const invoice = payments.opennode.find((o) => o.status === 'unpaid' && !lsatHelper.lsatExpired(o))
+              if (!invoice) {
+                dispatch('continueOrCreatePayment').then((result) => {
+                  resolve(result)
+                })
+              } else {
+                localStorage.setItem('OP_INVOICE', JSON.stringify(invoice))
+                commit('setInvoice', invoice)
+                resolve(invoice)
+                return null
+              }
+            } else {
+              dispatch('continueOrCreatePayment').then((result) => {
+                resolve(result)
+              })
+            }
+          })
+        }).catch(() => {
+          configuration.payment.paymentOptions[1].allowBitcoin = false
+          configuration.payment.paymentOptions[2].allowLightning = false
+          commit('updateConfiguration', configuration)
+          resolve({ status: 'unpaid' })
         })
       })
     },
     continueOrCreatePayment ({ dispatch, state, commit }) {
       return new Promise((resolve, reject) => {
         const configuration = state.configuration
-        axios.get(process.env.VUE_APP_RISIDIO_API + '/mesh/v1/rates/ticker').then(response => {
-          commit('setTickerRates', response.data)
-          setAmounts(state.tickerRates, configuration)
-          commit('addConfiguration', configuration)
-          this.dispatch('rpayStacksStore/fetchMacSkyWalletInfo', { root: true })
-          commit('addPaymentOptions')
-          if (configuration.payment.forceNew) {
+        this.dispatch('rpayStacksStore/fetchMacSkyWalletInfo', { root: true })
+        commit('addPaymentOptions')
+        if (configuration.payment.forceNew) {
+          localStorage.removeItem('OP_INVOICE')
+        }
+        commit('updateConfiguration', configuration)
+        if (localStorage.getItem('OP_INVOICE')) {
+          const savedInvoice = JSON.parse(localStorage.getItem('OP_INVOICE'))
+          if (savedInvoice && (savedInvoice.status === 'paid' || savedInvoice.status === 'processing')) {
             localStorage.removeItem('OP_INVOICE')
-          }
-          commit('addConfiguration', configuration)
-          if (localStorage.getItem('OP_INVOICE')) {
-            const savedInvoice = JSON.parse(localStorage.getItem('OP_INVOICE'))
-            if (savedInvoice && (savedInvoice.status === 'paid' || savedInvoice.status === 'processing')) {
-              localStorage.removeItem('OP_INVOICE')
-              // commit('setInvoice', savedInvoice)
-              // savedInvoice.opcode = 'btc-crypto-payment-prior'
-              // window.eventBus.$emit('rpayEvent', savedInvoice)
-              // resolve(savedInvoice)
-              // return
-            } else if (savedInvoice && !savedInvoice.lightning_invoice) {
-              localStorage.removeItem('OP_INVOICE')
-            } else if (!lsatHelper.lsatExpired(savedInvoice)) {
-              commit('setInvoice', savedInvoice)
-              try {
-                subscribePayment(commit, savedInvoice.id)
-              } catch (err) {
-              }
-              checkPayment(resolve, reject, state, commit, savedInvoice.id)
-              commit('addConfiguration', configuration)
-              resolve(savedInvoice)
-              return
+            // commit('setInvoice', savedInvoice)
+            // savedInvoice.opcode = 'btc-crypto-payment-prior'
+            // window.eventBus.$emit('rpayEvent', savedInvoice)
+            // resolve(savedInvoice)
+            // return
+          } else if (savedInvoice && !savedInvoice.lightning_invoice) {
+            localStorage.removeItem('OP_INVOICE')
+          } else if (!lsatHelper.lsatExpired(savedInvoice)) {
+            commit('setInvoice', savedInvoice)
+            try {
+              subscribePayment(commit, savedInvoice.id)
+            } catch (err) {
             }
-          }
-          const allowed = configuration.payment.paymentOptions.find((o) => o.allowBitcoin) ||
-            configuration.payment.paymentOptions.find((o) => o.allowLightning)
-          if (!allowed) {
-            resolve({ status: 'unpaid' })
+            checkPayment(resolve, reject, state, commit, savedInvoice.id)
+            commit('updateConfiguration', configuration)
+            resolve(savedInvoice)
             return
           }
-          dispatch('fetchPayment').then((invoice) => {
-            localStorage.setItem('OP_INVOICE', JSON.stringify(invoice))
-            if (invoice) subscribePayment(commit, invoice.id)
-            resolve(invoice)
-          }).catch(() => {
-            resolve(false)
-          })
-        }).catch(() => {
-          configuration.payment.paymentOptions[1].allowBitcoin = false
-          configuration.payment.paymentOptions[2].allowLightning = false
-          commit('addConfiguration', configuration)
+        }
+        const allowed = configuration.payment.paymentOptions.find((o) => o.allowBitcoin) ||
+          configuration.payment.paymentOptions.find((o) => o.allowLightning)
+        if (!allowed) {
           resolve({ status: 'unpaid' })
+          return
+        }
+        dispatch('fetchPayment').then((invoice) => {
+          localStorage.setItem('OP_INVOICE', JSON.stringify(invoice))
+          if (invoice) subscribePayment(commit, invoice.id)
+          resolve(invoice)
+        }).catch(() => {
+          resolve(false)
         })
       })
     },
@@ -428,7 +423,7 @@ const merchantStore = {
         }).catch(() => {
           configuration.payment.paymentOptions[1].allowBitcoin = false
           configuration.payment.paymentOptions[2].allowLightning = false
-          commit('addConfiguration', configuration)
+          commit('updateConfiguration', configuration)
           resolve({ status: 'unpaid' })
         })
       })
@@ -448,7 +443,7 @@ const merchantStore = {
       let config = state.configuration
       config.payment.creditAttributes.start = data.numbCredits
       config = setAmounts(state.tickerRates, config)
-      commit('addConfiguration', config)
+      commit('updateConfiguration', config)
       // return this.dispatch('initialisePaymentFlow', state.configuration)
     },
     stopListening ({ commit }) {

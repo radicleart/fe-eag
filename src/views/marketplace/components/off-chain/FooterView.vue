@@ -1,6 +1,6 @@
 <template>
 <div class="">
-  <b-form-input class="text-warning" disabled id="range-2" :value="paymentStage" type="range" min="0" max="2" step="1"></b-form-input>
+  <b-form-input class="text-payments" disabled id="range-2" :value="paymentStage" type="range" min="0" max="2" step="1"></b-form-input>
   <div class="d-flex justify-content-between" style="font-size: 0.7rem;">
     <div :class="(paymentStage === 0) ? 'text-danger' : 'text-info'" @click="skipAhead(0)">Select Currency</div>
     <div :class="(paymentStage === 1) ? 'text-danger' : 'text-info'" @click="skipAhead(1)">Make Payment</div>

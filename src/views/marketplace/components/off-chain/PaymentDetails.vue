@@ -1,24 +1,33 @@
 <template>
-<b-container class="text-small mb-5">
+<b-container class="text-xsmall mb-5">
   <b-row>
-    <b-col cols="10" class="pt-2 mb-2 bg-light"><h6>Payment Details</h6></b-col>
-    <b-col cols="2" class="pt-2 mb-2 bg-light"><b-link @click="checkPayment(payment)">refresh</b-link></b-col>
+    <b-col cols="10" class="py-2 mb-2 bg-light text-upper"><span class="text-primary">Payment Details</span></b-col>
+    <b-col cols="2" class="py-2 mb-2 bg-light text-upper"><b-link @click="checkPayment(payment)">refresh</b-link></b-col>
     <b-col cols="4">Reference:</b-col><b-col cols="8">{{payment.id}}</b-col>
     <b-col cols="4">Amount:</b-col><b-col cols="8">{{getAmount(payment)}} {{payment.currency}}</b-col>
     <b-col cols="4">Status:</b-col><b-col cols="8">{{payment.status}}</b-col>
   </b-row>
-  <b-row v-if="payment.status === 'processing'">
-    <b-col cols="12" class="pt-2 my-2"><h6>Stacks Transaction</h6></b-col>
-    <b-col cols="10" class="pt-2 mb-2 bg-light">Transaction waiting on payment</b-col>
+  <b-row v-if="!transaction || transaction.tx_status === 'pending'">
+    <b-col cols="12" class="pt-2 mb-2 text-right">
+      Processing - results here when confirmations available
+      <a v-if="getTransactionId()" :href="transactionUrl()" target="_blank">view on explorer <b-icon class="text-payments" font-scale="1.2" icon="arrow-up-right-circle"/></a>
+    </b-col>
+  </b-row>
+  <b-row v-else-if="transaction.tx_status === 'success'">
+    <b-col cols="12" class="pt-2 my-2"><span class="text-primary text-upper">Stacks {{transaction.events[0].asset.asset_event_type}} Transaction</span></b-col>
+    <b-col cols="4">Contract:</b-col><b-col cols="8">{{transaction.contract_call.contract_id}}</b-col>
+    <b-col cols="4">Sender:</b-col><b-col cols="8">{{transaction.sender_address}}</b-col>
+    <b-col cols="4">Recipient:</b-col><b-col cols="8">{{transaction.events[0].asset.recipient}}</b-col>
+    <b-col cols="4">Asset:</b-col><b-col cols="8">{{getTokenId()}}</b-col>
   </b-row>
   <b-row v-else>
-    <b-col cols="12" class="pt-2 my-2"><h6>Stacks Transaction</h6></b-col>
-    <b-col cols="4">Status:</b-col><b-col cols="8">{{payment.transactionData.txStatus}}</b-col>
-    <b-col cols="4">Type:</b-col><b-col cols="8">{{txType(payment)}}</b-col>
-    <b-col cols="4">Asset:</b-col><b-col cols="8">{{payment.transactionData.assetName}}</b-col>
-    <b-col cols="4">Sender:</b-col><b-col cols="8">{{payment.transactionData.sender}}</b-col>
-    <b-col cols="4">Recipient:</b-col><b-col cols="8">{{payment.transactionData.recipient}}</b-col>
-    <b-col cols="4">Tx Id:</b-col><b-col cols="8">{{payment.transactionData.stacksmateResponse}}</b-col>
+    <b-col cols="12" class="pt-2 my-2"><h6>NFT Details</h6></b-col>
+    <b-col cols="4">Asset:</b-col><b-col cols="8">{{transaction.tx_status}}</b-col>
+  </b-row>
+  <b-row v-if="getTransactionId()">
+    <b-col cols="12" class="pt-2 mb-2 text-right">
+      <a :href="transactionUrl()" target="_blank">view on explorer <b-icon class="text-payments" font-scale="1.2" icon="arrow-up-right-circle"/></a>
+    </b-col>
   </b-row>
 </b-container>
 </template>
@@ -34,25 +43,46 @@ export default {
   props: ['payment'],
   data () {
     return {
-      nftRecipient: null
+      transaction: null
     }
   },
   mounted () {
     this.nftRecipient = this.profile.stxAddress
+    this.checkPayment()
   },
   methods: {
-    checkPayment (payment) {
-      this.$store.dispatch('merchantStore/checkPayment', payment.id).then((invoice) => {
-        const expired = this.$store.getters[APP_CONSTANTS.KEY_INVOICE_EXPIRED]
-        this.checkingChain = false
-        if (invoice && invoice.opcode === 'btc-crypto-payment-success') {
-          this.$store.commit('merchantStore/setDisplayCard', 104)
-          this.$notify({ type: 'success', title: 'Payment Detected', text: 'Redirecting to NFT transfer' })
-        } else {
-          this.$notify({ type: 'warning', title: 'Payment Not Detected', text: 'Scan the qr code or paste the info into your btc wallet.' })
+    transactionUrl: function () {
+      return 'https://explorer.stacks.co/txid/' + this.getTransactionId() + '?chain=' + process.env.VUE_APP_NETWORK
+    },
+    getTransactionId: function () {
+      if (this.transaction) return this.transaction.tx_id
+      try {
+        const resp = JSON.parse(this.payment.transactionData.stacksmateResponse)
+        // if (typeof resp === 'object') resp = resp.txid
+        if (!resp.txid.startsWith('0x')) resp.txid = '0x' + resp.txid
+        return resp.txid
+      } catch (e) {
+        return null
+      }
+    },
+    checkPayment () {
+      const path = '/extended/v1/tx/' + this.getTransactionId()
+      const txOptions = {
+        path: path,
+        httpMethod: 'GET',
+        postData: {
+          arguments: [],
+          sender: null // this.profile.stxAddress
         }
-        return expired
+      }
+      this.$store.dispatch('rpayStacksStore/callApi', txOptions).then((result) => {
+        this.transaction = result
+        this.$notify({ type: 'warning', title: 'Check Status', text: 'Transaction status is ' + this.transaction.tx_status })
       })
+    },
+    getTokenId () {
+      const result = utils.jsonFromTxResult(this.transaction.events[0].asset.value.hex)
+      return this.transaction.events[0].asset.asset_id.split('::')[1] + ' #' + result.value
     },
     getAmount (payment) {
       if (payment.currency === 'BTC') {

@@ -11,7 +11,7 @@
     </div>
     <div v-else v-for="(lr, index) in allLoopRuns" :key="index">
       <div :class="(loopRun && loopRun.currentRunKey ===  lr.currentRunKey) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link :id="'popover-image-' + index" :to="'/my-nfts/' + lr.currentRunKey">{{lr.currentRun}}</b-link></div>
-      <CollectionData :loopRun="lr" :index="index"/>
+      <CollectionPopover :loopRun="lr" :index="index"/>
     </div>
   </div>
 </b-container>
@@ -20,13 +20,13 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import utils from '@/services/utils'
-import CollectionData from './CollectionData'
+import CollectionPopover from './CollectionPopover'
 import MyNftData from './MyNftData'
 
 export default {
   name: 'CollectionsNavigation',
   components: {
-    CollectionData,
+    CollectionPopover,
     MyNftData
   },
   props: ['loopRun', 'asset', 'context', 'filter', 'pagingData'],

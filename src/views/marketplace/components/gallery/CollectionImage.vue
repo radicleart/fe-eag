@@ -4,7 +4,7 @@
     <div class="box">
       <b-link :to="'/nft-collection/' + loopRun.currentRunKey">
       <FramedImage :options="{ 'width': '600px', 'height': '600px' }" :id="'popover-image-' + index" :imageSrc="getCollectionImageUrl(loopRun)"/>
-      <CollectionData :loopRun="loopRun" :index="index"/>
+      <CollectionPopover :loopRun="loopRun" :index="index"/>
     </b-link>
     </div>
   </div>
@@ -13,13 +13,13 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import CollectionData from './CollectionData'
+import CollectionPopover from './CollectionPopover'
 import FramedImage from './FramedImage'
 
 export default {
   name: 'CollectionImage',
   components: {
-    CollectionData,
+    CollectionPopover,
     FramedImage
   },
   props: ['loopRun', 'index', 'options'],

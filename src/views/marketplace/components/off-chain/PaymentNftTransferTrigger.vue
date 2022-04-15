@@ -1,11 +1,11 @@
 <template>
 <div>
-  <div v-if="loaded">
-    <div class="w-100" v-if="inFlightPayments">
-      <b-button class="w-100" variant="outline-dark" @click="showAddressOrInflightPayments">Show</b-button>
+  <div>
+    <div class="w-100">
+      <b-button v-if="inFlightPayments.length < loopRun.spinsPerDay" class="w-100" variant="outline-dark" @click="showAddress">SHOW</b-button>
     </div>
-    <div class="w-100" v-else>
-      <b-button class="w-100" variant="outline-dark" @click="showAddressOrInflightPayments">Start</b-button>
+    <div class="w-100" v-if="inFlightPayments.length > 0">
+      <b-link class="text-xsmall" @click="showInflightPayments"><b-icon icon="cart"/> open cart</b-link>
     </div>
   </div>
   <b-modal size="lg" id="in-flight-modal" centered>
@@ -37,11 +37,9 @@ export default {
     StacksAddressModal,
     InFlightPaymentModal
   },
-  props: ['configuration', 'transactionData'],
+  props: ['loopRun', 'configuration', 'transactionData', 'inFlightPayments'],
   data () {
     return {
-      loaded: false,
-      inFlightPayments: null,
       recipient: null
     }
   },
@@ -52,29 +50,39 @@ export default {
     this.recipient = this.profile.stxAddress
     this.$store.dispatch('rpayAuthStore/fetchAccountInfo', data)
     data.stxAddress = this.profile.stxAddress
-    this.$store.dispatch('merchantStore/fetchPayments', data).then((payments) => {
-      this.loaded = true
-      if (payments && payments.opennode.filter((o) => o.status !== 'unpaid').length > 0) {
-        this.inFlightPayments = payments.opennode.filter((o) => o.status !== 'unpaid')
-      }
-    })
     if (this.$route.query && this.$route.query.stxAddress) {
       this.recipient = this.$route.query.stxAddress
     }
     if (!this.recipient && this.profile.loggedIn) {
       this.recipient = this.profile.stxAddress
     }
+    if (!this.transactionData.nftIndex) {
+      this.transactionData.nftIndex = this.mintCounter + 1
+    }
   },
   methods: {
     stacksMateEvent (data) {
-      this.$notify({ type: 'warning', title: 'Pending', text: 'Event data: ' + data })
-    },
-    showAddressOrInflightPayments () {
-      if (this.inFlightPayments) {
-        this.$bvModal.show('in-flight-modal')
-      } else {
-        this.$bvModal.show('stacks-address-modal')
+      if (data.opcode === 'change-payment-method') return
+      this.$bvModal.hide('payment-modal')
+      this.$bvModal.hide('stacks-address-modal')
+      this.$bvModal.show('in-flight-modal')
+      if (data.opcode === 'crypto-payment-expired' || data.opcode === 'payment-restart') {
+        this.$notify({ type: 'warning', title: 'Payments', text: 'Payment expired.' })
+      } else if (data.opcode.indexOf('-payment-error') > -1) {
+        this.$notify({ type: 'danger', title: 'Payments', text: 'Payment was not recieved due to an unexpected error.' })
+      } else if (data.opcode.indexOf('-payment-cancelled') > -1) {
+        this.$notify({ type: 'warning', title: 'Payments', text: 'Payment cancelled.' })
+      } else if (data.opcode.indexOf('-payment-success') > -1) {
+        this.$notify({ type: 'warning', title: 'Pending', text: 'Event data: ' + data })
       }
+    },
+    showInflightPayments () {
+      if (this.inFlightPayments.length > 0) {
+        this.$bvModal.show('in-flight-modal')
+      }
+    },
+    showAddress () {
+      this.$bvModal.show('stacks-address-modal')
     },
     showPayment (data) {
       this.recipient = data.recipient
@@ -102,8 +110,14 @@ export default {
     }
   },
   computed: {
+    mintCounter () {
+      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
+      const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      if (this.loopRun.offset === 0) return counter + 1
+      return counter
+    },
     paymentMessage () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONFIG]
+      const configuration = this.$store.getters[APP_CONSTANTS.KEY_PURCHASE_CONFIGURATION]
       if (!configuration) return ''
 
       const amounts = this.getAmounts
@@ -111,8 +125,8 @@ export default {
       if (this.transactionData) {
         return ''
       }
-      const baseMessage = '<h3 class="mb-4">' + amounts.baseAmounts.currency + ' <span class="text-warning">' + amounts.baseAmounts.amountFiatFormatted + '</span> Swap</h3>'
-      return baseMessage + '<div>Swap <span class="text-warning">' + amounts.fiatAmounts.amountFiatFormatted + '</span> ' + amounts.fiatAmounts.currency + ' for <span class="text-warning">' + amounts.baseAmounts.amountStx + '</span> STX</div>'
+      const baseMessage = '<h3 class="mb-4">' + amounts.baseAmounts.currency + ' <span class="text-payments">' + amounts.baseAmounts.amountFiatFormatted + '</span> Swap</h3>'
+      return baseMessage + '<div>Swap <span class="text-payments">' + amounts.fiatAmounts.amountFiatFormatted + '</span> ' + amounts.fiatAmounts.currency + ' for <span class="text-payments">' + amounts.baseAmounts.amountStx + '</span> STX</div>'
     },
     getAmounts () {
       const amounts = this.$store.getters[APP_CONSTANTS.KEY_AMOUNTS]

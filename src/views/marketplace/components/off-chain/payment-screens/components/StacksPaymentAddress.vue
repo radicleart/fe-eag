@@ -22,7 +22,7 @@
       <b-icon class="text-two" width="20px" height="20px" icon="file-earmark"/>
     </div>
     <div class="mt-5 text-center">
-      <b-button class="cp-btn-order" variant="warning" @click.prevent="sendPayment()">{{buttonLabel}}</b-button>
+      <b-button class="cp-btn-order" variant="payments" @click.prevent="sendPayment()">{{buttonLabel}}</b-button>
     </div>
     <div class="my-3 text-center">
       <span class="text-small text-danger">{{errorMessage}}</span>

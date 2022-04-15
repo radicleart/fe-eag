@@ -5,7 +5,7 @@
 <div v-else :key="componentKey">
   <div class="mx-auto">
     <b-card-group class="">
-      <b-card v-if="page === 'payment-page'" header-tag="header" footer-tag="footer">
+      <b-card header-tag="header" footer-tag="footer">
         <template #header>
           <b-row class="mx-2">
             <b-col cols="2" v-if="configuration.risidioCardMode === 'nft-purchase-flow'">
@@ -17,7 +17,6 @@
           </b-row>
         </template>
         <div>
-          <!-- <CryptoPicker :configuration="configuration" v-if="displayCard === 100" @rpayEvent="rpayEvent($event)"/> -->
           <div>
             <OrderInfo :configuration="configuration" v-if="configuration.payment.allowMultiples" class="pb-4" @rpayEvent="rpayEvent($event)"/>
             <div class="d-flex flex-column align-items-center">
@@ -27,18 +26,14 @@
                 <b-icon icon="circle" animation="throb" font-scale="1"></b-icon> Payment in Progress
                 <br/><span class="text-danger text-small">Please leave this tab open until we get the response</span>
               </p>
-              <CryptoPaymentScreen :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
+              <CryptoPaymentScreen :transactionData="transactionData" :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
             </div>
           </div>
-          <!-- <ResultPage :configuration="configuration" :result="'error'" v-else @rpayEvent="rpayEvent($event)"/> -->
         </div>
         <template v-slot:footer>
           <FooterView class="mx-4" :paymentStage="paymentStage" @rangeEvent="rangeEvent"/>
         </template>
       </b-card>
-      <div v-else>
-        <ResultPage :configuration="configuration"/>
-      </div>
     </b-card-group>
   </div>
 </div>
@@ -49,7 +44,6 @@ import { APP_CONSTANTS } from '@/app-constants'
 import CryptoPaymentScreen from './payment-screens/CryptoPaymentScreen'
 import CryptoOptions from './payment-screens/components/CryptoOptions'
 import OrderInfo from './payment-screens/components/OrderInfo'
-import ResultPage from './ResultPage'
 import FooterView from './FooterView'
 
 export default {
@@ -58,8 +52,7 @@ export default {
     FooterView,
     CryptoPaymentScreen,
     OrderInfo,
-    CryptoOptions,
-    ResultPage
+    CryptoOptions
   },
   props: ['transactionData'],
   data () {
@@ -97,6 +90,7 @@ export default {
           if (invoice && (invoice.status === 'paid' || invoice.status === 'processing')) {
             // this.page = 'payment-result'
           }
+          this.configuration = this.$store.getters[APP_CONSTANTS.KEY_PURCHASE_CONFIGURATION]
           this.loading = false
         }
       })
@@ -124,8 +118,9 @@ export default {
         this.paymentStage = 1
         this.componentKey++
       } else if (data.opcode.indexOf('-payment-success') > -1) {
-        // this.doTransfer(data)
+        // this.$emit('stacksMateEvent', data)
       }
+      this.$emit('stacksMateEvent', data)
     },
     paymentExpired () {
       this.$store.dispatch('merchantStore/initialisePaymentFlow').then(() => {
@@ -145,7 +140,7 @@ export default {
       } else if (this.configuration.payment.paymentOption === 'bitcoin' || this.configuration.payment.paymentOption === 'lightning') {
         sm += this.configuration.payment.amountBtc + '</span> BTC / <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX. '
       } else {
-        sm += this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' to us. '
+        sm += this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' / <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX. '
       }
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') {
         sm += '<br/>We send <span class="text-xsmall text-danger">#' + this.configuration.asset.contractAsset.nftIndex + '</span> to ' + this.configuration.transactionData.recipient
@@ -155,9 +150,6 @@ export default {
         sm += '<br/>We send <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX to you. '
       }
       return sm
-    },
-    configuration () {
-      return this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONFIG]
     },
     sufficientFunds () {
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') return true

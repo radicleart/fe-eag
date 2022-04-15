@@ -1,8 +1,13 @@
 <template>
-<div>
+<div v-if="!context">
     <span ref="flashee" class="mr-3">{{getAddress}}</span>
-    <a v-if="owner" href="#" class="pointer" v-b-tooltip.hover="{ variant: 'dark' }" :title="'Copy full stacks address'" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a>
+    <a v-if="owner" href="#" class="pointer" v-b-tooltip.hover="{ variant: 'dark' }" :title="'Copy full stacks address'" @click.prevent="copyAddress('stx')"><b-icon icon="file-earmark"/></a>
     <input class="mr-3 fake-input" id="copy-stx-address" readonly v-model="owner"/>
+</div>
+<div v-else-if="context === 'minting'" class="w-100 bg-white p-3">
+    <div><a v-if="owner" href="#" class="pointer" v-b-tooltip.hover="{ variant: 'dark' }" :title="'Copy full stacks address'" @click.prevent="copyAddress('minting')">COPY ADDRESS</a></div>
+    <div ref="flashee" class="mr-3">{{owner}}</div>
+    <input class="mr-3 fake-input" id="copy-minting-address" readonly v-model="owner"/>
 </div>
 </template>
 <script>
@@ -11,7 +16,7 @@ export default {
   name: 'OwnerInfo',
   components: {
   },
-  props: ['owner'],
+  props: ['owner', 'context'],
   data () {
     return {
       stxAddress: null
@@ -27,7 +32,7 @@ export default {
   },
   methods: {
     copyAddress (value) {
-      const copyText = document.querySelector('#copy-stx-address')
+      const copyText = document.querySelector('#copy-' + value + '-address')
       copyText.select()
       document.execCommand('copy')
       this.doFlash()

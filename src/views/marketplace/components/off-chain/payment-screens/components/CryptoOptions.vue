@@ -73,9 +73,9 @@ export default {
         return 'outline-light'
       }
       if (option.value === this.selected) {
-        return 'warning'
+        return 'payments'
       } else {
-        return 'outline-warning'
+        return 'outline-payments'
       }
     },
     fiatOptions () {

@@ -1,43 +1,38 @@
 <template>
-  <b-row style="height: 100%;" v-if="commissions">
-    <b-col cols="12" align-self="end">
-      <p v-if="mintPasses > 0">MINT PASSES: {{mintPasses}}</p>
-      <p class="">EDITION: {{loopRun.versionLimit}}</p>
-      <p class="">AVAILABLE: {{available}}</p>
-    </b-col>
-    <b-col cols="12" align-self="end">
-      <div class="mt-2">
-        <div v-if="mintingAllowed">
-          <div v-if="canMint">
-            <b-row class="">
-              <b-col cols="6" class="">
-                <b-form-select style="text-align: center; font-size: 1.2rem; font-weight: 700; height: 2.4rem;" v-if="loopRun.batchSize > 1" id="batchOption" v-model="batchOption" :options="batchOptions()"></b-form-select>
-              </b-col>
-              <b-col cols="6">
-                <b-button class="w-100" variant="outline-dark" @click="startMinting()">Mint<span v-if="mintPasses > 1"> {{batchOption}}</span></b-button>
-              </b-col>
-            </b-row>
+  <div v-if="commissions">
+    <div class="d-flex w-50 w-sm-100" v-if="mintPasses > 0">
+      <div class="w-75 p-2 mr-1 bg-darkish text-white">MINT PASSES</div>
+      <div class="w-25 p-2 mr-1 bg-darkish text-white">{{mintPasses}}</div>
+    </div>
+    <div v-if="mintingAllowed" class="mt-4">
+      <div v-if="hasMintPass">
+        <div class="d-flex">
+          <div class="w-50 mr-1">
+            <b-form-select style="text-align: center; font-size: 1.2rem; font-weight: 700; height: 2.4rem;" v-if="loopRun.batchSize > 1" id="batchOption" v-model="batchOption" :options="batchOptions()"></b-form-select>
           </div>
-          <b-row class="mt-5" v-if="available > 0">
-            <b-col cols="6" class="pt-3 text-right">
-              Purchase options
-            </b-col>
-            <b-col cols="6" class="text-center">
-              <PaymentNftTransferTrigger class="w-100 text-white" :transactionData="transactionData()"/>
-            </b-col>
-          </b-row>
-        </div>
-        <div v-else>
-          Minting Unavailable
+          <div class="w-50 ml-1">
+            <b-button class="w-100" variant="outline-dark" @click="startMinting()">MINT<span v-if="mintPasses > 1"> {{batchOption}}</span></b-button>
+          </div>
         </div>
       </div>
-      <div class="mt-4 pt-4 border-top text-right"><img width="100%" :src="iconLN" /></div>
-    </b-col>
-    <b-modal size="lg" id="minting-modal">
+      <div class="d-flex mt-4" v-if="available > 0 && loadedInFlights">
+        <div class="w-50 mr-1 pt-2 text-right text-upper">
+          <!-- {{purchases}} purchase<span v-if="purchases !== 1"></span> left -->
+          <span v-if="hasMintPass">Other</span><span v-else>Purchase</span> Options
+        </div>
+        <div class="w-50 ml-1" v-if="loaded">
+          <PaymentNftTransferTrigger class="w-100 text-white" :loopRun="loopRun" :transactionData="transactionData()" :inFlightPayments="inFlightPayments"/>
+        </div>
+      </div>
+    </div>
+    <div v-else class="mt-2">
+      Minting Unavailable
+    </div>
+    <b-modal size="lg" id="minting-modal" v-if="commissions">
       <MintingV3Flow v-if="loopRun.marketplaceVersion === 3" @update="update" :commissions="commissions" :loopRun="loopRun" :batchOption="batchOption"/>
       <template #modal-footer class="text-center"><div class="w-100"></div></template>
     </b-modal>
-  </b-row>
+  </div>
 </template>
 
 <script>
@@ -51,12 +46,14 @@ export default {
     MintingV3Flow,
     PaymentNftTransferTrigger
   },
-  props: ['loopRun', 'mintPasses'],
+  props: ['loopRun', 'mintPasses', 'commissions'],
   data () {
     return {
-      iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo neon.png'),
       batchOption: 1,
-      commissions: null
+      loaded: false,
+      loadedInFlights: false,
+      inFlightPayments: [],
+      commission: null
     }
   },
   watch: {
@@ -65,18 +62,19 @@ export default {
   },
   mounted () {
     const data = {
-      contractId: this.loopRun.contractId
+      contractId: this.loopRun.contractId,
+      stxAddress: this.profile.stxAddress
     }
-    this.$store.dispatch('rpayMarketGenFungStore/getCommissionTokensByContract', data).then((commissions) => {
-      if (commissions) {
-        this.tokenContractId = commissions[0].tokenContractId
-        this.commissions = commissions
-        this.commission = commissions[0]
-        this.$store.commit(APP_CONSTANTS.SET_PURCHASE_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, commission: this.commission })
-        this.$notify({ type: 'success', title: 'Mint Commission', text: 'Mint commission: ' + commissions.length })
+    this.$store.dispatch('merchantStore/fetchPayments', data).then((payments) => {
+      this.loadedInFlights = true
+      if (payments && payments.opennode.filter((o) => o.status !== 'unpaid').length > 0) {
+        this.inFlightPayments = payments.opennode.filter((o) => o.status !== 'unpaid')
+        this.inFlightPayments = payments.square.filter((o) => o.status !== 'unpaid')
       }
-      this.loading = false
     })
+    this.commission = this.commissions.find((o) => o.name === 'unwrapped-stx-token') || this.commissions[0]
+    this.$store.commit(APP_CONSTANTS.SET_PURCHASE_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, commission: this.commission })
+    this.loaded = true
   },
   methods: {
     transactionData () {
@@ -144,7 +142,10 @@ export default {
     available () {
       return this.loopRun.versionLimit - this.mintCounter
     },
-    canMint () {
+    purchases () {
+      return this.loopRun.spinsPerDay - this.inFlightPayments.length
+    },
+    hasMintPass () {
       return this.available > 0 && this.mintPasses > 0
     }
   }

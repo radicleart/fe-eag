@@ -4,11 +4,11 @@
     <canvas ref="lndQrcode"></canvas>
   </div>
   <div class="mt-5 mb-3 text-center">
-    <b-button v-if="!loading" class="cp-btn-order" variant="warning" @click.prevent="sendPayment()">Connect via Meta Mask</b-button>
+    <b-button v-if="!loading" class="cp-btn-order" variant="payments" @click.prevent="sendPayment()">Connect via Meta Mask</b-button>
     <span v-else class="text-message text-info" v-html="waitingMessage"></span>
   </div>
   <div class="text-center">
-    <span><a class="text-message text-warning" target="_blank" href="https://metamask.io/download.html">Install Meta Mask</a></span>
+    <span><a class="text-message text-payments" target="_blank" href="https://metamask.io/download.html">Install Meta Mask</a></span>
   </div>
 </div>
 </template>

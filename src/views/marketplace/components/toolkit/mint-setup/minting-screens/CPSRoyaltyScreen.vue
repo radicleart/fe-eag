@@ -54,7 +54,6 @@ export default {
         this.tokenContractId = commissions[0].tokenContractId
         this.commissions = commissions
         this.commission = commissions[0]
-        this.$notify({ type: 'success', title: 'Mint Commission', text: 'Mint commission: ' + commissions.length })
       }
       this.loading = false
     })

@@ -32,7 +32,7 @@
       </div>
     </form>
     <div class="mt-3 d-flex justify-content-center">
-      <b-button class="button-credit-card" style="width: 40%;" variant="warning" @click.prevent="requestCardNonce($event)">Send <span class="" v-html="fiatSymbol"></span> {{formattedFiat}}</b-button>
+      <b-button class="button-credit-card" style="width: 40%;" variant="payments" @click.prevent="requestCardNonce($event)">Send <span class="" v-html="fiatSymbol"></span> {{formattedFiat}}</b-button>
     </div>
   </div>
   <b-card-text v-if="testMode">

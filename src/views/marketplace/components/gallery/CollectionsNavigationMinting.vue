@@ -2,18 +2,18 @@
 <b-container id="col-nav" fluid class="py-0 mx-0 px-0 bg-light">
   <div class="d-flex text-primary">
     <div :id="'popover-image-1'" class="bg-white py-2 px-4 border-right">Minting</div>
-    <CollectionData :loopRun="loopRun" :index="'1'"/>
+    <CollectionPopover :loopRun="loopRun" :index="'1'"/>
   </div>
 </b-container>
 </template>
 
 <script>
-import CollectionData from './CollectionData'
+import CollectionPopover from './CollectionPopover'
 
 export default {
   name: 'CollectionsNavigationMinting',
   components: {
-    CollectionData
+    CollectionPopover
   },
   props: ['loopRun', 'asset', 'context', 'filter', 'pagingData'],
   data () {

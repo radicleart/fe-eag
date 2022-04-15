@@ -179,14 +179,4 @@ export default {
   border: none !important;
   background-color: transparent !important;
 }
-#minting-modal .modal-content {
-  border: none !important;
-  background-color: transparent !important;
-}
-#minting-tools  .nav-link.active {
-  color: #000;
-}
-#minting-tools .nav-link:hover {
-  color: #ccc;
-}
 </style>

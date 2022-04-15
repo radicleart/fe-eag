@@ -43,9 +43,10 @@
 }
 
 html, body {
-  font-family: 'Barlow-Medium';
   height: 100%;
+  font-size: 16px;
   color: $primary;
+  letter-spacing: 0.05rem;
 }
 
 /** - footer styles ------------------------------------------------- **/
@@ -60,6 +61,7 @@ html, body {
   text-transform: capitalise;
   font-size: 0.625rem;
   color: #999;
+  letter-spacing: 0.05rem;
 }
 /** --------------------------------------------------------------- **/
 /** - nav bar styles ------------------------------------------------- **/
@@ -121,6 +123,20 @@ html, body {
   color: #666;
 }
 /** --------------------------------------------------------------- **/
+
+select {
+  background: #fff!important;
+  border-radius: 0px!important;
+}
+
+.btn {
+  border-radius: 0px!important;
+}
+
+input {
+  border-radius: 0px!important;
+}
+
 /** - Popup menu navs --------------------------------------------- **/
 .my-popover-class {
   background: transparent;
@@ -138,7 +154,13 @@ html, body {
   color: #666;
   text-transform: uppercase;
 }
-/** --------------------------------------------------------------- **/
+.popover .arrow:after, .popover .arrow:before {
+  position: absolute;
+  display: none;
+  content: "";
+  border-color: transparent;
+  border-style: solid;
+}/** --------------------------------------------------------------- **/
 
 #home-page a {
   color: $info;
@@ -161,6 +183,9 @@ a:hover {
 }
 .text-lower {
   text-transform: lowercase;
+}
+.text-upper {
+  text-transform: uppercase;
 }
 .collection-image {
   border: 12px solid #fff;
@@ -198,7 +223,12 @@ a:hover {
     width: 85%;
   }
 }
-
+.my-tooltip-class > div {
+  padding: 10px 20px;
+}
+.capitalize {
+  text-transform: capitalize;
+}
 .text-900 {
   font-weight: 900;
 }
@@ -208,11 +238,17 @@ a:hover {
 .text-300 {
   font-weight: 300;
 }
+.text-100 {
+  font-weight: 100;
+}
 .text-dark {
   color: $dark;
 }
 .text-white {
   color: #fff;
+}
+.bg-darkish {
+  background-color: #666;
 }
 .text-small {
   font-size: 0.8rem;
@@ -248,6 +284,9 @@ a:hover {
 }
 
 /** - modals ------------------------------------------------- **/
+.modal-dialog {
+  width: 80%;
+}
 #purchase-modal .modal-body {
   background-color: #fff;
   text-align: left !important;
@@ -281,6 +320,21 @@ a:hover {
 }
 #minting-modal .modal-header {
   display: none;
+}
+#minting-modal .card-header {
+  padding: 0;
+  margin-bottom: 0;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+#minting-modal .card-footer {
+  padding: 20px;
+  margin-bottom: 0;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+#minting-modal .card {
+  border: none;
 }
 /** -------------------------------------------------- **/
 /** - Payment Modal ------------------------------------------------- **/
@@ -316,6 +370,45 @@ a:hover {
 }
 /** -------------------------------------------------- **/
 
+
+
+
+/** payments --------------------------------------------**/
+#payment-modal {
+  font-family: 'Barlow-Regular';
+}
+#payment-modal .text-danger {
+  color: $info !important;
+}
+.text-payments {
+  color: $secondary;
+}
+.btn-payments {
+  color: $info;
+  border-color: $info;
+  background-color: $secondary;
+}
+.btn-outline-payments {
+  color: $secondary;
+  border-color: $secondary;
+}
+input {
+  color: #000 !important;
+}
+.card-input-wrapper {
+  color: #000 !important;
+}
+#card-number-wrapper input {
+  padding: 0 16px 0 68px;
+  color: #000 !important;
+}
+
+
+/** -------------------------------------------------- **/
+
+
+
+
 /** paging **/
 .page-item .page-link {
   background-color: #fff !important;
@@ -329,11 +422,13 @@ a:hover {
 }
 
 .fake-input {
+  min-width: 400px;
+  position: absolute;
+  left: 2000px;
   background-color: $white;
   border: none;
-  width: 10px;
-  font-size: 0.1rem;
   color: $light;
+  letter-spacing: 0.1rem;
 }
 .fake-input:focus {
   border: $white;

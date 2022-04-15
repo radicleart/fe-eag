@@ -322,8 +322,4 @@ export default {
 </script>
 
 <style>
-#minting-modal .modal-content {
-  border: none !important;
-  background-color: transparent !important;
-}
 </style>

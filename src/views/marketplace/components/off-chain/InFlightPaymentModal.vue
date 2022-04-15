@@ -1,8 +1,11 @@
 <template>
   <b-card-group>
     <b-card class="p-3" style="width: 100%;" bg-variant="white" header-tag="header" footer-tag="footer">
+      <b-card-text>
+        <div class="text-right"><img width="60%" :src="iconLN" /></div>
+      </b-card-text>
       <b-card-text class="">
-        <h2 class="pointer mb-4 border-bottom">In Flight Transactions</h2>
+        <h4 class="pointer mb-4 border-bottom text-upper">Purchase History</h4>
         <div class="" v-for="(payment, index) in payments" :key="index">
           <PaymentDetails :payment="payment"/>
         </div>
@@ -23,6 +26,7 @@ export default {
   props: ['payments'],
   data () {
     return {
+      iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo grey.png'),
       nftRecipient: null
     }
   },

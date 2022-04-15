@@ -10,8 +10,8 @@
       </div>
       <!-- <input v-show="false" class="input2" readonly="true" ref="paymentAddressBtc"  @click="copyAddress($event)" :value="paymentRequest" placeholder="Lightning invoice"/> -->
       <div class="d-flex justify-content-center">
+        <p><a href="#" class="pointer" @click.prevent="copyAddress()">COPY PAYMENT URI</a></p>
         <input class="fake-input" id="copy-address" readonly v-model="paymentUri"/>
-        <a href="#" class="pointer" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a>
       </div>
     </div>
     <div title="Open Channel" v-else>

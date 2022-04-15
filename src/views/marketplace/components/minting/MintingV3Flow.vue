@@ -1,30 +1,29 @@
 <template>
-<div v-if="!loading" class="bg-dark d-flex justify-content-center">
+<div v-if="!loading">
   <div class="mx-auto">
-    <b-card-group>
-      <b-card bg-variant="dark" class="border-white text-white" header-tag="header" footer-tag="footer">
-        <b-row class="">
-          <b-col cols="12" class="px-1">
-            <MintingCollectionData :item="null" :loopRun="loopRun"/>
-          </b-col>
-          <b-col cols="12" class="px-1">
-            <MintingV3TokenSelection :batchOption="batchOption" :loopRun="loopRun" :hidePrimaries="true" :mintButtonText="mintButtonText()" :errorMessage="errorMessage" :item="null" @mintToken="beginMintProcess"/>
-          </b-col>
-        </b-row>
+    <b-card-group v-if="commissions">
+      <b-card bg-variant="white" header-tag="header" footer-tag="footer" class="m-0">
+        <template #header>
+            <div class="bg-darkish text-right m-0 p-4"><img width="60%" :src="iconLN" /></div>
+        </template>
+        <b-card-text>
+          <MintingCollectionInfo :commissions="commissions" :item="null" :loopRun="loopRun"/>
+        </b-card-text>
+        <b-card-text>
+          <MintingV3TokenSelection :commissions="commissions" :batchOption="batchOption" :loopRun="loopRun" :hidePrimaries="true" :mintButtonText="mintButtonText()" :errorMessage="errorMessage" :item="null" @mintToken="beginMintProcess"/>
+        </b-card-text>
         <template #footer>
-          <b-row class="text-whiter text-bold">
-            <b-col cols="12" class="">
-              <div><span class="text-xsmall">Minting to:</span> <span class="text-xsmall text-warning">{{profile.stxAddress}}</span></div>
-            </b-col>
-          </b-row>
-          <b-row class="text-whiter text-bold">
-            <b-col cols="12">
-              <span class="text-xsmall" v-b-tooltip.hover="{ variant: 'warning' }"  :title="'Collection key: ' + loopRun.currentRunKey">{{loopRun.currentRun + ' / ' + loopRun.makerName}}</span>
-            </b-col>
-            <b-col cols="12" class="text-right">
-              <span class="text-xsmall">{{loopRun.contractId}}</span>
-            </b-col>
-          </b-row>
+          <div class="text-xsmall">
+            <b-row class="d-flex">
+              <b-col cols="12" md="12"><span class="" v-b-tooltip.hover="{ variant: 'warning' }"  :title="'Collection key: ' + loopRun.currentRunKey">{{loopRun.currentRun + ' / ' + loopRun.makerName}}</span></b-col>
+            </b-row>
+            <b-row class="d-flex">
+              <b-col sm="12" md="12">{{profile.stxAddress}}</b-col>
+            </b-row>
+            <b-row class="d-flex">
+              <b-col sm="12" md="12">{{loopRun.contractId}}</b-col>
+            </b-row>
+          </div>
         </template>
       </b-card>
     </b-card-group>
@@ -36,17 +35,18 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import MintingV3TokenSelection from './MintingV3TokenSelection'
-import MintingCollectionData from './MintingCollectionData'
+import MintingCollectionInfo from './MintingCollectionInfo'
 
 export default {
   name: 'MintingV3Flow',
   components: {
     MintingV3TokenSelection,
-    MintingCollectionData
+    MintingCollectionInfo
   },
-  props: ['loopRun', 'batchOption'],
+  props: ['loopRun', 'batchOption', 'commissions'],
   data () {
     return {
+      iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo neon.png'),
       loading: true,
       gaiaAssets: [],
       makerUrlKey: null,
