@@ -4,7 +4,8 @@ set -e;
 export DEPLOYMENT=$1
 PATH_DEPLOY=../radsoc/volumes/www/production/electricart
 mkdir -p $PATH_DEPLOY
-export SERVER=locke.brightblock.org
+#export SERVER=locke.brightblock.org
+export SERVER=176.58.109.133
 export BUILDER=build-stag
 if [ "$DEPLOYMENT" == "prod" ]; then
   SERVER=chomsky.brightblock.org;

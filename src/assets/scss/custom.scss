@@ -420,23 +420,25 @@ input {
   background-color: #fff !important;
   color: $primary !important;
 }
-
+.fake-input input {
+  color: white!important;
+}
 .fake-input {
   min-width: 400px;
   position: absolute;
   left: 2000px;
   background-color: $white;
-  border: none;
-  color: $light;
+  border: white;
+  color: white!important;
   letter-spacing: 0.1rem;
 }
 .fake-input:focus {
   border: $white;
-  color: $light;
+  color: $white;
 }
 .fake-input:focus-visible {
   border: none;
-  color: $light;
+  color: $white;
 }
 /** ---- Notification styles ------------------------------------------------------ **/
 .vue-notification-template {

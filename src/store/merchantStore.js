@@ -298,10 +298,28 @@ const merchantStore = {
     }
   },
   actions: {
-    fetchPayments ({ state }, data) {
+    fetchPurchases ({ state }, data) {
       return new Promise((resolve) => {
-        let url = process.env.VUE_APP_RISIDIO_API + '/mesh/v2/purchases/' + data.contractId + '/' + data.stxAddress
+        let url = process.env.VUE_APP_RISIDIO_API + '/mesh/v2/purchases'
+        if (data.contractId) url += '/' + data.contractId
+        if (data.stxAddress) url += '/' + data.stxAddress
         if (data.status) url += '/' + data.status
+        axios.get(url).then(response => {
+          const paymentMap = response.data
+          let payments = []
+          if (paymentMap && paymentMap.opennode.filter((o) => o.status !== 'unpaid').length > 0) {
+            payments = paymentMap.opennode.filter((o) => o.status !== 'unpaid')
+          }
+          if (paymentMap && paymentMap.square.filter((o) => o.status !== 'unpaid').length > 0) {
+            payments = payments.concat(paymentMap.square.filter((o) => o.status !== 'unpaid'))
+          }
+          resolve(payments)
+        })
+      })
+    },
+    fetchPurchase ({ state }, paymentId) {
+      return new Promise((resolve) => {
+        const url = process.env.VUE_APP_RISIDIO_API + '/mesh/v2/purchase/' + paymentId
         axios.get(url).then(response => {
           resolve(response.data)
         })
@@ -331,9 +349,9 @@ const merchantStore = {
           }
           dispatch('initialiseRates')
           const profile = rootGetters['rpayAuthStore/getMyProfile']
-          dispatch('fetchPayments', { stxAddress: profile.stxAddress }).then((payments) => {
-            if (payments && payments.opennode.filter((o) => o.status === 'unpaid').length > 0) {
-              const invoice = payments.opennode.find((o) => o.status === 'unpaid' && !lsatHelper.lsatExpired(o))
+          dispatch('fetchPurchases', { stxAddress: profile.stxAddress }).then((payments) => {
+            if (payments) {
+              const invoice = payments.find((o) => o.status === 'unpaid' && !lsatHelper.lsatExpired(o))
               if (!invoice) {
                 dispatch('continueOrCreatePayment').then((result) => {
                   resolve(result)

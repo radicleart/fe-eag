@@ -39,6 +39,7 @@
         <b-dropdown-divider />
         <b-dropdown-item v-if="profile.superAdmin" to="/swaps">STX Swap</b-dropdown-item>
         <b-dropdown-item to="/nft-collections">Collections</b-dropdown-item>
+        <b-dropdown-item to="/accounts/purchase-summary">Purchases</b-dropdown-item>
         <b-dropdown-item to="/my-nfts">My NFTs</b-dropdown-item>
         <b-dropdown-divider />
         <b-dropdown-item class="text-left text-small">

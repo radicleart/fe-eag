@@ -6,6 +6,8 @@ import MainFooter from '@/components/layout/MainFooter.vue'
 const MyNftLibrary = () => import('@/views/marketplace/MyNftLibrary.vue')
 const NftCollection = () => import('@/views/marketplace/NftCollection.vue')
 const NftCollections = () => import('@/views/marketplace/NftCollections.vue')
+const PurchaseDetails = () => import('@/views/accounts/PurchaseDetails.vue')
+const PurchaseSummary = () => import('@/views/accounts/PurchaseSummary.vue')
 const PunkMinter = () => import('@/views/marketplace/PunkMinter.vue')
 const AssetDetails = () => import('@/views/marketplace/AssetDetails.vue')
 const ItemPreview = () => import('@/views/marketplace/ItemPreview.vue')
@@ -27,16 +29,28 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   },
   {
+    path: '/accounts/purchase-summary',
+    name: 'purchase-summary',
+    components: { default: PurchaseSummary, header: MainNavbar, footer: MainFooter },
+    meta: { title: 'Purchase details for NFTs by the Electric Art Gallery Team Secured by Bitcoin' }
+  },
+  {
+    path: '/accounts/statements/:paymentId',
+    name: 'purchase-details',
+    components: { default: PurchaseDetails, header: MainNavbar, footer: MainFooter },
+    meta: { title: 'Purchase details for NFTs by the Electric Art Gallery Team Secured by Bitcoin' }
+  },
+  {
     path: '/minting/:maker/:collection',
     name: 'minting',
     components: { default: PunkMinter, header: MainNavbar, footer: MainFooter },
-    meta: { title: 'Marketplace for NFTs by the StacksMate Team Secured by Bitcoin' }
+    meta: { title: 'Marketplace for NFTs by the Electric Art Gallery Team Secured by Bitcoin' }
   },
   {
     path: '/nft-collections',
     name: 'collections',
     components: { default: NftCollections, header: MainNavbar, footer: MainFooter },
-    meta: { title: 'Marketplace for NFTs by the StacksMate Team Secured by Bitcoin' }
+    meta: { title: 'Marketplace for NFTs by the Electric Art Gallery Team Secured by Bitcoin' }
   },
   {
     path: '/nft-collection/:collectionId',

@@ -87,21 +87,6 @@ export default {
         this.commissions = commissions
         this.loadMempoolTransactions()
       })
-
-      /**
-      this.$store.dispatch('rpayTransactionStore/fetchByContractIdAndFrom', data).then((transactions) => {
-        if (transactions) {
-          transactions = transactions.filter((o) => o.functionName === 'mint-with')
-          if (transactions) this.transaction = transactions.reverse()[0]
-          if (this.transaction && this.transaction.txStatus === 'pending') {
-            this.$store.dispatch('rpayTransactionStore/fetchTransactionFromChainByTxId', this.transaction.txId).then((result) => {
-              this.transaction = result
-              this.$notify({ type: 'warning', title: 'Check Status', text: 'Transaction status is ' + result.txStatus })
-            })
-          }
-        }
-      })
-      **/
       this.$store.dispatch('rpayMarketStore/lookupMintPassBalance', data).then((result) => {
         if (result && result.result.value > 0) {
           this.mintPasses = Number(result.result.value)
@@ -181,8 +166,9 @@ export default {
   },
   computed: {
     mintCounter () {
-      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
+      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter
     },

@@ -100,10 +100,4 @@ export default {
 .tab-content {
   padding-top: 0px;
 }
-.fake-input {
-  border: none;
-  font-size: 0.6rem;
-  width: 200px;
-  text-align: center;
-}
 </style>

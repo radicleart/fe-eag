@@ -5,7 +5,7 @@ import { makeECPrivateKey, publicKeyToAddress, signECDSA, verifyECDSA, encryptEC
 import { SECP256K1Client } from 'jsontokens'
 import { sha256 } from 'sha.js'
 import {
-  hexToCV, cvToJSON
+  hexToCV, cvToJSON, uintCV, serializeCV
 } from '@stacks/transactions'
 
 const precision = 1000000
@@ -25,6 +25,9 @@ const utils = {
     } catch (e) {
       return null
     }
+  },
+  serializeToHex: function (str) {
+    return `0x${serializeCV(uintCV(str)).toString('hex')}`
   },
   stringToHex: function (str) {
     const arr = []

@@ -13,14 +13,13 @@
       <div class="w-50 p-2 mr-1 px-3 mb-1 bg-white">AVAILABLE</div>
       <div class="w-50 p-2 ml-0 px-3 mb-1 bg-white">{{loopRun.versionLimit - mintCounter}} of {{loopRun.versionLimit}}</div>
     </div>
-    <div class="p-2 px-3 mb-1 bg-white" v-if="commission">PRICE {{commission.price}} {{commission.sipTenToken.symbol}}</div>
+    <div class="p-2 px-3 mb-1 bg-white" v-if="commission">PRICE {{commission.price}} {{getSymbol(commission.sipTenToken)}}</div>
     <div class="p-2 px-3 mb-1 bg-white"><a class="text-primary" :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
   </div>
 </div>
 </template>
 
 <script>
-import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
   name: 'CollectionDataMinting',
@@ -37,6 +36,12 @@ export default {
     this.commission = (this.commissions) ? this.commissions.find((o) => o.sipTenToken.contractId.indexOf('unwrapped-stx-token') > -1) : null
   },
   methods: {
+    getSymbol: function (sipTenToken) {
+      if (sipTenToken.contractId.indexOf('unwrapped-stx-token') > -1) {
+        return 'STX'
+      }
+      return sipTenToken.symbol
+    },
     transactionUrl: function (data) {
       const stacksApiUrl = process.env.VUE_APP_STACKS_EXPLORER
       return stacksApiUrl + '/txid/' + this.loopRun.contractId + '?chain=' + process.env.VUE_APP_NETWORK
@@ -48,8 +53,9 @@ export default {
       return profile
     },
     mintCounter () {
-      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
+      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter
     }

@@ -15,14 +15,8 @@
           </div>
         </div>
       </div>
-      <div class="d-flex mt-4" v-if="available > 0 && loadedInFlights">
-        <div class="w-50 mr-1 pt-2 text-right text-upper">
-          <!-- {{purchases}} purchase<span v-if="purchases !== 1"></span> left -->
-          <span v-if="hasMintPass">Other</span><span v-else>Purchase</span> Options
-        </div>
-        <div class="w-50 ml-1" v-if="loaded">
-          <PaymentNftTransferTrigger class="w-100 text-white" :loopRun="loopRun" :transactionData="transactionData()" :inFlightPayments="inFlightPayments"/>
-        </div>
+      <div class="mt-4" v-if="available > 0 && loadedInFlights">
+        <PaymentTrigger class="w-100" :loopRun="loopRun" :transactionData="transactionData()" :inFlightPayments="inFlightPayments"/>
       </div>
     </div>
     <div v-else class="mt-2">
@@ -38,13 +32,13 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import MintingV3Flow from '@/views/marketplace/components/minting/MintingV3Flow'
-import PaymentNftTransferTrigger from '@/views/marketplace/components/off-chain/PaymentNftTransferTrigger'
+import PaymentTrigger from '@/views/marketplace/components/off-chain/PaymentTrigger'
 
 export default {
   name: 'PunkMintHelper',
   components: {
     MintingV3Flow,
-    PaymentNftTransferTrigger
+    PaymentTrigger
   },
   props: ['loopRun', 'mintPasses', 'commissions'],
   data () {
@@ -65,12 +59,9 @@ export default {
       contractId: this.loopRun.contractId,
       stxAddress: this.profile.stxAddress
     }
-    this.$store.dispatch('merchantStore/fetchPayments', data).then((payments) => {
+    this.$store.dispatch('merchantStore/fetchPurchases', data).then((payments) => {
+      this.inFlightPayments = payments
       this.loadedInFlights = true
-      if (payments && payments.opennode.filter((o) => o.status !== 'unpaid').length > 0) {
-        this.inFlightPayments = payments.opennode.filter((o) => o.status !== 'unpaid')
-        this.inFlightPayments = payments.square.filter((o) => o.status !== 'unpaid')
-      }
     })
     this.commission = this.commissions.find((o) => o.name === 'unwrapped-stx-token') || this.commissions[0]
     this.$store.commit(APP_CONSTANTS.SET_PURCHASE_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, commission: this.commission })
@@ -80,7 +71,7 @@ export default {
     transactionData () {
       const comm = this.commissions.find((o) => o.tokenContractId.indexOf('unwrapped-stx-token') > -1)
       return {
-        type: 'mint-with',
+        type: 'admin-mint-nft',
         price: comm.price,
         batchOption: 1,
         contractId: this.loopRun.contractId,
@@ -131,8 +122,9 @@ export default {
       return profile
     },
     mintCounter () {
-      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
+      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter
     },

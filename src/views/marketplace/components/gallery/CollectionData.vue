@@ -9,8 +9,6 @@
 </template>
 
 <script>
-import { APP_CONSTANTS } from '@/app-constants'
-
 export default {
   name: 'CollectionData',
   components: {
@@ -35,8 +33,9 @@ export default {
       return profile
     },
     mintCounter () {
-      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
+      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter
     }

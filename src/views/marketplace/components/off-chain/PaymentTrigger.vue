@@ -1,15 +1,21 @@
 <template>
 <div>
-  <div>
-    <div class="w-100">
-      <b-button v-if="inFlightPayments.length < loopRun.spinsPerDay" class="w-100" variant="outline-dark" @click="showAddress">SHOW</b-button>
+  <div class="d-flex mt-4" v-if="!inFlightPayments || inFlightPayments.length < loopRun.spinsPerDay">
+    <div class="w-50 mr-1 pt-2 text-right text-upper">
+      <span>Purchase options</span>
     </div>
-    <div class="w-100" v-if="inFlightPayments.length > 0">
+    <div class="w-50 ml-1">
+      <b-button class="w-100" variant="outline-dark" @click="showAddress">SHOW</b-button>
+    </div>
+  </div>
+  <div class="d-flex mt-4" v-if="inFlightPayments && inFlightPayments.length > 0">
+    <div class="w-50 ml-1">
       <b-link class="text-xsmall" @click="showInflightPayments"><b-icon icon="cart"/> open cart</b-link>
     </div>
   </div>
+
   <b-modal size="lg" id="in-flight-modal" centered>
-    <InFlightPaymentModal :payments="inFlightPayments"/>
+    <StatementCard :payments="inFlightPayments"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
   <b-modal size="lg" id="stacks-address-modal" centered>
@@ -27,15 +33,15 @@
 import { APP_CONSTANTS } from '@/app-constants'
 import PaymentFlow from '@/views/marketplace/components/off-chain/PaymentFlow'
 import StacksAddressModal from '@/views/marketplace/components/off-chain/StacksAddressModal'
-import InFlightPaymentModal from '@/views/marketplace/components/off-chain/InFlightPaymentModal'
+import StatementCard from '@/views/accounts/components/StatementCard'
 import utils from '@/services/utils'
 
 export default {
-  name: 'PaymentNftTransferTrigger',
+  name: 'PaymentTrigger',
   components: {
     PaymentFlow,
     StacksAddressModal,
-    InFlightPaymentModal
+    StatementCard
   },
   props: ['loopRun', 'configuration', 'transactionData', 'inFlightPayments'],
   data () {
@@ -111,8 +117,9 @@ export default {
   },
   computed: {
     mintCounter () {
-      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
+      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
+      const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter
     },

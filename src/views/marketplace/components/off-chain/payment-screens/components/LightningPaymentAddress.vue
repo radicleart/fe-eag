@@ -122,12 +122,6 @@ export default {
 }
 </script>
 <style lang="scss" >
-.fake-input {
-  border: none;
-  font-size: 0.6rem;
-  width: 200px;
-  text-align: center;
-}
 .flasher {
   font-size: 16px;
   border: 2pt solid #FFCE00;

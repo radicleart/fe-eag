@@ -3,9 +3,13 @@
   <b-card v-if="!loading" class="" style="min-height: 30vh;" header-tag="header" footer-tag="footer">
     <b-card-text>
       <p class="text-bold" v-if="item">{{item.name}}</p>
-      <div class="w-100 mb-3" role="group" v-if="commissions">
-        <label for="status-name">Mint With Token</label>
-        <b-form-select @change="changeToken" id="status-name" v-model="tokenContractId" :options="commissionTokens()"></b-form-select>
+      <div class="w-100 mb-3" role="group" v-if="commissions && commissions.length > 1">
+        <label for="status-name">Mint With</label>
+        <div class="">
+          <div v-for="(commission, index) in commissions" :key="index">
+            <b-button variant="outline-dark" @click="changeToken(commission.sipTenToken.contractId)" :disabled="(commission.sipTenToken.contractId === tokenContractId)">{{getSymbol(commission.sipTenToken)}}</b-button>
+          </div>
+        </div>
       </div>
       <div class="text-100 text-small">
         Minting: {{batchOption}} @ <span v-if="commission">{{commission.price}} {{tokenName()}}</span><span v-else>{{loopRun.mintPrice}} STX</span>
@@ -55,6 +59,12 @@ export default {
     this.loading = false
   },
   methods: {
+    getSymbol: function (sipTenToken) {
+      if (sipTenToken.contractId.indexOf('unwrapped-stx-token') > -1) {
+        return 'STX'
+      }
+      return sipTenToken.symbol
+    },
     tokenName: function (choice) {
       if (this.tokenContractId.indexOf('unwrapped-stx') > -1) return 'STX'
       return this.commission.sipTenToken.name
