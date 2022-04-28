@@ -5,13 +5,15 @@ import { APP_CONSTANTS } from '@/app-constants'
 import storeUtils from './storeUtils'
 import contentStore from './contentStore'
 import merchantStore from './merchantStore'
+import stacksApiStore from './stacksApiStore'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
     contentStore,
-    merchantStore
+    merchantStore,
+    stacksApiStore
   },
   state: {
     configuration: {}

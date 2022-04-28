@@ -52,6 +52,7 @@ export default {
     return {
       iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo grey.png'),
       mintPasses: -1,
+      mintEvents: null,
       componentKey: 0,
       batchOption: 1,
       result: null,
@@ -71,12 +72,22 @@ export default {
     this.currentRunKey = this.$route.params.collection
     this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.currentRunKey).then((loopRun) => {
       this.loopRun = loopRun
+      let data = {
+        asset_identifier: loopRun.contractId + '::' + loopRun.assetName,
+        limit: 1,
+        offset: 0,
+        unanchored: true,
+        tx_metadata: true
+      }
+      this.$store.dispatch('stacksApiStore/fetchMintEvents', data).then((mintEvents) => {
+        this.mintEvents = mintEvents
+      })
       this.mintImage = loopRun.mintImage1 || loopRun.image
       if (!this.profile.loggedIn) {
         this.$router.push('/')
         return
       }
-      const data = {
+      data = {
         stxAddress: this.profile.stxAddress,
         contractId: loopRun.contractId,
         contractAddress: loopRun.contractId.split('.')[0],
@@ -133,16 +144,10 @@ export default {
       return 'https://explorer.stacks.co/txid/' + this.transaction.txId + '?chain=' + process.env.VUE_APP_NETWORK
     },
     loadMempoolTransactions: function () {
-      const path = '/extended/v1/tx/mempool?sender_address=' + this.profile.stxAddress
-      const txOptions = {
-        path: path,
-        httpMethod: 'GET',
-        postData: {
-          arguments: [],
-          sender: null // this.profile.stxAddress
-        }
+      const data = {
+        stxAddress: this.profile.stxAddress
       }
-      this.$store.dispatch('rpayStacksStore/callApi', txOptions).then((result) => {
+      this.$store.dispatch('stacksApiStore/fetchMempoolTxsByAddress', data).then((result) => {
         if (result.total > 0) {
           this.transactions = result.results
           this.transaction = result.results[0]

@@ -4,6 +4,9 @@
     <b-row v-if="collection" class="border">
       <b-col cols="12" class="py-2 bg-light border">{{collection.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
     </b-row>
+    <b-row v-else class="border">
+      <b-col cols="12" class="py-2 bg-light border">This collection is not currently supported</b-col>
+    </b-row>
     <b-row v-if="collection" class="border-bottom">
       <b-col cols="12" class="py-2 text-lower">{{collection.makerName}}</b-col>
     </b-row>

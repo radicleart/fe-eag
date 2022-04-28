@@ -1,19 +1,20 @@
 <template>
 <div v-if="!loading" class="ml-5 bg-light">
-  <CollectionsNavigationMyNfts :context="'item-preview'" :loopRun="loopRun" :asset="item" :filter="'asset'"/>
+  <CollectionsNavigationMyNfts v-if="loopRun" :context="'item-preview'" :loopRun="loopRun" :asset="item" :filter="'asset'"/>
   <b-container style="height: auto;" fluid class="px-5 mt-5">
     <b-row :key="componentKey" style="min-height: 50vh;" >
       <b-col lg="7" sm="12" class="mb-5">
         <MediaItemGeneral :classes="'hash1-image'" :options="options" :asset="item"/>
         <div class="text-left text-small mt-3">
-          <b-link :to="'/my-nfts/' + loopRun.currentRunKey"><b-icon icon="chevron-left"/> Back</b-link>
+          <b-link v-if="loopRun.currentRunKey" :to="'/my-nfts/' + loopRun.currentRunKey"><b-icon icon="chevron-left"/> Back</b-link>
+          <b-link v-else :to="'/my-nfts'"><b-icon icon="chevron-left"/> Back</b-link>
         </div>
       </b-col>
       <b-col lg="5" sm="12" class="my-5">
         <div>
           <div class="mb-2 d-flex justify-content-between">
             <h2 class="d-block border-bottom mb-5">{{mintedMessage}}</h2>
-            <ItemActionMenu :item="item" :loopRun="loopRun" v-if="item && !item.contractAsset"/>
+            <ItemActionMenu :item="item" :loopRun="loopRun" v-if="loopRun && item && !item.contractAsset"/>
           </div>
           <h6 v-if="item.artist" class="text-small">By : {{item.artist}}</h6>
         </div>
@@ -21,13 +22,13 @@
           <a target="_blank" :href="cacheUrl()">read from cache</a>
         </p>
         <p v-if="item.description" class="pt-4 text-small" v-html="preserveWhiteSpace(item.description)"></p>
-        <MintInfo :item="item" :loopRun="loopRun"/>
+        <MintInfo v-if="loopRun.currentRunKey" :item="item" :loopRun="loopRun"/>
         <PendingTransactionInfo v-if="pending && pending.txStatus === 'pending'" :pending="pending"/>
         <div v-else-if="iAmOwner">
-          <MintingTools class="w-100" :items="[item]" :loopRun="loopRun" @update="update"/>
+          <MintingTools v-if="loopRun.currentRunKey" class="w-100" :items="[item]" :loopRun="loopRun" @update="update"/>
         </div>
         <div>
-          <NftHistory class="mt-5" @update="update" @setPending="setPending" :loopRun="loopRun" :nftIndex="(item.contractAsset) ? item.contractAsset.nftIndex : -1" :assetHash="item.assetHash"/>
+          <NftHistory v-if="loopRun.currentRunKey" class="mt-5" @update="update" @setPending="setPending" :loopRun="loopRun" :nftIndex="(item.contractAsset) ? item.contractAsset.nftIndex : -1" :assetHash="item.assetHash"/>
         </div>
       </b-col>
     </b-row>
@@ -116,7 +117,15 @@ export default {
         this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', data).then((item) => {
           this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.contractId).then((loopRun) => {
             this.item = item
-            this.loopRun = loopRun
+            if (!loopRun) {
+              this.loopRun = {
+                contractId: this.contractId,
+                currentRun: 'Unsupported Collection',
+                type: 'unkown'
+              }
+            } else {
+              this.loopRun = loopRun
+            }
             this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex })
             this.loading = false
           })
