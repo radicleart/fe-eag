@@ -8,16 +8,24 @@
       <b-col cols="12" class="py-2 bg-light border">This collection is not currently supported</b-col>
     </b-row>
     <b-row v-if="collection" class="border-bottom">
-      <b-col cols="12" class="py-2 text-lower">{{collection.makerName}}</b-col>
-    </b-row>
-    <b-row v-if="!collection" class="border-bottom">
-      <b-col cols="12" class="py-2 text-lower">{{asset.contractAsset.contractId.split('.')[1]}} #{{asset.contractAsset.nftIndex}}</b-col>
-    </b-row>
-    <b-row class="border-bottom">
       <b-col cols="12" class="py-2 text-lower">
         <div class="d-flex justify-content-between">
-          <div v-if="asset.name">{{asset.name}}</div>
-          <div v-else>Unamed</div>
+          <div class="pointer" @click="showDetails = ! showDetails">
+            {{collection.makerName}}
+          </div>
+          <div class="pointer" @click="showDetails = ! showDetails">
+            <b-icon v-if="showDetails" class="text-primary" font-scale="1.5" icon="arrow-down-right-circle"/>
+            <b-icon v-else class="text-primary" font-scale="1.5" icon="arrow-up-right-circle"/>
+          </div>
+        </div>
+      </b-col>
+    </b-row>
+    <b-row v-if="!collection" class="border-bottom">
+      <b-col cols="12" class="py-2 text-lower">
+        <div class="d-flex justify-content-between">
+          <div class="pointer" @click="showDetails = ! showDetails">
+            {{asset.contractAsset.contractId.split('.')[1]}} #{{asset.contractAsset.nftIndex}}
+          </div>
           <div class="pointer" @click="showDetails = ! showDetails">
             <b-icon v-if="showDetails" class="text-primary" font-scale="1.5" icon="arrow-down-right-circle"/>
             <b-icon v-else class="text-primary" font-scale="1.5" icon="arrow-up-right-circle"/>
@@ -27,9 +35,19 @@
     </b-row>
   </b-container>
   <b-container v-if="showDetails">
-    <b-row class="border-bottom">
+    <b-row class="border-bottom" v-if="asset.name">
       <b-col cols="12" class="py-2 text-lower">
+        <div class="d-flex justify-content-between">
+          <div>{{asset.name}}</div>
+        </div>
+      </b-col>
+    </b-row>
+    <b-row class="border-bottom">
+      <b-col cols="12" class="py-2 text-lower" v-if="asset.contractAsset.owner">
         <OwnerInfo :owner="asset.contractAsset.owner" />
+      </b-col>
+      <b-col cols="12" class="py-2 text-lower" v-else>
+        add to basket
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="isListed() && $route.name !== 'my-nfts'">
@@ -49,7 +67,7 @@
         </div>
       </b-col>
     </b-row>
-    <b-row class="border">
+    <b-row class="border" v-if="loopRun.status !== 'unrevealed'">
       <b-col cols="12" class="border bg-light py-2">
         <div><a class="text-primary" :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
       </b-col>

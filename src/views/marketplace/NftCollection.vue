@@ -4,7 +4,7 @@
   <b-container fluid class="px-5 mt-5">
     <b-row>
       <b-col cols="12" style="min-height: 50vh">
-        <div class="mb-4" v-if="(loopRun.status === 'unrevealed' || loopRun.status === 'active' || loopRun.status === 'inactive')">
+        <div class="mb-4">
           <PageableItems v-on="$listeners" :resultSet="resultSet" :loopRun="loopRun"/>
         </div>
       </b-col>
@@ -131,7 +131,25 @@ export default {
           this.$router.push('/')
         }
         this.loopRun = loopRun
-        this.fetchPage(this.pagingData.offset - 1, false, this.defQuery)
+        if (loopRun.status === 'unrevealed') {
+          this.resultSet = []
+          const ipfsUrl = this.loopRun.punkImageIPFSUrl
+          for (let i = 1; i <= loopRun.versionLimit; i++) {
+            this.resultSet.push({
+              contractAsset: {
+                contractId: loopRun.contractId,
+                nftIndex: i,
+                tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, i) }
+              }
+            })
+          }
+          this.tokenCount = loopRun.versionLimit
+          this.pagingData.numberOfItems = loopRun.versionLimit
+          this.$emit('tokenCount', { numbTokens: loopRun.versionLimit })
+          this.loaded = true
+        } else {
+          this.fetchPage(this.pagingData.offset - 1, false, this.defQuery)
+        }
       })
     },
     getQueryString (query) {

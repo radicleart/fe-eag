@@ -67,7 +67,7 @@ img {
   height:auto;
   max-width:100%;
   min-width:90%;
-  padding:0vmin;
+  padding:5vmin;
   position:relative;
   text-align:center;
 }

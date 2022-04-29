@@ -5,7 +5,7 @@
       <b-col cols="12" ref="gallery">
         <vue-horizontal v-if="loaded">
           <div class="pr-5" v-for="(loopRun, index) in allLoopRuns" :key="index">
-            <CollectionImage :loopRun="loopRun" :index="index" :options="{ 'min-width': '400px' }"/>
+            <CollectionImage :loopRun="loopRun" :index="index"/>
           </div>
         </vue-horizontal>
         <b-container v-else>
@@ -58,6 +58,11 @@ export default {
     allLoopRuns () {
       let loopRuns = this.$store.getters[APP_CONSTANTS.GET_LOOP_RUNS]
       loopRuns = loopRuns.filter((o) => o.status !== 'disabled')
+      if (this.filter) {
+        loopRuns = loopRuns.filter((o) => o.type !== 'traditional')
+      } else {
+        loopRuns = loopRuns.filter((o) => o.type === 'traditional')
+      }
       return utils.sortLoopRuns(loopRuns)
     },
     profile () {

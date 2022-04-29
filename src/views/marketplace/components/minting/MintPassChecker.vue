@@ -28,7 +28,7 @@ export default {
     }
   },
   mounted () {
-    if (this.profile.loggedIn) {
+    if (this.profile.loggedIn && this.loopRun.status !== 'unrevealed') {
       const data = {
         stxAddress: this.profile.stxAddress,
         contractAddress: this.loopRun.contractId.split('.')[0],
@@ -41,6 +41,8 @@ export default {
         } else {
           this.mintPasses = 0
         }
+      }).catch(() => {
+        this.mintPasses = 0
       })
     }
   },

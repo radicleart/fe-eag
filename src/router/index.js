@@ -75,6 +75,16 @@ const routes = [
     }
   },
   {
+    path: '/artwork/:contractId/:nftIndex',
+    name: 'artwork-by-index',
+    components: { default: AssetDetails, header: MainNavbar, footer: MainFooter },
+    meta: {
+      requiresAuth: false,
+      requiresAdmin: false,
+      title: 'NFT display'
+    }
+  },
+  {
     path: '/nft-preview/:contractId/:nftIndex',
     name: 'nft-preview',
     components: { default: ItemPreview, header: MainNavbar, footer: MainFooter },

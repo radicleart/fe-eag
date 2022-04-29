@@ -3,13 +3,15 @@
   <CollectionNavigation :loopRun="loopRun" :asset="gaiaAsset" :filter="'asset'"/>
   <b-container style="height: auto;" fluid class="px-5 mt-5">
     <div v-if="!loading && gaiaAsset && loopRun">
-      <NftDisplay v-on="$listeners" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>
+      <NftDisplay v-if="loopRun.status !== 'unrevealed'" v-on="$listeners" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>
+      <PreNftDisplay v-else v-on="$listeners" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>
     </div>
   </b-container>
 </div>
 </template>
 
 <script>
+import PreNftDisplay from '@/views/marketplace/components/gallery/PreNftDisplay'
 import NftDisplay from '@/views/marketplace/components/gallery/NftDisplay'
 import { APP_CONSTANTS } from '@/app-constants'
 import CollectionNavigation from '@/views/marketplace/components/gallery/CollectionNavigation'
@@ -18,6 +20,7 @@ export default {
   name: 'AssetDetails',
   components: {
     NftDisplay,
+    PreNftDisplay,
     CollectionNavigation
   },
   data: function () {
@@ -41,24 +44,27 @@ export default {
   methods: {
     loadPage () {
       this.contractId = this.$route.params.contractId
-      if (this.$route.name === 'asset-by-index') {
-        this.nftIndex = Number(this.$route.params.nftIndex)
-        this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex }).then((gaiaAsset) => {
-          this.$store.dispatch('rpayCategoryStore/fetchLoopRuns').then((loopRuns) => {
+      this.nftIndex = Number(this.$route.params.nftIndex)
+      this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.contractId).then((loopRun) => {
+        this.loopRun = loopRun
+        if (this.$route.name === 'asset-by-index') {
+          this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex }).then((gaiaAsset) => {
             this.gaiaAsset = gaiaAsset
-            this.loopRun = loopRuns.find((o) => o.contractId === this.contractId)
             this.$store.dispatch('rpayManageCacheStore/cacheUpdate', { contractId: this.contractId, nftIndex: this.nftIndex })
             this.loading = false
           })
-        })
-      } else {
-        this.assetHash = this.$route.params.assetHash
-        this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndAssetHash', { contractId: this.contractId, assetHash: this.assetHash }).then((gaiaAsset) => {
-          this.gaiaAsset = gaiaAsset
-          this.$store.dispatch('rpayManageCacheStore/cacheUpdate', { contractId: this.contractId, assetHash: this.assetHash })
+        } else {
+          const ipfsUrl = this.loopRun.punkImageIPFSUrl
+          this.gaiaAsset = {
+            contractAsset: {
+              contractId: loopRun.contractId,
+              nftIndex: this.nftIndex,
+              tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, this.nftIndex) }
+            }
+          }
           this.loading = false
-        })
-      }
+        }
+      })
     },
     parseRunKey (gaiaAsset) {
       if (gaiaAsset && gaiaAsset.properties && gaiaAsset.properties.collectionId) {

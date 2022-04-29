@@ -4,16 +4,16 @@
     <div class="d-flex text-primary">
       <b-nav-item-dropdown :class="(!filter) ? 'bg-white' : ''" class="py-0 px-0" style="list-style: none;" no-caret>
         <template v-slot:button-content>
-          <span>Collections</span>
+          <b-link to="/nft-collections"><span>Collections</span></b-link>
         </template>
         <b-dropdown-item style="list-style: none;" class="no-focus-outline pl-0 m-0" v-for="(lr, index) in allLoopRuns" :key="index">
           <div :class="(loopRun && loopRun.currentRunKey ===  lr.currentRunKey) ? 'bg-white' : ''" class=""><b-link :to="'/nft-collection/' + lr.currentRunKey">{{lr.currentRun}}</b-link></div>
         </b-dropdown-item>
       </b-nav-item-dropdown>
       <div class="d-flex text-primary" v-if="!loopRun">
-        <div :class="(filter ===  'featured') ? 'bg-white' : ''" class="py-2 px-4 mx-0  pointer">| <b-link to="/nft-collections?filter=featured">Featured</b-link> |</div>
-        <div :class="(filter ===  'latest') ? 'bg-white' : ''" class="py-2 px-4 mx-0  pointer">| <b-link to="/nft-collections?filter=latest">Latest Listings</b-link> |</div>
-        <div :class="(filter ===  'upcoming') ? 'bg-white' : ''" class="py-2 px-4 mx-0  pointer">| <b-link to="/nft-collections?filter=upcoming">Upcoming</b-link> |</div>
+        <b-link class="py-2 px-4 mx-0  pointer" to="/nft-collections?filter=featured"><span :class="(filter ===  'featured') ? 'bg-white' : ''">| Featured |</span></b-link>
+        <b-link class="py-2 px-4 mx-0  pointer" to="/nft-collections?filter=latest"><span :class="(filter ===  'latest') ? 'bg-white' : ''">| Latest Listings |</span></b-link>
+        <b-link class="py-2 px-4 mx-0  pointer" to="/nft-collections?filter=upcoming"><span :class="(filter ===  'upcoming') ? 'bg-white' : ''">| Upcoming |</span></b-link>
       </div>
     </div>
   </div>

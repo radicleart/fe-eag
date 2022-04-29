@@ -3,7 +3,7 @@
   <div class="container">
     <div class="box">
       <b-link :to="'/nft-collection/' + loopRun.currentRunKey">
-      <FramedImage :options="{ 'width': '600px', 'height': '600px' }" :id="'popover-image-' + index" :imageSrc="getCollectionImageUrl(loopRun)"/>
+      <FramedImage :options="{ 'width': '500px', 'height': '500px' }" :id="'popover-image-' + index" :imageSrc="getCollectionImageUrl(loopRun)"/>
       <CollectionPopover :loopRun="loopRun" :index="index"/>
     </b-link>
     </div>
@@ -22,7 +22,7 @@ export default {
     CollectionPopover,
     FramedImage
   },
-  props: ['loopRun', 'index', 'options'],
+  props: ['loopRun', 'index'],
   data () {
     return {
       showOverlay: false
