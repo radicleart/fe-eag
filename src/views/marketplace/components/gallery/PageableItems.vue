@@ -3,7 +3,7 @@
   <vue-horizontal>
     <div class="" v-for="(asset, index) of resultSet" :key="index">
       <NftImage v-if="loopRun.status !== 'unrevealed'" v-on="$listeners" @update="update" :loopRun="loopRun" :asset="asset"/>
-      <PreNftImage v-else v-on="$listeners" @update="update" :loopRun="loopRun" :asset="asset"/>
+      <SftImage v-else v-on="$listeners" @update="update" :loopRun="loopRun" :asset="asset"/>
     </div>
   </vue-horizontal>
 </div>
@@ -11,7 +11,7 @@
 
 <script>
 import NftImage from './NftImage'
-import PreNftImage from './PreNftImage'
+import SftImage from './SftImage'
 import { APP_CONSTANTS } from '@/app-constants'
 import VueHorizontal from 'vue-horizontal'
 
@@ -19,7 +19,7 @@ export default {
   name: 'PageableItems',
   components: {
     NftImage,
-    PreNftImage,
+    SftImage,
     VueHorizontal
   },
   props: ['loopRun', 'resultSet'],

@@ -12,7 +12,7 @@ const setAmounts = function (tickerRates, configuration) {
   try {
     const rate = tickerRates.find((o) => o.currency === configuration.payment.currency)
     let amountFiat = configuration.payment.amountFiat
-    if (configuration.commission) amountFiat = (configuration.commission.price * rate.stxPrice)
+    if (configuration.commission) amountFiat = (configuration.commission.price * configuration.commission.amount * rate.stxPrice)
     if (configuration.payment.allowMultiples) {
       amountFiat = amountFiat * configuration.payment.creditAttributes.start
     }
@@ -247,10 +247,11 @@ const merchantStore = {
   },
   mutations: {
     setPurchaseConfiguration (state, data) {
-      const config = state.configuration
+      let config = state.configuration
       config.risidioCardMode = data.flow
       config.loopRun = data.loopRun
       config.commission = data.commission
+      config = setAmounts(state.tickerRates, config)
       state.configuration = config
     },
     updateConfiguration (state, configuration) {
@@ -326,13 +327,15 @@ const merchantStore = {
       })
     },
     initialiseRates ({ commit }) {
-      return new Promise(() => {
+      return new Promise((resolve) => {
         try {
           axios.get(process.env.VUE_APP_RISIDIO_API + '/mesh/v1/rates/ticker').then(response => {
             connectApiNews(commit)
             commit('setTickerRates', response.data)
+            resolve(response.data)
           })
         } catch (err) {
+          resolve()
         }
       })
     },
@@ -347,7 +350,6 @@ const merchantStore = {
             configuration.transactionData = transactionData
             commit('updateConfiguration', configuration)
           }
-          dispatch('initialiseRates')
           const profile = rootGetters['rpayAuthStore/getMyProfile']
           dispatch('fetchPurchases', { stxAddress: profile.stxAddress }).then((payments) => {
             if (payments) {
@@ -457,12 +459,10 @@ const merchantStore = {
       }
     },
     updateAmount ({ state, commit }, data) {
-      localStorage.removeItem('OP_INVOICE')
       let config = state.configuration
-      config.payment.creditAttributes.start = data.numbCredits
+      config.commission.amount = data.amount
       config = setAmounts(state.tickerRates, config)
       commit('updateConfiguration', config)
-      // return this.dispatch('initialisePaymentFlow', state.configuration)
     },
     stopListening ({ commit }) {
       if (stompClient) stompClient.disconnect()

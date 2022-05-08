@@ -14,8 +14,19 @@
             <span><b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light', customClass: 'my-tooltip-class' }" :title="'Your address if your purchasing for yourself or a friends address if this is a gift?'" class="ml-2" variant="outline-success"><b-icon icon="question-circle"/></b-link></span>
           </p>
         </div>
+      </b-card-text>
+      <b-card-text class="" v-if="transactionData && transactionData.type === 'admin-mint-sft'">
+        <label for="status-name">Select percent of artwork to buy</label>
+        <div class="w-100">
+          <vue-slider @change="changeToken" v-model="amount" :data="percentages()"/>
+        </div>
+        <div class="w-100 text-xsmall">
+          <span v-html="paymentMessage"></span>
+        </div>
+      </b-card-text>
+      <b-card-text>
         <div class="p-0 offset-10 col-2 text-right mb-5">
-          <b-button class="w-100" variant="outline-dark" @click="$emit('showPayment', { recipient: nftRecipient })">Next</b-button>
+          <b-button class="w-100" variant="outline-dark" @click="$emit('showPayment', { recipient: nftRecipient, amount: amount })">Next</b-button>
         </div>
       </b-card-text>
     </b-card>
@@ -24,23 +35,45 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/antd.css'
 
 export default {
   name: 'StacksAddressModal',
   components: {
+    VueSlider
   },
+  props: ['transactionData'],
   data () {
     return {
+      amount: 50,
       iconLN: require('@/assets/img/EAG - WEB UX assets - png/EAG - logo grey.png'),
       nftRecipient: null
     }
   },
   mounted () {
+    this.amount = this.transactionData.commission.amount
     this.nftRecipient = this.profile.stxAddress
   },
   methods: {
+    changeToken: function (choice) {
+      this.amount = choice
+      this.$emit('showPayment', { opcode: 'amount-change', amount: this.amount })
+      this.$store.dispatch('merchantStore/updateAmount', { amount: this.amount })
+    },
+    percentages () {
+      const options = []
+      for (let i = 10; i <= 100; i += 10) {
+        options.push({ text: i, value: i })
+      }
+      return options
+    }
   },
   computed: {
+    paymentMessage () {
+      const configuration = this.$store.getters[APP_CONSTANTS.KEY_PURCHASE_CONFIGURATION]
+      return 'Buying ' + this.amount + '% of <span class="text-grey">' + configuration.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span> For ' + configuration.payment.amountStx + ' stx (' + configuration.payment.amountFiat + ' ' + configuration.payment.currency + ' / ' + configuration.payment.amountBtc + ' btc)'
+    },
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       return profile
@@ -49,4 +82,9 @@ export default {
 }
 </script>
 <style lang="scss">
+$themeColor: #dae0e6;
+
+/* import theme style */
+@import '~vue-slider-component/lib/theme/default.scss';
+
 </style>

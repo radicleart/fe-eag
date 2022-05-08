@@ -21,7 +21,7 @@ import FramedImage from './FramedImage'
 import ListingInfo from '@/views/marketplace/components/gallery/common/ListingInfo'
 
 export default {
-  name: 'PreNftImage',
+  name: 'SftImage',
   components: {
     FramedImage,
     ListingInfo

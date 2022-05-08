@@ -158,10 +158,13 @@ export default {
       return (wallet && wallet.accountInfo.balance >= (this.configuration.payment.amountStx * 4))
     },
     paymentMessage () {
+      if (this.transactionData.type === 'admin-mint-sft') {
+        return 'Mint ' + this.transactionData.commission.amount + '% of <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
+      }
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') {
         return 'Purchasing <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.configuration.asset.contractAsset.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
       } else if (this.configuration.risidioCardMode === 'nft-mint-flow') {
-        return 'Mint <span class="text-danger">' + this.configuration.loopRun.currentRun + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
+        return 'Mint <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
       }
       return 'Swap <span class="text-danger">' + this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' for <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX<br/><span>to:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
     },

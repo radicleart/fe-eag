@@ -1,5 +1,5 @@
 <template>
-<div class="bg-light">
+<div class="bg-light" v-if="allowed">
   <b-container fluid class="text-primary p-3" v-if="available">
     <div v-if="mintPasses < 0">Checking for mint passes</div>
     <div v-else-if="canMint">{{available}} available - you have {{mintPasses}} mint passes - <b-link :to="'/minting/' + loopRun.makerUrlKey + '/' + loopRun.currentRunKey">mint here</b-link></div>
@@ -28,7 +28,7 @@ export default {
     }
   },
   mounted () {
-    if (this.profile.loggedIn && this.loopRun.status !== 'unrevealed') {
+    if (this.allowed && this.profile.loggedIn && this.loopRun.status !== 'unrevealed') {
       const data = {
         stxAddress: this.profile.stxAddress,
         contractAddress: this.loopRun.contractId.split('.')[0],
@@ -49,6 +49,9 @@ export default {
   methods: {
   },
   computed: {
+    allowed () {
+      return this.loopRun && this.loopRun.type !== 'SIP-013'
+    },
     available () {
       return this.loopRun.versionLimit - this.mintCounter
     },

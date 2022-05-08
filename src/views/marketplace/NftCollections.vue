@@ -33,35 +33,37 @@ export default {
   },
   watch: {
     '$route' () {
+      this.loaded = false
       this.filter = this.$route.query.filter
+      this.reload()
     }
   },
   data () {
     return {
       popoverData: {},
       filter: null,
-      loaded: false,
-      rightSpace: 0
+      loaded: false
     }
   },
   mounted () {
-    const $self = this
-    const $ele = this.$refs.gallery
-    Vue.nextTick(function () {
-      $self.rightSpace = ($ele.clientWidth * 50) / 100
-      $self.loaded = true
-    }, this)
+    this.reload()
   },
   methods: {
+    reload () {
+      const $self = this
+      Vue.nextTick(function () {
+        $self.loaded = true
+      }, this)
+    }
   },
   computed: {
     allLoopRuns () {
       let loopRuns = this.$store.getters[APP_CONSTANTS.GET_LOOP_RUNS]
       loopRuns = loopRuns.filter((o) => o.status !== 'disabled')
       if (this.filter) {
-        loopRuns = loopRuns.filter((o) => o.type !== 'traditional')
+        loopRuns = loopRuns.filter((o) => o.type !== 'SIP-013')
       } else {
-        loopRuns = loopRuns.filter((o) => o.type === 'traditional')
+        loopRuns = loopRuns.filter((o) => o.type === 'SIP-013')
       }
       return utils.sortLoopRuns(loopRuns)
     },

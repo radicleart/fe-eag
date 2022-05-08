@@ -118,6 +118,7 @@ export default {
           transactionData: this.transactionData,
           locationId: this.configuration.payment.squarePay.locationId
         })
+        this.$emit('rpayEvent', { opcode: 'square-payment-begun' })
         fetch(this.configuration.risidioBaseApi + this.submitUrl, {
           method: 'POST',
           headers: {

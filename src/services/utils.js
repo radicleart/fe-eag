@@ -5,13 +5,25 @@ import { makeECPrivateKey, publicKeyToAddress, signECDSA, verifyECDSA, encryptEC
 import { SECP256K1Client } from 'jsontokens'
 import { sha256 } from 'sha.js'
 import {
-  hexToCV, cvToJSON, uintCV, serializeCV
+  hexToCV, cvToJSON, uintCV, serializeCV, deserializeCV
 } from '@stacks/transactions'
 
 const precision = 1000000
 const btcPrecision = 100000000
 
 const utils = {
+  tokenIdOwnerFromRpr: function (value) {
+    if (!value || !value.repr) return
+    let part1 = value.repr.split('owner ')[1]
+    part1 = part1.split(')')[0]
+    let part2 = value.repr.split('token-id ')[1]
+    part2 = Number(part2.split(')')[0].substring(1))
+    return { owner: part1, nftIndex: part2 }
+  },
+  fromHex: function (value) {
+    const res = deserializeCV(value)
+    return res
+  },
   jsonFromTxResult: function (tx) {
     if (!tx) return null
     try {

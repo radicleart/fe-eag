@@ -28,46 +28,22 @@
 </template>
 
 <script>
-import utils from '@/services/utils'
 
 export default {
   name: 'NFTHistroy',
   components: {
   },
-  props: ['nftIndex', 'assetHash', 'loopRun'],
+  props: ['gaiaAsset', 'loopRun', 'events'],
   data: function () {
     return {
-      events: null,
       paymentAddress: null,
       timer: null,
       previouslyPending: false
     }
   },
   mounted () {
-    this.loadNFTHistory()
   },
   methods: {
-    loadNFTHistory: function () {
-      let url = '/extended/v1/tokens/nft/history?'
-      const assetIdentifier = this.loopRun.contractId + '::' + this.loopRun.assetName
-      url += 'asset_identifier=' + assetIdentifier
-      url += '&value=' + utils.serializeToHex(this.nftIndex)
-      // url += '&value=' + '0x' + (this.nftIndex.toString(16).padStart(2, '0'))
-      const txOptions = {
-        path: url,
-        httpMethod: 'GET',
-        postData: {
-          arguments: [],
-          sender: null // this.profile.stxAddress
-        }
-      }
-      this.$store.dispatch('rpayStacksStore/callApi', txOptions).then((result) => {
-        if (result.total > 0) {
-          this.events = result.results
-        }
-        this.loaded = true
-      })
-    },
     getAnimation: function (data) {
       return 'none'
     },

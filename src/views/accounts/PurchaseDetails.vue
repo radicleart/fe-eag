@@ -130,6 +130,8 @@ export default {
     txType (payment) {
       if (payment.transactionData.type === 'mint-nft' || payment.transactionData.type === 'admin-mint-nft') {
         return 'mint'
+      } else if (payment.transactionData.type === 'mint-sft' || payment.transactionData.type === 'admin-mint-sft') {
+        return 'mint'
       }
       return 'transfer'
     }

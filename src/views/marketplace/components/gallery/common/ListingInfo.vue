@@ -46,17 +46,28 @@
       <b-col cols="12" class="py-2 text-lower" v-if="asset.contractAsset.owner">
         <OwnerInfo :owner="asset.contractAsset.owner" />
       </b-col>
-      <b-col cols="12" class="py-2 text-lower" v-else>
-        add to basket
+      <b-col cols="12" class="py-2 text-lower" v-if="$route.name === 'collection'">
+        {{getMintPriceFormatted()}}
       </b-col>
     </b-row>
-    <b-row class="border-bottom" v-if="isListed() && $route.name !== 'my-nfts'">
+    <b-row class="border-bottom" v-if="$route.name === 'collection'">
+      <b-col cols="6" class="py-2 text-lower"></b-col>
+      <b-col cols="6" class="py-2 bg-dark text-white text-center">
+        <b-link :to="'/artwork/' + loopRun.contractId + '/' + asset.contractAsset.nftIndex">BUY NOW</b-link>
+      </b-col>
+    </b-row>
+    <b-row class="border-bottom" v-if="$route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
+      <b-col cols="12" class="py-2 bg-dark text-white text-center">
+        {{getMintPriceFormatted()}}
+      </b-col>
+    </b-row>
+    <b-row class="border-bottom" v-if="isListedOrUnMinted() && $route.name !== 'my-nfts'">
       <b-col cols="6" class="py-2 text-lower">{{getPriceFormatted()}}</b-col>
       <b-col cols="6" class="py-2 bg-dark text-white text-center">
         <span class="pt-3 pointer" :title="ttBiddingHelp" @click="openPurchaceDialog()">BUY NOW</span>
       </b-col>
     </b-row>
-    <b-row class="border-bottom" v-if="isListed() && $route.name === 'my-nfts'">
+    <b-row class="border-bottom" v-if="isListedOrUnMinted() && $route.name === 'my-nfts'">
       <b-col cols="12" class="py-2">Listed for: {{getPriceFormatted()}}</b-col>
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'my-nfts' && $route.name !== 'asset-by-index'">
@@ -121,12 +132,17 @@ export default {
     getPriceFormatted () {
       return formatUtils.fmtAmount(this.asset.contractAsset.listingInUstx.price, 'stx') + ' ' + this.asset.contractAsset.listingInUstx.symbol
     },
+    getMintPriceFormatted () {
+      return formatUtils.fmtAmount(this.loopRun.mintPrice * 100, 'stx') + ' STX - fractions available'
+    },
     formatNumber: function (number) {
       return utils.formatNumber(number)
     },
-    isListed: function () {
+    isListedOrUnMinted: function () {
       if (this.asset.contractAsset.listingInUstx && this.asset.contractAsset.listingInUstx.price) {
         return this.asset.contractAsset.listingInUstx.price > 0
+      } else if (!this.asset.contractAsset.nftIndex) {
+        return true
       }
       return false
     },

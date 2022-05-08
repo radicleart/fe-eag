@@ -1,11 +1,8 @@
 <template>
 <div>
-  <div class="d-flex mt-4" v-if="!inFlightPayments || inFlightPayments.length < loopRun.spinsPerDay">
-    <div class="w-50 mr-1 pt-2 text-right text-upper">
-      <span>Purchase options</span>
-    </div>
-    <div class="w-50 ml-1">
-      <b-button class="w-100" variant="outline-dark" @click="showAddress">SHOW</b-button>
+  <div class="mt-0" v-if="!inFlightPayments || inFlightPayments.length < loopRun.spinsPerDay">
+    <div class="w-100 ml-1">
+      <b-button class="w-50" variant="outline-dark" @click="showAddress">BUY NOW</b-button>
     </div>
   </div>
   <div class="d-flex mt-4" v-if="inFlightPayments && inFlightPayments.length > 0">
@@ -14,16 +11,20 @@
     </div>
   </div>
 
+  <b-modal size="lg" id="payment-begun-modal" centered>
+    <p>Payment begun</p>
+    <template #modal-footer class="text-center"><div class="w-100"></div></template>
+  </b-modal>
   <b-modal size="lg" id="in-flight-modal" centered>
     <StatementCard :payments="inFlightPayments"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
   <b-modal size="lg" id="stacks-address-modal" centered>
-    <StacksAddressModal @showPayment="showPayment"/>
+    <StacksAddressModal @showPayment="showPayment" v-on="$listeners" :transactionData="transactionData"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
   <b-modal size="lg" id="payment-modal" centered>
-    <PaymentFlow :transactionData="transactionData" :configuration="configuration" @stacksMateEvent="stacksMateEvent"/>
+    <PaymentFlow :transactionData="transactionData" @stacksMateEvent="stacksMateEvent"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
 </div>
@@ -69,18 +70,25 @@ export default {
   methods: {
     stacksMateEvent (data) {
       if (data.opcode === 'change-payment-method') return
-      this.$bvModal.hide('payment-modal')
       this.$bvModal.hide('stacks-address-modal')
-      this.$bvModal.show('in-flight-modal')
+      this.$bvModal.hide('payment-begun-modal')
       if (data.opcode === 'crypto-payment-expired' || data.opcode === 'payment-restart') {
         this.$notify({ type: 'warning', title: 'Payments', text: 'Payment expired.' })
+      } else if (data.opcode.indexOf('-payment-begun') > -1) {
+        this.$bvModal.show('payment-begun-modal')
       } else if (data.opcode.indexOf('-payment-error') > -1) {
         this.$notify({ type: 'danger', title: 'Payments', text: 'Payment was not recieved due to an unexpected error.' })
+        this.$bvModal.show('in-flight-modal')
       } else if (data.opcode.indexOf('-payment-cancelled') > -1) {
         this.$notify({ type: 'warning', title: 'Payments', text: 'Payment cancelled.' })
       } else if (data.opcode.indexOf('-payment-success') > -1) {
         this.$notify({ type: 'warning', title: 'Pending', text: 'Event data: ' + data })
+        this.$bvModal.hide('payment-modal')
+        this.$bvModal.show('in-flight-modal')
       }
+    },
+    update (data) {
+      this.$emit('update', data)
     },
     showInflightPayments () {
       if (this.inFlightPayments.length > 0) {
@@ -91,6 +99,10 @@ export default {
       this.$bvModal.show('stacks-address-modal')
     },
     showPayment (data) {
+      if (data.opcode && data.opcode === 'amount-change') {
+        this.$emit('update', data)
+        return
+      }
       this.recipient = data.recipient
       if (!this.recipient) {
         this.$notify({ type: 'error', title: 'Purchase Error', text: 'An address is needed as this is where we send the artwork!' })
