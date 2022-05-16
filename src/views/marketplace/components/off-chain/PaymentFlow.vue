@@ -159,7 +159,7 @@ export default {
     },
     paymentMessage () {
       if (this.transactionData.type === 'admin-mint-sft') {
-        return 'Mint ' + this.transactionData.commission.amount + '% of <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
+        return 'Mint ' + this.transactionData.amount + '% of <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'
       }
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') {
         return 'Purchasing <span class="text-danger">' + this.configuration.loopRun.currentRun + ' #' + this.configuration.asset.contractAsset.nftIndex + '</span><br/>For ' + this.configuration.payment.amountBtc + ' btc / ' + this.configuration.payment.amountStx + ' stx' + '<br/><span>To:</span> <span class="text-danger">' + this.configuration.transactionData.recipient + '</span>'

@@ -1,5 +1,5 @@
 <template>
-<div>
+<div v-if="loadedInFlights">
   <div class="mt-0" v-if="!inFlightPayments || inFlightPayments.length < loopRun.spinsPerDay">
     <div class="w-100 ml-1">
       <b-button class="w-50" variant="outline-dark" @click="showAddress">BUY NOW</b-button>
@@ -20,7 +20,7 @@
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
   <b-modal size="lg" id="stacks-address-modal" centered>
-    <StacksAddressModal @showPayment="showPayment" v-on="$listeners" :transactionData="transactionData"/>
+    <StacksAddressModal @showPayment="showPayment" v-on="$listeners" :gaiaAsset="gaiaAsset" :transactionData="transactionData" :loopRun="loopRun"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
   <b-modal size="lg" id="payment-modal" centered>
@@ -44,16 +44,20 @@ export default {
     StacksAddressModal,
     StatementCard
   },
-  props: ['loopRun', 'configuration', 'transactionData', 'inFlightPayments'],
+  props: ['gaiaAsset', 'loopRun', 'configuration', 'transactionData'],
   data () {
     return {
-      recipient: null
+      loadedInFlights: false,
+      inFlightPayments: [],
+      recipient: null,
+      payment: null
     }
   },
   mounted () {
     const data = {
       stxAddress: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
     }
+    this.fetchInFlightTransactions()
     this.recipient = this.profile.stxAddress
     this.$store.dispatch('rpayAuthStore/fetchAccountInfo', data)
     data.stxAddress = this.profile.stxAddress
@@ -82,10 +86,36 @@ export default {
       } else if (data.opcode.indexOf('-payment-cancelled') > -1) {
         this.$notify({ type: 'warning', title: 'Payments', text: 'Payment cancelled.' })
       } else if (data.opcode.indexOf('-payment-success') > -1) {
-        this.$notify({ type: 'warning', title: 'Pending', text: 'Event data: ' + data })
+        this.payment = data
+        this.fetchInFlightTransactions()
+        this.$notify({ type: 'warning', title: 'NFT Transfer', text: 'Thank you - your NFT will be delivered to your wallet soon.' })
         this.$bvModal.hide('payment-modal')
         this.$bvModal.show('in-flight-modal')
       }
+    },
+    fetchInFlightTransactions () {
+      const data = {
+        contractId: this.loopRun.contractId,
+        stxAddress: this.profile.stxAddress
+      }
+      this.$store.dispatch('merchantStore/fetchPurchases', data).then((payments) => {
+        this.inFlightPayments = payments.reverse()
+        this.checkInFlightTransactions(payments)
+        this.$store.commit(APP_CONSTANTS.SET_PURCHASE_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, commission: this.transactionData })
+        this.loadedInFlights = true
+      })
+    },
+    checkInFlightTransactions (payments) {
+      payments.forEach((payment) => {
+        if (payment.transactionData.txStatus === 'processing') {
+          const txId = JSON.parse(payment.transactionData.stacksmateResponse).txid
+          this.$store.dispatch('stacksApiStore/fetchTransaction', { txId: txId }).then((res) => {
+            if (res) {
+              payment.transactionData.txStatus = res.tx_status
+            }
+          })
+        }
+      })
     },
     update (data) {
       this.$emit('update', data)

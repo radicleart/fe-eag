@@ -5,7 +5,7 @@
     <b-row>
       <b-col cols="12" style="min-height: 50vh">
         <div class="mb-4">
-          <PageableItems v-on="$listeners" :resultSet="resultSet" :loopRun="loopRun"/>
+          <PageableItems v-on="$listeners" :resultSet="resultSet" :loopRun="loopRun" :mintEvents="mintEvents"/>
         </div>
       </b-col>
     </b-row>
@@ -43,6 +43,7 @@ export default {
         offset: 1,
         numberOfItems: 0
       },
+      mintEvents: null,
       resultSet: null,
       componentKey: 0,
       loaded: false,
@@ -71,7 +72,7 @@ export default {
     const $self = this
     let resizeTimer
     if (this.loopRun) this.pagingData.numberOfItems = this.loopRun.tokenCount
-    this.reload()
+    this.loadNFTMints()
 
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer)
@@ -86,6 +87,22 @@ export default {
     }
   },
   methods: {
+    loadNFTMints: function (loopRun) {
+      this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.$route.params.collectionId).then((loopRun) => {
+        if (!loopRun) {
+          this.$router.push('/')
+        }
+        this.loopRun = loopRun
+        const data = {
+          contractId: this.loopRun.contractId,
+          asset_identifier: loopRun.contractId + '::' + loopRun.assetName
+        }
+        this.$store.dispatch('stacksApiStore/fetchMintEvents', data).then((mintEvents) => {
+          this.mintEvents = mintEvents
+          this.reload(loopRun)
+        })
+      })
+    },
     updateResults (data) {
       this.defQuery = data.query
       this.$router.push('/nft-collection/' + this.loopRun.currentRunKey + '?' + this.getQueryString(this.defQuery))
@@ -108,6 +125,9 @@ export default {
         data.contractId = (this.loopRun) ? this.loopRun.contractId : STX_CONTRACT_ADDRESS + '.' + STX_CONTRACT_NAME
         this.$store.dispatch('rpayStacksContractStore/fetchTokensByContractId', data).then((result) => {
           this.resultSet = result.gaiaAssets
+          this.resultSet.forEach((asset) => {
+            asset.mintEvents = this.filterMints(asset.contractAsset.nftIndex)
+          })
           this.tokenCount = result.tokenCount
           this.pagingData.numberOfItems = result.tokenCount
           this.$emit('tokenCount', { numbTokens: result.tokenCount })
@@ -125,32 +145,30 @@ export default {
         })
       }
     },
-    reload () {
-      this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.$route.params.collectionId).then((loopRun) => {
-        if (!loopRun) {
-          this.$router.push('/')
+    filterMints (mintEvents, nftIndex) {
+      if (!mintEvents) return
+      return mintEvents.filter((o) => o.nftIndex === nftIndex)
+    },
+    reload (loopRun) {
+      if (loopRun.status === 'unrevealed') {
+        this.resultSet = []
+        const ipfsUrl = loopRun.punkImageIPFSUrl
+        for (let i = 1; i <= loopRun.versionLimit; i++) {
+          this.resultSet.push({
+            contractAsset: {
+              contractId: loopRun.contractId,
+              nftIndex: i,
+              tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, i) }
+            }
+          })
         }
-        this.loopRun = loopRun
-        if (loopRun.status === 'unrevealed') {
-          this.resultSet = []
-          const ipfsUrl = this.loopRun.punkImageIPFSUrl
-          for (let i = 1; i <= loopRun.versionLimit; i++) {
-            this.resultSet.push({
-              contractAsset: {
-                contractId: loopRun.contractId,
-                nftIndex: i,
-                tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, i) }
-              }
-            })
-          }
-          this.tokenCount = loopRun.versionLimit
-          this.pagingData.numberOfItems = loopRun.versionLimit
-          this.$emit('tokenCount', { numbTokens: loopRun.versionLimit })
-          this.loaded = true
-        } else {
-          this.fetchPage(this.pagingData.offset - 1, false, this.defQuery)
-        }
-      })
+        this.tokenCount = loopRun.versionLimit
+        this.pagingData.numberOfItems = loopRun.versionLimit
+        this.$emit('tokenCount', { numbTokens: loopRun.versionLimit })
+        this.loaded = true
+      } else {
+        this.fetchPage(this.pagingData.offset - 1, false, this.defQuery)
+      }
     },
     getQueryString (query) {
       let queryStr = '?'

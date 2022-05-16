@@ -4,6 +4,10 @@
     <b-row align-h="center" :style="'min-height: ' + videoHeight + 'px'">
       <b-col lg="7" sm="12" class="mb-5">
         <MediaItemGeneral :classes="'hash1-image'" v-on="$listeners" :options="videoOptions" :asset="gaiaAsset"/>
+        <div class="d-flex justify-content-between" v-if="nftIndex > 0">
+          <div><b-link :to="prevNft()">&lt;&lt;</b-link></div>
+          <div><b-link :to="nextNft()">&gt;&gt;</b-link></div>
+        </div>
       </b-col>
       <b-col lg="5" sm="12" class="my-5">
         <ListingInfo class="my-5" :classes="'bg-white text-primary mr-5 text-small'" v-on="$listeners" :asset="gaiaAsset" :loopRun="loopRun" :context="'collection'"/>
@@ -19,9 +23,12 @@
             </div>
           </b-col>
         </b-row>
-        <b-row v-if="loadedInFlights">
-          <b-col md="12" align-self="end" :key="componentKey">
-            <PaymentTrigger class="w-100" @update="update" :loopRun="loopRun" :transactionData="transactionDataSft()" :inFlightPayments="inFlightPayments"/>
+        <b-row v-if="loaded">
+          <b-col md="12" align-self="end" :key="componentKey" v-if="gaiaAsset.totalSupply < 100">
+            <PaymentTrigger class="w-100" @update="update" :gaiaAsset="gaiaAsset" :loopRun="loopRun" :transactionData="transactionDataSft()"/>
+          </b-col>
+          <b-col md="12" align-self="end" :key="componentKey" v-else>
+            <b-button :disabled="true" variant="outline-dark">SOLD</b-button>
           </b-col>
         </b-row>
         <b-row v-if="events">
@@ -46,7 +53,7 @@ import PendingTransactionInfo from '@/views/marketplace/components/toolkit/nft-h
 import PaymentTrigger from '@/views/marketplace/components/off-chain/PaymentTrigger'
 
 export default {
-  name: 'NftDisplay',
+  name: 'SftDisplay',
   components: {
     PaymentTrigger,
     ListingInfo,
@@ -58,32 +65,25 @@ export default {
   data () {
     return {
       nftIndex: -1,
-      amount: 100,
+      loaded: false,
       pending: null,
+      amount: 0,
       videoHeight: 0,
       componentKey: 0,
-      loadedInFlights: false,
-      inFlightPayments: [],
       txData: null
     }
   },
   mounted () {
     this.nftIndex = Number(this.$route.params.nftIndex)
     const $self = this
-    const data = {
-      contractId: this.loopRun.contractId,
-      stxAddress: this.profile.stxAddress
-    }
+    this.loadMempoolTransactions()
     this.$store.dispatch('merchantStore/initialiseRates').then((res) => {
-      this.$store.dispatch('merchantStore/fetchPurchases', data).then((payments) => {
-        this.inFlightPayments = payments
-        this.$store.commit(APP_CONSTANTS.SET_PURCHASE_FLOW, { flow: 'nft-mint-flow', loopRun: this.loopRun, commission: { price: this.loopRun.mintPrice, amount: 100 } })
-        this.loadedInFlights = true
-      })
+      this.loaded = true
     })
     this.resizeContainers()
     if (window.eventBus && window.eventBus.$on) {
       window.eventBus.$on('rpayEvent', function (data) {
+        this.loadMempoolTransactions()
         if ($self.$route.name.indexOf('asset-by-') === -1) return
         $self.componentKey++
         $self.$bvModal.hide('result-modal')
@@ -102,14 +102,24 @@ export default {
     }, this)
   },
   methods: {
+    nextNft () {
+      const parts = this.$route.fullPath.split('/')
+      const nftIndex = (this.nftIndex === this.loopRun.versionLimit) ? 1 : (this.nftIndex + 1)
+      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
+    },
+    prevNft () {
+      const parts = this.$route.fullPath.split('/')
+      const nftIndex = (this.nftIndex === 1) ? this.loopRun.versionLimit : (this.nftIndex - 1)
+      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
+    },
     transactionDataSft () {
       return {
-        commission: { price: this.loopRun.mintPrice, amount: this.amount },
         type: 'admin-mint-sft',
         batchOption: 1,
+        price: this.loopRun.mintPrice,
+        amount: (100 - this.gaiaAsset.totalSupply - this.amount),
         contractId: this.loopRun.contractId,
         nftIndex: this.nftIndex,
-        amount: this.amount,
         recipient: null,
         sender: this.profile.stxAddress,
         assetName: this.loopRun.assetName
@@ -131,6 +141,18 @@ export default {
       }
       this.pending = result
     },
+    loadMempoolTransactions: function () {
+      const data = {
+        contractId: this.loopRun.contractId,
+        offset: 0,
+        limit: 96,
+        sender_address: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS, // this.profile.stxAddress,
+        unanchored: true
+      }
+      this.$store.dispatch('stacksApiStore/fetchMempoolTransactions', data).then((mintEvents) => {
+        if (mintEvents) this.pending = mintEvents.filter((o) => o.value.indexOf('u' + this.nftIndex + ')') > -1)
+      })
+    },
     updateCacheByNftIndex (data) {
       this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', data).then(() => {
         this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', data)
@@ -139,6 +161,7 @@ export default {
     update (data) {
       if (data.opcode === 'amount-change') {
         this.amount = data.amount
+        // this closes the modal.. this.componentKey++
       }
     },
     resizeContainers () {

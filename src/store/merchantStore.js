@@ -113,15 +113,15 @@ const payment = {
   stxPaymentAddress: process.env.VUE_APP_STACKS_PAYMENT_ADDRESS,
   ethPaymentAddress: process.env.VUE_APP_ETH_PAYMENT_ADDRESS,
   ethNetworkId: Number(process.env.VUE_APP_ETH_NETWORK_ID),
-  paymentOption: 'bitcoin',
+  paymentOption: 'fiat',
   paymentOptions: [
     { allowFiat: true, disabled: false },
-    { allowPaypal: true, disabled: true },
+    { allowPaypal: false, disabled: true },
     { allowBitcoin: true, disabled: false },
     { allowLightning: true, disabled: false },
     { allowStacks: false, disabled: true },
     { allowLSAT: false, disabled: true },
-    { allowEthereum: true, disabled: true }
+    { allowEthereum: false, disabled: true }
   ],
   creditAttributes: {
     start: 2,

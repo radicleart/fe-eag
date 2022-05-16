@@ -128,10 +128,11 @@ export default {
         }).then((paymentResponse) => {
           if (paymentResponse.ok) {
             resolve(paymentResponse.json())
+          } else {
+            paymentResponse.text().then((errorBody) => {
+              reject(new Error(errorBody))
+            })
           }
-          paymentResponse.text().then((errorBody) => {
-            reject(new Error(errorBody))
-          })
         })
       })
     },

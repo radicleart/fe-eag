@@ -94,7 +94,11 @@ export default {
       if (process.env.VUE_APP_NETWORK === 'local') {
         data.stxAddress = 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG'
       }
-      this.$store.dispatch('rpayStacksContractStore/fetchMyTokensCPSV2', data).then((result) => {
+      let method = 'rpayStacksContractStore/fetchMyTokensCPSV2'
+      if (this.loopRun.type === 'SIP-013') {
+        method = 'rpayStacksContractStore/fetchMyTokensSip013'
+      }
+      this.$store.dispatch(method, data).then((result) => {
         this.resultSet = result.gaiaAssets // this.resultSet.concat(results)
         this.tokenCount = result.tokenCount
         this.pagingData.numberOfItems = result.gaiaAssets.length

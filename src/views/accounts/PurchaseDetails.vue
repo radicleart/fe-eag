@@ -11,7 +11,12 @@
     <b-col cols="4">Amount:</b-col><b-col cols="8">{{getAmount(payment)}}</b-col>
     <b-col cols="4">Status:</b-col><b-col cols="8">{{getStatus(payment)}}</b-col>
   </b-row>
-  <b-row v-if="!transaction || transaction.tx_status === 'pending'">
+  <b-row v-if="payment.transactionData.txStatus === 'errored'">
+    <b-col cols="12" class="pt-2 mb-2">
+      Something went wrong with the NFT transfer. We will transfer this NFT to {{payment.transactionData.recipient}} in an offline process.
+    </b-col>
+  </b-row>
+  <b-row v-else-if="!transaction || transaction.tx_status === 'pending'">
     <b-col cols="12" class="pt-2 mb-2 text-right">
       Processing - results here when confirmations available
       <a v-if="getTransactionId()" :href="transactionUrl()" target="_blank">view on explorer <b-icon class="text-payments" font-scale="1.2" icon="arrow-up-right-circle"/></a>
@@ -38,7 +43,6 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import utils from '@/services/utils'
 import { DateTime } from 'luxon'
 
 export default {
@@ -97,6 +101,7 @@ export default {
     },
     getTransactionId: function () {
       if (this.transaction) return this.transaction.tx_id
+      if (!this.payment.transactionData.stacksmateResponse || this.payment.transactionData.txStatus === 'errored') return null
       try {
         const resp = JSON.parse(this.payment.transactionData.stacksmateResponse)
         // if (typeof resp === 'object') resp = resp.txid
@@ -107,7 +112,10 @@ export default {
       }
     },
     checkPayment () {
-      if (!this.getTransactionId()) return
+      if (!this.getTransactionId()) {
+        this.loaded = true
+        return
+      }
       const path = '/extended/v1/tx/' + this.getTransactionId()
       const txOptions = {
         path: path,
@@ -124,8 +132,11 @@ export default {
       })
     },
     getTokenId () {
-      const result = utils.jsonFromTxResult(this.transaction.events[0].asset.value.hex)
-      return this.transaction.events[0].asset.asset_id.split('::')[1] + ' #' + result.value
+      const event = this.transaction.events.find((o) => o.event_type === 'non_fungible_token_asset')
+      if (!event) return
+      let part1 = event.asset.value.repr.split('token-id u')[1]
+      part1 = part1.split(')')[0]
+      return event.asset.asset_id.split('::')[1] + ' #' + part1
     },
     txType (payment) {
       if (payment.transactionData.type === 'mint-nft' || payment.transactionData.type === 'admin-mint-nft') {

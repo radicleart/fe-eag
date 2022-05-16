@@ -28,7 +28,7 @@
           <MintingTools v-if="loopRun.currentRunKey" class="w-100" :items="[item]" :loopRun="loopRun" @update="update"/>
         </div>
         <div>
-          <NftHistory v-if="loopRun.currentRunKey" class="mt-5" @update="update" @setPending="setPending" :loopRun="loopRun" :nftIndex="(item.contractAsset) ? item.contractAsset.nftIndex : -1" :assetHash="item.assetHash"/>
+          <NftHistory v-if="loopRun.currentRunKey" class="mt-5" @update="update" @setPending="setPending" :loopRun="loopRun"  :gaiaAsset="item"/>
         </div>
       </b-col>
     </b-row>
@@ -111,47 +111,24 @@ export default {
       this.$store.dispatch('rpayMyItemStore/quickSaveItem', item)
     },
     fetchItem () {
-      if (this.$route.name === 'nft-preview') {
-        this.nftIndex = Number(this.$route.params.nftIndex)
-        const data = { contractId: this.contractId, nftIndex: this.nftIndex }
-        this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', data).then((item) => {
-          this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.contractId).then((loopRun) => {
-            this.item = item
-            if (!loopRun) {
-              this.loopRun = {
-                contractId: this.contractId,
-                currentRun: 'Unsupported Collection',
-                type: 'unkown'
-              }
-            } else {
-              this.loopRun = loopRun
-            }
-            this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex })
-            this.loading = false
-          })
-        })
-      } else {
-        this.assetHash = this.$route.params.assetHash
-        this.edition = Number(this.$route.params.edition)
-        this.$store.dispatch('rpayMyItemStore/findItemByAssetHash', this.assetHash).then((item) => {
-          this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.parseRunKey(item)).then((loopRun) => {
-            this.item = item
-            this.loopRun = loopRun
-            const data = {
-              asc: true,
-              page: 0,
-              pageSize: 100,
-              stxAddress: (process.env.VUE_APP_NETWORK !== 'local') ? this.profile.stxAddress : 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG'
-            }
-            this.$store.dispatch('rpayStacksContractStore/fetchMyTokensCPSV2', data).then((results) => {
-              if (results && results.tokenCount > 0) {
-                const item = results.gaiaAssets.find((o) => o.assetHash === this.assetHash)
-                if (item) this.item = item
-              }
+      this.nftIndex = Number(this.$route.params.nftIndex)
+      const data = { contractId: this.contractId, nftIndex: this.nftIndex }
+      this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', data).then((item) => {
+        this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.contractId).then((loopRun) => {
+          this.loopRun = loopRun
+          data.stxAddress = this.profile.stxAddress
+          data.asset_identifier = this.loopRun.contractId + '::' + this.loopRun.assetName
+          data.unanchored = true
+          this.$store.dispatch('stacksApiStore/fetchMintEvents', data).then((result) => {
+            this.$store.dispatch('stacksApiStore/fetchBalance', data).then((result) => {
+              this.item = item
+              this.item.contractAsset.balance = result
+              this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex })
+              this.loading = false
             })
           })
         })
-      }
+      })
     },
     setPending (result) {
       if (this.pending) {
@@ -184,8 +161,7 @@ export default {
           this.nftIndex = result.nftIndex
           data.nftIndex = result.nftIndex
           this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', data).then(() => {
-            if (this.nftIndex && this.$route.name !== 'nft-preview') this.$router.push('/nft-preview/' + this.loopRun.contractId + '/' + result.nftIndex)
-            else this.fetchItem()
+            this.fetchItem()
           })
         } else {
           this.fetchItem()

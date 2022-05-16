@@ -1,19 +1,47 @@
 
 import axios from 'axios'
 import { APP_CONSTANTS } from '@/app-constants'
+import utils from '@/services/utils'
+import {
+  uintCV,
+  serializeCV,
+  standardPrincipalCV
+} from '@stacks/transactions'
+
+const setNftTupleKeys = function (events) {
+  let mapped = []
+  mapped = events.map(function (event) {
+    const ep = utils.tokenIdOwnerFromRpr(event.value)
+    return {
+      recipient: event.recipient,
+      event_index: event.event_index,
+      tx_id: event.tx_id,
+      nftIndex: ep.nftIndex,
+      owner: ep.owner,
+      sender: 'eag',
+      asset_event_type: 'mint'
+    }
+  })
+  return mapped
+}
 
 const stacksApiStore = {
   namespaced: true,
   state: {
+    mintEvents: null
   },
   getters: {
-    getDisplayCard: (state) => {
-      return state.displayCard
+    getMintEvents: (state) => {
+      return state.mintEvents
+    },
+    getMintEventsForToken: (state) => nftIndex => {
+      if (!state.mintEvents) return
+      return state.mintEvents.filter((o) => o.nftIndex === nftIndex)
     }
   },
   mutations: {
-    setConfiguration (state, data) {
-      state.configuration = data
+    saveMintEvents (state, data) {
+      state.mintEvents = data
     }
   },
   actions: {
@@ -33,7 +61,7 @@ const stacksApiStore = {
         })
       })
     },
-    fetchMintEvents ({ dispatch }, data) {
+    fetchMintEvents ({ commit, dispatch }, data) {
       return new Promise((resolve) => {
         let path = '/extended/v1/tokens/nft/mints?asset_identifier=' + data.asset_identifier
         if (data.limit) path += '&limit=' + data.limit
@@ -49,7 +77,98 @@ const stacksApiStore = {
           }
         }
         dispatch('rpayStacksStore/callApi', txOptions, { root: true }).then((result) => {
+          if (result.results && result.results.length > 0) {
+            const mintEvents = setNftTupleKeys(result.results)
+            // commit('saveMintEvents', mintEvents)
+            const events = []
+            resolve(mintEvents)
+            mintEvents.forEach((event) => {
+              data.stxAddress = event.owner
+              data.nftIndex = event.nftIndex
+              dispatch('fetchBalance', data).then((result) => {
+                event.balance = result
+                events.push(event)
+                commit('saveMintEvents', events)
+              })
+            })
+          } else {
+            resolve([])
+          }
+        })
+      })
+    },
+    fetchMempoolTransactions ({ dispatch }, data) {
+      return new Promise((resolve) => {
+        const path = '/extended/v1/tx/mempool?sender_address=' + data.sender_address
+        // if (data.unanchored) path += '&unanchored=' + data.unanchored
+        const txOptions = {
+          path: path,
+          httpMethod: 'GET',
+          postData: {
+            arguments: [],
+            sender: null // this.profile.stxAddress
+          }
+        }
+        dispatch('rpayStacksStore/callApi', txOptions, { root: true }).then((result) => {
+          resolve(result.results)
+        }).catch(() => {
+          resolve()
+        })
+      })
+    },
+    fetchBalance ({ dispatch }, data) {
+      return new Promise((resolve) => {
+        if (!data.nftIndex || !data.stxAddress) return
+        const functionArgs = [`0x${serializeCV(uintCV(data.nftIndex)).toString('hex')}`, `0x${serializeCV(standardPrincipalCV(data.stxAddress)).toString('hex')}`]
+        const txOptions = {
+          contractAddress: data.contractId.split('.')[0],
+          contractName: data.contractId.split('.')[1],
+          functionName: 'get-balance',
+          functionArgs: functionArgs
+        }
+        dispatch('rpayStacksStore/callContractReadOnly', txOptions, { root: true }).then((result) => {
+          try {
+            resolve(Number(result.result.value.value))
+          } catch (e) {
+            resolve(0)
+          }
+        })
+      })
+    },
+    fetchTransaction ({ dispatch }, data) {
+      return new Promise((resolve) => {
+        const path = '/extended/v1/tx/' + data.txId
+        // if (data.unanchored) path += '&unanchored=' + data.unanchored
+        const txOptions = {
+          path: path,
+          httpMethod: 'GET',
+          postData: {
+            arguments: [],
+            sender: null // this.profile.stxAddress
+          }
+        }
+        dispatch('rpayStacksStore/callApi', txOptions, { root: true }).then((result) => {
           resolve(result)
+        }).catch(() => {
+          resolve()
+        })
+      })
+    },
+    fetchTotalSupply ({ dispatch }, data) {
+      return new Promise((resolve) => {
+        const functionArgs = [`0x${serializeCV(uintCV(data.nftIndex)).toString('hex')}`]
+        const txOptions = {
+          contractAddress: data.contractId.split('.')[0],
+          contractName: data.contractId.split('.')[1],
+          functionName: 'get-total-supply',
+          functionArgs: functionArgs
+        }
+        dispatch('rpayStacksStore/callContractReadOnly', txOptions, { root: true }).then((result) => {
+          try {
+            resolve(Number(result.result.value.value))
+          } catch (e) {
+            resolve(0)
+          }
         })
       })
     },

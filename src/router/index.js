@@ -97,7 +97,8 @@ const routes = [
   {
     path: '/my-nfts',
     name: 'my-nfts',
-    components: { default: MyNftLibrary, header: MainNavbar, footer: MainFooter },
+    redirect: '/my-nfts/voyager',
+    // components: { default: MyNftLibrary, header: MainNavbar, footer: MainFooter },
     meta: {
       requiresAuth: true,
       requiresAdmin: false

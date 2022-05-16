@@ -2,7 +2,7 @@
 <div v-if="loaded" class="ml-5 bg-light">
   <CollectionNavigation :loopRun="loopRun" :asset="gaiaAsset" :filter="'asset'"/>
   <b-container style="height: auto;" fluid class="px-5 mt-5">
-    <div v-if="gaiaAsset && loopRun">
+    <div v-if="gaiaAsset && loopRun" :key="componentKey">
       <SftDisplay v-if="loopRun.type === 'SIP-013'" v-on="$listeners" :gaiaAsset="gaiaAsset" :events="events" :loopRun="loopRun"/>
       <NftDisplay v-else v-on="$listeners" :gaiaAsset="gaiaAsset" :events="events" :loopRun="loopRun"/>
     </div>
@@ -15,7 +15,6 @@ import SftDisplay from '@/views/marketplace/components/gallery/SftDisplay'
 import NftDisplay from '@/views/marketplace/components/gallery/NftDisplay'
 import { APP_CONSTANTS } from '@/app-constants'
 import CollectionNavigation from '@/views/marketplace/components/gallery/CollectionNavigation'
-import utils from '@/services/utils'
 
 export default {
   name: 'AssetDetails',
@@ -27,46 +26,36 @@ export default {
   data: function () {
     return {
       nftIndex: null,
-      events: null,
       commissions: null,
       assetHash: null,
       loaded: false,
       gaiaAsset: null,
       loopRun: null,
-      contractId: null
+      contractId: null,
+      componentKey: 0
     }
   },
   watch: {
     '$route' () {
-      this.loadPage()
+      this.loadPage(true)
     }
   },
   mounted () {
     this.loadPage()
   },
   methods: {
-    loadPage () {
+    loadPage (components) {
       this.contractId = this.$route.params.contractId
       this.nftIndex = Number(this.$route.params.nftIndex)
       this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.contractId).then((loopRun) => {
         this.loopRun = loopRun
-        if (loopRun.type !== 'SIP-01333333') {
-          this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex }).then((gaiaAsset) => {
-            this.gaiaAsset = gaiaAsset
-            if (!gaiaAsset.contractAsset) this.gaiaAsset.contractAsset = this.getToken(loopRun)
-            this.$store.dispatch('rpayManageCacheStore/cacheUpdate', { contractId: this.contractId, nftIndex: this.nftIndex })
-            this.loadNFTMints()
-          })
-        } else {
-          this.gaiaAsset = { contractAsset: this.getToken(loopRun) }
-          this.$store.dispatch('stacksApiStore/fetchMetaData', this.gaiaAsset).then((metaData) => {
-            this.gaiaAsset.image = metaData.image
-            if (metaData.properties && metaData.properties.full_size_image) {
-              this.gaiaAsset.image = metaData.properties.full_size_image
-            }
-            this.loadNFTMints()
-          })
-        }
+        this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex }).then((gaiaAsset) => {
+          this.gaiaAsset = gaiaAsset
+          if (!gaiaAsset.contractAsset) this.gaiaAsset.contractAsset = this.getToken(loopRun)
+          this.$store.dispatch('rpayManageCacheStore/cacheUpdate', { contractId: this.contractId, nftIndex: this.nftIndex })
+          this.loadNFTMints(loopRun, this.nftIndex)
+          if (components) this.componentKey++
+        })
       })
     },
     getToken (loopRun) {
@@ -87,47 +76,25 @@ export default {
       }
       this.$store.dispatch('rpayMarketGenFungStore/getCommissionTokensByContract', data).then((commissions) => {
         this.commissions = commissions
-        this.loadNFTMints()
+        this.loadNFTMints(this.loopRun, this.nftIndex)
       })
     },
-    loadNFTMints: function () {
-      let url = '/extended/v1/tokens/nft/history?'
-      // let url = '/extended/v1/tokens/nft/mints?'
-      const assetIdentifier = this.loopRun.contractId + '::' + this.loopRun.assetName
-      url += 'asset_identifier=' + assetIdentifier
-      url += '&value=' + utils.serializeToHex(this.gaiaAsset.contractAsset.nftIndex)
-      // url += '&value=' + '0x' + (this.nftIndex.toString(16).padStart(2, '0'))
-      const txOptions = {
-        path: url,
-        httpMethod: 'GET',
-        postData: {
-          arguments: [],
-          sender: null // this.profile.stxAddress
-        }
+    loadNFTMints: function (loopRun, nftIndex) {
+      const data = {
+        contractId: this.loopRun.contractId,
+        asset_identifier: loopRun.contractId + '::' + loopRun.assetName,
+        nftIndex: nftIndex,
+        unanchored: true
       }
-      this.$store.dispatch('rpayStacksStore/callApi', txOptions).then((result) => {
-        if (result.total > 0) {
-          this.events = this.values(result.results)
-        }
+      this.$store.dispatch('stacksApiStore/fetchMintEvents', data)
+      this.$store.dispatch('stacksApiStore/fetchTotalSupply', data).then((totalSupply) => {
+        this.gaiaAsset.totalSupply = totalSupply
         this.loaded = true
       })
     },
-    values (events) {
-      let mapped = []
-      mapped = events.map(function (event) {
-        const ep = utils.tokenIdOwnerFromRpr(event.value)
-        return {
-          recipient: event.recipient,
-          event_index: event.event_index,
-          tx_id: event.tx_id,
-          nftIndex: ep.nftIndex,
-          owner: ep.owner,
-          sender: 'eag',
-          asset_event_type: 'mint'
-        }
-      })
-      if (mapped && mapped.length > 0) mapped = mapped.filter((o) => o.nftIndex === this.nftIndex)
-      return mapped
+    filterMints (mintEvents, nftIndex) {
+      if (!mintEvents) return
+      return mintEvents.filter((o) => o.nftIndex === nftIndex)
     },
     parseRunKey (gaiaAsset) {
       if (gaiaAsset && gaiaAsset.properties && gaiaAsset.properties.collectionId) {
@@ -149,12 +116,8 @@ export default {
     }
   },
   computed: {
-    gaiaAsset1 () {
-      if (this.nftIndex || this.nftIndex === 0) {
-        return this.$store.getters[APP_CONSTANTS.KEY_ASSET_FROM_NFT_INDEX](this.nftIndex)
-      } else {
-        return this.$store.getters[APP_CONSTANTS.KEY_GAIA_ASSET_BY_HASH](this.assetHash)
-      }
+    events () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS]
     },
     profile () {
       const profile = this.$store.getters['rpayAuthStore/getMyProfile']

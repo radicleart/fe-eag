@@ -18,7 +18,7 @@
       <b-card-text class="" v-if="transactionData && transactionData.type === 'admin-mint-sft'">
         <label for="status-name">Select percent of artwork to buy</label>
         <div class="w-100">
-          <vue-slider @change="changeToken" v-model="amount" :data="percentages()"/>
+          <vue-slider @change="changeToken" v-model="amount" :data="percentages()" :max="transactionData.amount"/>
         </div>
         <div class="w-100 text-xsmall">
           <span v-html="paymentMessage"></span>
@@ -26,7 +26,7 @@
       </b-card-text>
       <b-card-text>
         <div class="p-0 offset-10 col-2 text-right mb-5">
-          <b-button class="w-100" variant="outline-dark" @click="$emit('showPayment', { recipient: nftRecipient, amount: amount })">Next</b-button>
+          <b-button class="w-100" variant="outline-dark" @click="next">Next</b-button>
         </div>
       </b-card-text>
     </b-card>
@@ -43,7 +43,7 @@ export default {
   components: {
     VueSlider
   },
-  props: ['transactionData'],
+  props: ['transactionData', 'loopRun', 'gaiaAsset'],
   data () {
     return {
       amount: 50,
@@ -52,10 +52,17 @@ export default {
     }
   },
   mounted () {
-    this.amount = this.transactionData.commission.amount
+    this.amount = this.transactionData.amount
     this.nftRecipient = this.profile.stxAddress
   },
   methods: {
+    next () {
+      if (this.amount > 0) {
+        this.$emit('showPayment', { recipient: this.nftRecipient, amount: this.amount })
+      } else {
+        this.$notify({ type: 'warning', title: 'Select Amount', text: 'Please select the share of the artwork to buy?' })
+      }
+    },
     changeToken: function (choice) {
       this.amount = choice
       this.$emit('showPayment', { opcode: 'amount-change', amount: this.amount })
@@ -63,7 +70,7 @@ export default {
     },
     percentages () {
       const options = []
-      for (let i = 10; i <= 100; i += 10) {
+      for (let i = 0; i <= (100 - this.gaiaAsset.totalSupply); i += 10) {
         options.push({ text: i, value: i })
       }
       return options
@@ -72,7 +79,9 @@ export default {
   computed: {
     paymentMessage () {
       const configuration = this.$store.getters[APP_CONSTANTS.KEY_PURCHASE_CONFIGURATION]
-      return 'Buying ' + this.amount + '% of <span class="text-grey">' + configuration.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span> For ' + configuration.payment.amountStx + ' stx (' + configuration.payment.amountFiat + ' ' + configuration.payment.currency + ' / ' + configuration.payment.amountBtc + ' btc)'
+      let msg = 'Buying ' + this.amount + '% of <span class="text-grey">' + this.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span> For ' + configuration.payment.amountStx + ' stx (' + configuration.payment.amountFiat + ' ' + configuration.payment.currency + ' / ' + configuration.payment.amountBtc + ' btc)'
+      msg += ' <br/>' + (100 - this.gaiaAsset.totalSupply) + '% bought by other collectors'
+      return msg
     },
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
