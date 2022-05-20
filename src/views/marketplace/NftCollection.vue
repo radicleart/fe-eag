@@ -126,7 +126,7 @@ export default {
         this.$store.dispatch('rpayStacksContractStore/fetchTokensByContractId', data).then((result) => {
           this.resultSet = result.gaiaAssets
           this.resultSet.forEach((asset) => {
-            asset.mintEvents = this.filterMints(asset.contractAsset.nftIndex)
+            asset.mintEvents = this.filterMints(asset.mintEvents, asset.contractAsset.nftIndex)
           })
           this.tokenCount = result.tokenCount
           this.pagingData.numberOfItems = result.tokenCount

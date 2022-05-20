@@ -14,6 +14,9 @@ const btcPrecision = 100000000
 const utils = {
   tokenIdOwnerFromRpr: function (value) {
     if (!value || !value.repr) return
+    if (value.repr.indexOf('owner') === -1) {
+      return { nftIndex: Number(value.repr.substring(1)) }
+    }
     let part1 = value.repr.split('owner ')[1]
     part1 = part1.split(')')[0]
     let part2 = value.repr.split('token-id ')[1]

@@ -92,10 +92,6 @@ export default {
         this.loaded = true
       })
     },
-    filterMints (mintEvents, nftIndex) {
-      if (!mintEvents) return
-      return mintEvents.filter((o) => o.nftIndex === nftIndex)
-    },
     parseRunKey (gaiaAsset) {
       if (gaiaAsset && gaiaAsset.properties && gaiaAsset.properties.collectionId) {
         if (gaiaAsset.properties.collectionId.indexOf('/') > -1) {

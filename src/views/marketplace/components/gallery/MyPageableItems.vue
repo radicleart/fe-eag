@@ -87,6 +87,7 @@ export default {
       const data = {
         contractId: (this.loopRun) ? this.loopRun.contractId : null,
         stxAddress: this.profile.stxAddress,
+        type: this.loopRun.type,
         asc: true,
         page: page,
         pageSize: this.pagingData.pageSize
