@@ -26,6 +26,7 @@ export const APP_CONSTANTS = {
   KEY_CONTENT_INFO_PAGE: 'contentStore/getInformationById',
   KEY_BREAK_LINE: 'contentStore/getBreakLine',
   KEY_PIXEL_BACKGROUND: 'contentStore/getPixelBackground',
+  KEY_EMAIL_TEMPLATE: 'contentStore/getEmailTemplate',
 
   KEY_PURCHASE_CONFIGURATION: 'merchantStore/getPurchaseConfiguration',
   SET_PURCHASE_FLOW: 'merchantStore/setPurchaseConfiguration',
@@ -43,6 +44,7 @@ export const APP_CONSTANTS = {
   KEY_INVOICE_EXPIRY: 'merchantStore/getInvoiceExpiry',
   KEY_INVOICE_DURATION: 'merchantStore/getInvoiceDuration',
   KEY_INVOICE: 'merchantStore/getInvoice',
+  KEY_HISTORIC_INVOICE: 'merchantStore/getHistoricInvoice',
 
   KEY_CATEGORIES: 'rpayCategoryStore/getCategories',
   GET_LOOP_RUN: 'rpayCategoryStore/getLoopRun',

@@ -18,14 +18,14 @@
   -->
   <b-collapse id="nav-collapse" is-nav class="show">
     <b-navbar class="mx-auto">
-      <b-nav-item-dropdown style="list-style: none;" class="" left v-if="profile.loggedIn" no-caret>
+      <b-nav-item-dropdown style="list-style: none;" class="" left v-if="profile.loggedIn" no-caret dropright>
         <template v-slot:button-content>
           <img :src="iconHN" v-if="!isHomePage" class="ml-5 pointer icon"/>
         </template>
-        <b-dropdown-item>JOURNEY</b-dropdown-item>
-        <b-dropdown-item>MARKETPLACE</b-dropdown-item>
-        <b-dropdown-item>COMMUNITY</b-dropdown-item>
-        <b-dropdown-item>CREATE</b-dropdown-item>
+        <b-dropdown-item to="/information/journey">JOURNEY</b-dropdown-item>
+        <b-dropdown-item to="/information/marketplace">MARKETPLACE</b-dropdown-item>
+        <b-dropdown-item to="/information/community">COMMUNITY</b-dropdown-item>
+        <b-dropdown-item to="/information/create">CREATE</b-dropdown-item>
       </b-nav-item-dropdown>
     </b-navbar>
     <b-navbar class="ml-auto">
@@ -37,9 +37,8 @@
         </template>
         <b-dropdown-item>{{username}}</b-dropdown-item>
         <b-dropdown-divider />
-        <b-dropdown-item v-if="profile.superAdmin" to="/swaps">STX Swap</b-dropdown-item>
+        <!-- <b-dropdown-item v-if="profile.superAdmin" to="/swaps">STX Swap</b-dropdown-item> -->
         <b-dropdown-item to="/nft-collections">Collections</b-dropdown-item>
-        <b-dropdown-item to="/accounts/purchase-summary">Purchases</b-dropdown-item>
         <b-dropdown-item to="/my-nfts">My NFTs</b-dropdown-item>
         <b-dropdown-divider />
         <b-dropdown-item class="text-left text-small">
@@ -48,6 +47,12 @@
         <b-dropdown-item v-if="profile.accountInfo" class="text-right text-small">
           <span>Balance: {{profile.accountInfo.balance}} STX</span>
         </b-dropdown-item>
+        <b-dropdown-divider />
+        <b-dropdown-item to="/information/faq">faq</b-dropdown-item>
+        <b-dropdown-item to="/information/info-privacy-policy">Privacy policy</b-dropdown-item>
+        <b-dropdown-item to="/information/collaboration">Collaborate</b-dropdown-item>
+        <b-dropdown-divider />
+        <b-dropdown-item to="/account/invoices">Account</b-dropdown-item>
         <b-dropdown-divider />
         <b-dropdown-item>
           <span @click="startLogin()">Switch Account</span>

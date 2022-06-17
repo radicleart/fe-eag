@@ -2,37 +2,36 @@
 <section id="asset-details-section" v-if="gaiaAsset && gaiaAsset.contractAsset">
   <b-container class="center-section" style="min-height: 50vh;">
     <b-row align-h="center" :style="'min-height: ' + videoHeight + 'px'">
-      <b-col lg="7" sm="12" class="mb-5">
+      <b-col lg="7" sm="12" class="mb-5 pr-5">
         <MediaItemGeneral :classes="'hash1-image'" v-on="$listeners" :options="videoOptions" :asset="gaiaAsset"/>
-        <div class="d-flex justify-content-between" v-if="nftIndex > 0">
-          <div><b-link :to="prevNft()">&lt;&lt;</b-link></div>
-          <div><b-link :to="nextNft()">&gt;&gt;</b-link></div>
-        </div>
       </b-col>
-      <b-col lg="5" sm="12" class="my-5">
+      <b-col lg="5" sm="12" class="my-5" :key="componentKey">
         <ListingInfo class="my-5" :classes="'bg-white text-primary mr-5 text-small'" v-on="$listeners" :asset="gaiaAsset" :loopRun="loopRun" :context="'collection'"/>
-        <b-row  v-if="gaiaAsset.description" class="py-2 border-bottom text-primary">
+        <b-row  v-if="gaiaAsset.description" class="py-2 border-bottom">
           <b-col cols="12">
-            <div v-html="preserveWhiteSpace(gaiaAsset.description)"></div>
+            <div class="text-description" v-html="preserveWhiteSpace(gaiaAsset.description)"></div>
           </b-col>
         </b-row>
         <b-row>
-          <b-col md="12" align-self="end" :key="componentKey">
+          <b-col md="12" align-self="end">
             <div class="w-100">
               <PendingTransactionInfo v-if="pending && pending.txStatus === 'pending'" :pending="pending"/>
             </div>
           </b-col>
         </b-row>
         <b-row v-if="loaded">
-          <b-col md="12" align-self="end" :key="componentKey" v-if="gaiaAsset.totalSupply < 100">
+          <b-col md="12" align-self="end" v-if="!hasSupply && gaiaAsset.totalSupply < 100">
             <PaymentTrigger class="w-100" @update="update" :gaiaAsset="gaiaAsset" :loopRun="loopRun" :transactionData="transactionDataSft()"/>
           </b-col>
-          <b-col md="12" align-self="end" :key="componentKey" v-else>
-            <b-button :disabled="true" variant="outline-dark">SOLD</b-button>
+          <b-col md="12" align-self="end" v-else-if="hasSupply">
+            <b-button variant="outline-dark" to="/my-nfts" class="w-50 btn-asset-details">YOU OWN {{mySupply}}% - MANAGE</b-button>
+          </b-col>
+          <b-col md="12" align-self="end" v-else>
+            <b-button :disabled="true" variant="outline-dark" class="w-50 btn-asset-details">SOLD</b-button>
           </b-col>
         </b-row>
         <b-row v-if="events">
-          <b-col md="12" align-self="end" :key="componentKey">
+          <b-col md="12" align-self="end">
             <NftHistory class="text-small mt-5" @setPending="setPending" :events="events" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>
           </b-col>
         </b-row>
@@ -45,7 +44,7 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import Vue from 'vue'
-import ListingInfo from '@/views/marketplace/components/gallery/common/ListingInfo'
+import ListingInfo from '@/views/marketplace/components/gallery/common/AssetDetailsListingInfo'
 import MediaItemGeneral from '@/views/marketplace/components/media/MediaItemGeneral'
 // import EditionTrigger from '@/views/marketplace/components/toolkit/editions/EditionTrigger'
 import NftHistory from '@/views/marketplace/components/toolkit/nft-history/NftHistory'
@@ -83,7 +82,7 @@ export default {
     this.resizeContainers()
     if (window.eventBus && window.eventBus.$on) {
       window.eventBus.$on('rpayEvent', function (data) {
-        this.loadMempoolTransactions()
+        // $self.loadMempoolTransactions()
         if ($self.$route.name.indexOf('asset-by-') === -1) return
         $self.componentKey++
         $self.$bvModal.hide('result-modal')
@@ -102,16 +101,6 @@ export default {
     }, this)
   },
   methods: {
-    nextNft () {
-      const parts = this.$route.fullPath.split('/')
-      const nftIndex = (this.nftIndex === this.loopRun.versionLimit) ? 1 : (this.nftIndex + 1)
-      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
-    },
-    prevNft () {
-      const parts = this.$route.fullPath.split('/')
-      const nftIndex = (this.nftIndex === 1) ? this.loopRun.versionLimit : (this.nftIndex - 1)
-      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
-    },
     transactionDataSft () {
       return {
         type: 'admin-mint-sft',
@@ -216,6 +205,15 @@ export default {
         fluid: false
       }
       return videoOptions
+    },
+    mySupply () {
+      if (!this.events || this.events.length === 0) return false
+      const event = this.events.find((o) => o.recipient === this.profile.stxAddress)
+      return (event) ? event.balance : 0
+    },
+    hasSupply () {
+      if (!this.events || this.events.length === 0) return false
+      return this.events.filter((o) => o.recipient === this.profile.stxAddress).length > 0
     },
     owner () {
       return this.gaiaAsset.contractAsset.owner

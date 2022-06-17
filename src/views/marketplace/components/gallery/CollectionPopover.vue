@@ -1,7 +1,7 @@
 <template>
 <div>
-  <b-popover no-caret placement="topleft" triggers="hover" variant="transparent" :target="'popover-image-' + index" custom-class="my-popover-class sub-menu">
-    <CollectionData :loopRun="loopRun"/>
+  <b-popover no-caret placement="bottom" triggers="hover" variant="transparent" :target="'popover-image-' + index" custom-class="my-popover-class sub-menu">
+    <CollectionData :loopRun="loopRun" style="top: -300px;"/>
   </b-popover>
 </div>
 </template>

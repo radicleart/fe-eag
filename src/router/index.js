@@ -3,11 +3,13 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import MainNavbar from '@/components/layout/MainNavbar.vue'
 import MainFooter from '@/components/layout/MainFooter.vue'
+const Information = () => import('@/views/Information.vue')
+const Collaboration = () => import('@/views/Collaboration.vue')
 const MyNftLibrary = () => import('@/views/marketplace/MyNftLibrary.vue')
 const NftCollection = () => import('@/views/marketplace/NftCollection.vue')
 const NftCollections = () => import('@/views/marketplace/NftCollections.vue')
-const PurchaseDetails = () => import('@/views/accounts/PurchaseDetails.vue')
-const PurchaseSummary = () => import('@/views/accounts/PurchaseSummary.vue')
+const Invoice = () => import('@/views/accounts/Invoice.vue')
+const Invoices = () => import('@/views/accounts/Invoices.vue')
 const PunkMinter = () => import('@/views/marketplace/PunkMinter.vue')
 const AssetDetails = () => import('@/views/marketplace/AssetDetails.vue')
 const ItemPreview = () => import('@/views/marketplace/ItemPreview.vue')
@@ -29,15 +31,25 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   },
   {
-    path: '/accounts/purchase-summary',
-    name: 'purchase-summary',
-    components: { default: PurchaseSummary, header: MainNavbar, footer: MainFooter },
+    path: '/information/collaboration',
+    name: 'collaboration',
+    components: { default: Collaboration, header: MainNavbar, footer: MainFooter }
+  },
+  {
+    path: '/information/:infoId',
+    name: 'info-page',
+    components: { default: Information, header: MainNavbar, footer: MainFooter }
+  },
+  {
+    path: '/account/invoices/:paymentId',
+    name: 'purchase-details',
+    components: { default: Invoice, header: MainNavbar, footer: MainFooter },
     meta: { title: 'Purchase details for NFTs by the Electric Art Gallery Team Secured by Bitcoin' }
   },
   {
-    path: '/accounts/statements/:paymentId',
-    name: 'purchase-details',
-    components: { default: PurchaseDetails, header: MainNavbar, footer: MainFooter },
+    path: '/account/invoices',
+    name: 'purchase-summary',
+    components: { default: Invoices, header: MainNavbar, footer: MainFooter },
     meta: { title: 'Purchase details for NFTs by the Electric Art Gallery Team Secured by Bitcoin' }
   },
   {

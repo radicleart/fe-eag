@@ -81,11 +81,14 @@ const stacksApiStore = {
             const mintEvents = setNftTupleKeys(result.results)
             // commit('saveMintEvents', mintEvents)
             const events = []
+            const fbData = {
+              contractId: data.contractId
+            }
             resolve(mintEvents)
             mintEvents.forEach((event) => {
-              data.stxAddress = event.owner
-              data.nftIndex = event.nftIndex
-              dispatch('fetchBalance', data).then((result) => {
+              fbData.stxAddress = event.owner
+              fbData.nftIndex = event.nftIndex
+              dispatch('fetchBalance', fbData).then((result) => {
                 event.balance = result
                 events.push(event)
                 commit('saveMintEvents', events)

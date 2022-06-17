@@ -28,7 +28,7 @@
 import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
-  name: 'NFTHistroy',
+  name: 'NFTHistory',
   components: {
   },
   props: ['gaiaAsset', 'loopRun'],
@@ -125,7 +125,7 @@ export default {
 
 <style>
 .flasher {
-  border-bottom: 2pt solid #FFCE00;
-  padding: 0px;
+  border-bottom: 2pt solid #ccc;
+  padding-bottom: 3px;
 }
 </style>

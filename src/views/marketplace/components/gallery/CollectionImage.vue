@@ -2,10 +2,21 @@
 <div>
   <div class="container">
     <div class="box">
-      <b-link :to="'/nft-collection/' + loopRun.currentRunKey">
-      <FramedImage :options="{ 'width': '500px', 'height': '500px' }" :id="'popover-image-' + index" :imageSrc="getCollectionImageUrl(loopRun)"/>
-      <CollectionPopover :loopRun="loopRun" :index="index"/>
-    </b-link>
+      <b-row>
+        <b-col cols="11">
+          <b-link :to="'/nft-collection/' + loopRun.currentRunKey">
+            <CollectionPopover :loopRun="loopRun" :index="index"/>
+            <FramedImage :options="{ 'max-width': '400px', 'max-height': '400px' }" :id="'popover-image-' + index" :imageSrc="getCollectionImageUrl(loopRun)"/>
+          </b-link>
+        </b-col>
+        <b-col cols="1" align-self="center" v-if="showNext">
+          <div class="pointer" @click="$emit('moveon', index)"><b-icon icon="chevron-right" font-scale="2"/></div>
+        </b-col>
+      </b-row>
+      <div class="mx-5" style="max-width: 500px">
+        <h1 class="coll-header">{{loopRun.currentRun}}</h1>
+        <p class="coll-body" v-html="loopRun.description"></p>
+      </div>
     </div>
   </div>
 </div>
@@ -22,7 +33,7 @@ export default {
     CollectionPopover,
     FramedImage
   },
-  props: ['loopRun', 'index'],
+  props: ['loopRun', 'index', 'numbLoopRuns'],
   data () {
     return {
       showOverlay: false
@@ -36,6 +47,9 @@ export default {
     }
   },
   computed: {
+    showNext () {
+      return this.numbLoopRuns > this.index + 1
+    },
     profile () {
       const profile = this.$store.getters['rpayAuthStore/getMyProfile']
       return profile

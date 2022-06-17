@@ -18,9 +18,11 @@
           </div>
           <h6 v-if="item.artist" class="text-small">By : {{item.artist}}</h6>
         </div>
+        <!--
         <p v-if="profile.superAdmin">
           <a target="_blank" :href="cacheUrl()">read from cache</a>
         </p>
+        -->
         <p v-if="item.description" class="pt-4 text-small" v-html="preserveWhiteSpace(item.description)"></p>
         <MintInfo v-if="loopRun.currentRunKey" :item="item" :loopRun="loopRun"/>
         <PendingTransactionInfo v-if="pending && pending.txStatus === 'pending'" :pending="pending"/>

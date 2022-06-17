@@ -28,6 +28,10 @@ const setAmounts = function (tickerRates, configuration) {
     return configuration
   }
 }
+const extractTxId = function (invoice) {
+  const resp = JSON.parse(invoice.transactionData.stacksmateResponse)
+  return resp.txid
+}
 const currencyWhiteList = function (currency) {
   return currency === 'CNY' ||
           currency === 'GBP' ||
@@ -155,6 +159,7 @@ const configuration = {
 const merchantStore = {
   namespaced: true,
   state: {
+    historicInvoices: [],
     timer: null,
     tickerRates: null,
     configuration: configuration,
@@ -199,6 +204,9 @@ const merchantStore = {
     },
     getInvoice: state => {
       return state.invoice
+    },
+    getHistoricInvoice: state => paymentId => {
+      return state.historicInvoices.find((o) => o.id === paymentId)
     },
     isInvoiceExpired: state => invoice => {
       if (!state.invoice) return
@@ -289,6 +297,17 @@ const merchantStore = {
     setInvoice (state, invoice) {
       state.invoice = invoice
     },
+    setHistoricInvoices (state, historicInvoices) {
+      state.historicInvoices = historicInvoices
+    },
+    setHistoricInvoice (state, historicInvoice) {
+      const index = state.historicInvoices.findIndex((o) => o.id === historicInvoice.id)
+      if (index > -1) {
+        state.historicInvoices.splice(index, 1, historicInvoice)
+      } else {
+        state.historicInvoices.splice(0, 0, historicInvoice)
+      }
+    },
     mergePaidCharge (state, charge) {
       if (charge && charge.data) {
         state.invoice = Object.assign(state.invoice, charge.data)
@@ -299,7 +318,7 @@ const merchantStore = {
     }
   },
   actions: {
-    fetchPurchases ({ state }, data) {
+    fetchPurchases ({ commit }, data) {
       return new Promise((resolve) => {
         let url = process.env.VUE_APP_RISIDIO_API + '/mesh/v2/purchases'
         if (data.contractId) url += '/' + data.contractId
@@ -307,14 +326,37 @@ const merchantStore = {
         if (data.status) url += '/' + data.status
         axios.get(url).then(response => {
           const paymentMap = response.data
-          let payments = []
+          let historicInvoices = []
           if (paymentMap && paymentMap.opennode.filter((o) => o.status !== 'unpaid').length > 0) {
-            payments = paymentMap.opennode.filter((o) => o.status !== 'unpaid')
+            historicInvoices = paymentMap.opennode.filter((o) => o.status !== 'unpaid')
           }
           if (paymentMap && paymentMap.square.filter((o) => o.status !== 'unpaid').length > 0) {
-            payments = payments.concat(paymentMap.square.filter((o) => o.status !== 'unpaid'))
+            historicInvoices = historicInvoices.concat(paymentMap.square.filter((o) => o.status !== 'unpaid'))
           }
-          resolve(payments)
+          if (historicInvoices && historicInvoices.length > 0) {
+            historicInvoices = historicInvoices.reverse()
+          }
+          commit('setHistoricInvoices', historicInvoices)
+          resolve(historicInvoices)
+        })
+      })
+    },
+    checkTransaction ({ state, commit, dispatch }, invoice) {
+      return new Promise((resolve) => {
+        const txId = extractTxId(invoice)
+        const path = '/extended/v1/tx/' + txId
+        const txOptions = {
+          path: path,
+          httpMethod: 'GET',
+          postData: {
+            arguments: [],
+            sender: null
+          }
+        }
+        dispatch('rpayStacksStore/callApi', txOptions, { root: true }).then((result) => {
+          invoice.transactionData.txStatus = result.tx_status
+          commit('setHistoricInvoice', invoice)
+          resolve(result)
         })
       })
     },

@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 const contentStore = {
   namespaced: true,
   state: {
@@ -13,10 +15,14 @@ const contentStore = {
       emails: null,
       howItWorks: null
     },
+    emailTemplate: '<tr><td style="padding: 20px">CLIENT_TEXT1</td></tr><tr><td style="padding: 20px; text-align: center"><hr></td></tr><tr><td style="text-align: left;"><p class="footer"><strong>Stay in touch</strong></p></td></tr><tr><td style="text-align: center;"><div class="socials"><a href="#"><img width="50px" class="icons" src="https://images.prismic.io/dbid/bdd0533f-36ff-4c68-b733-813c329a478f_instagram-brands.png?auto=compress,format"></a><a href="#"><img width="50px" class="icons" src="https://images.prismic.io/dbid/56c89838-4d79-4f05-81b8-48848278f315_facebook-f-brands.png?auto=compress,format"></a><a href="#"><img class="icons" width="50px" src="https://images.prismic.io/dbid/08015eb7-df23-428c-a68f-d397f65ba15a_twitter-brands.png?auto=compress,format"></a></div></td></tr>',
     defaultArtist: 'chemicalx',
     waitingImage: 'https://images.prismic.io/dbid/c19ad445-eab4-4de9-9b5a-c10eb158dc5e_black_no1.png?auto=compress,format'
   },
   getters: {
+    getEmailTemplate: state => {
+      return state.emailTemplate
+    },
     getPixelBackground: state => {
       if (!state.content.homepage) return
       return state.content.homepage.pixelbackground.url
@@ -89,6 +95,15 @@ const contentStore = {
     }
   },
   actions: {
+    sendEmail ({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        axios.post(process.env.VUE_APP_RISIDIO_API + '/mesh/v2/register/email', data).then(response => {
+          resolve(response.data)
+        }).catch(() => {
+          resolve({ status: 'failed' })
+        })
+      })
+    }
   }
 }
 export default contentStore

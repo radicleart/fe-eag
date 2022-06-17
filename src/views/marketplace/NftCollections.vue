@@ -2,16 +2,16 @@
 <div style="height: 100%" class="bg-light">
   <CollectionsNavigation :filter="filter"/>
   <div class="py-5">
-      <b-col cols="12" ref="gallery">
-        <vue-horizontal v-if="loaded">
-          <div class="pr-5" v-for="(loopRun, index) in allLoopRuns" :key="index">
-            <CollectionImage :loopRun="loopRun" :index="index"/>
-          </div>
-        </vue-horizontal>
-        <b-container v-else>
-          No Collections found.
-        </b-container>
-      </b-col>
+    <b-col cols="11" ref="gallery">
+      <vue-horizontal ref="horizontal" v-if="loaded" @scroll-debounce="onScrollDebounce">
+        <div :id="'collection-' + index" class="pr-5" v-for="(loopRun, index) in allLoopRuns" :key="index">
+          <CollectionImage :loopRun="loopRun" :index="index" :numbLoopRuns="numbLoopRuns" @moveon="moveOn"/>
+        </div>
+      </vue-horizontal>
+      <b-container v-else>
+        No Collections found.
+      </b-container>
+    </b-col>
   </div>
 </div>
 </template>
@@ -42,13 +42,30 @@ export default {
     return {
       popoverData: {},
       filter: null,
-      loaded: false
+      loaded: false,
+      width: 0,
+      index: 0,
+      pages: 0
     }
   },
   mounted () {
     this.reload()
   },
   methods: {
+    onScrollDebounce ({ scrollWidth, width, left }) {
+      this.width = width
+      this.index = Math.round(left / width)
+      this.pages = Math.round(scrollWidth / width)
+    },
+    moveOn (index) {
+      const wid = document.getElementById('collection-' + index).clientWidth
+      if (index === this.pages - 1) {
+        // If last page, always scroll to last item
+        this.$refs.horizontal.scrollToIndex(this.allLoopRuns.length - 1)
+      } else {
+        this.$refs.horizontal.scrollToLeft((index + 1) * wid)
+      }
+    },
     reload () {
       const $self = this
       Vue.nextTick(function () {
@@ -57,6 +74,9 @@ export default {
     }
   },
   computed: {
+    numbLoopRuns () {
+      return (this.allLoopRuns) ? this.allLoopRuns.length : 0
+    },
     allLoopRuns () {
       let loopRuns = this.$store.getters[APP_CONSTANTS.GET_LOOP_RUNS]
       loopRuns = loopRuns.filter((o) => o.status !== 'disabled')

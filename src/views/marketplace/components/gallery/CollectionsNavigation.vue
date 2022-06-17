@@ -2,18 +2,18 @@
 <b-container id="col-nav" fluid class="py-0 mx-0 px-0 bg-light">
   <div class="d-flex justify-content-between">
     <div class="d-flex text-primary">
-      <b-nav-item-dropdown :class="(!filter) ? 'bg-white' : ''" class="py-0 px-0" style="list-style: none;" no-caret>
-        <template v-slot:button-content>
+      <b-nav-item-dropdown :class="(!filter) ? 'bg-white' : ''" style="list-style: none;" no-caret>
+        <template v-slot:button-content class="py-0 px-0">
           <b-link to="/nft-collections"><span>Collections</span></b-link>
         </template>
         <b-dropdown-item style="list-style: none;" class="no-focus-outline pl-0 m-0" v-for="(lr, index) in allLoopRuns" :key="index">
           <div :class="(loopRun && loopRun.currentRunKey ===  lr.currentRunKey) ? 'bg-white' : ''" class=""><b-link :to="'/nft-collection/' + lr.currentRunKey">{{lr.currentRun}}</b-link></div>
         </b-dropdown-item>
       </b-nav-item-dropdown>
-      <div class="d-flex text-primary" v-if="!loopRun">
-        <b-link class="py-2 px-4 mx-0  pointer" to="/nft-collections?filter=featured"><span :class="(filter ===  'featured') ? 'bg-white' : ''">| Featured |</span></b-link>
-        <b-link class="py-2 px-4 mx-0  pointer" to="/nft-collections?filter=latest"><span :class="(filter ===  'latest') ? 'bg-white' : ''">| Latest Listings |</span></b-link>
-        <b-link class="py-2 px-4 mx-0  pointer" to="/nft-collections?filter=upcoming"><span :class="(filter ===  'upcoming') ? 'bg-white' : ''">| Upcoming |</span></b-link>
+      <div class="d-flex text-primary mx-3" v-if="!loopRun">
+        <div class="pt-2 px-4 mx-2  pointer" :class="(filter ===  'featured') ? 'bg-white' : ''"><b-link to="/nft-collections?filter=featured">| <span class="mx-3">Featured</span> |</b-link></div>
+        <div class="pt-2 px-4 mx-2  pointer" :class="(filter ===  'latest') ? 'bg-white' : ''"><b-link to="/nft-collections?filter=latest">| <span class="mx-3">Latest Listings</span> |</b-link></div>
+        <div class="pt-2 px-4 mx-2  pointer" :class="(filter ===  'upcoming') ? 'bg-white' : ''"><b-link to="/nft-collections?filter=upcoming">| <span class="mx-3">Upcoming</span> |</b-link></div>
       </div>
     </div>
   </div>

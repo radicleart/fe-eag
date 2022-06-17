@@ -2,16 +2,12 @@
 <div :class="classes" class="sub-menu" style="min-width: 200px;">
   <b-container>
     <b-row v-if="collection" class="border">
-      <b-col cols="12" class="py-2 bg-light border">{{collection.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
-    </b-row>
-    <b-row v-else class="border">
-      <b-col cols="12" class="py-2 bg-light border">This collection is not currently supported</b-col>
-    </b-row>
-    <b-row v-if="collection" class="border-bottom">
+      <b-col cols="12" class="py-2 bg-light border">COLLECTION: {{collection.currentRun}}</b-col>
+      <b-col cols="12" class="py-2 bg-light border">NFT: #{{asset.contractAsset.nftIndex}} {{asset.name}}</b-col>
       <b-col cols="12" class="py-2 text-lower">
         <div class="d-flex justify-content-between">
           <div class="pointer" @click="showDetails = ! showDetails">
-            {{collection.makerName}}
+            <span class="text-upper">ARTIST:</span> {{collection.makerName}}
           </div>
           <div class="pointer" @click="showDetails = ! showDetails">
             <b-icon v-if="showDetails" class="text-primary" font-scale="1.5" icon="arrow-down-right-circle"/>
@@ -19,6 +15,9 @@
           </div>
         </div>
       </b-col>
+    </b-row>
+    <b-row v-else class="border">
+      <b-col cols="12" class="py-2 bg-light border">This collection is not currently supported</b-col>
     </b-row>
     <b-row v-if="!collection" class="border-bottom">
       <b-col cols="12" class="py-2 text-lower">
@@ -35,37 +34,28 @@
     </b-row>
   </b-container>
   <b-container v-if="showDetails">
-    <b-row class="border-bottom" v-if="asset.name">
-      <b-col cols="12" class="py-2 text-lower">
-        <div class="d-flex justify-content-between">
-          <div>{{asset.name}}</div>
-        </div>
-      </b-col>
-    </b-row>
     <b-row class="border-bottom">
       <b-col cols="12" class="py-2 text-lower" v-if="asset.contractAsset.owner">
-        <OwnerInfo :owner="asset.contractAsset.owner" />
-      </b-col>
-    </b-row>
-    <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
-      <b-col cols="12" class="py-2 text-center" v-if="loopRun.type === 'SIP-013'">
-        NFT fractions available <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light' }" :title="'Artist is selling percentages of this artwork'" class="ml-2" variant="outline-success"><b-icon icon="question-circle"/></b-link>
-      </b-col>
-    </b-row>
-    <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
-      <b-col cols="12" class="py-2">
-        {{getMintPriceFormatted()}} STX
+        <OwnerInfo :label="'NFT OWNER: '" :owner="asset.contractAsset.owner" />
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'collection'">
       <b-col cols="6" class="py-2 text-lower"></b-col>
-      <b-col cols="6" class="py-2 bg-darkish text-white text-center">
+      <b-col cols="6" class="py-2 bg-dark text-white text-center">
         <b-link :to="'/artwork/' + loopRun.contractId + '/' + asset.contractAsset.nftIndex">BUY NOW</b-link>
+      </b-col>
+    </b-row>
+    <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
+      <b-col cols="12" class="py-2 bg-dark text-white text-center" v-if="loopRun.type === 'SIP-013'">
+        NFT fractions available <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light' }" :title="'Artist is selling percentages of this artwork'" class="ml-2" variant="outline-success"><b-icon icon="question-circle"/></b-link>
+      </b-col>
+      <b-col cols="12" class="py-2">
+        VALUE: {{getMintPriceFormatted()}} STX
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="isListedOrUnMinted() && $route.name !== 'my-nfts'">
       <b-col cols="6" class="py-2 text-lower">{{getPriceFormatted()}}</b-col>
-      <b-col cols="6" class="py-2 bg-darkish text-white text-center">
+      <b-col cols="6" class="py-2 bg-dark text-white text-center">
         <span class="pt-3 pointer" :title="ttBiddingHelp" @click="openPurchaceDialog()">BUY NOW</span>
       </b-col>
     </b-row>
@@ -95,7 +85,7 @@ import formatUtils from '@/services/formatUtils.js'
 import OwnerInfo from '@/views/marketplace/components/gallery/common/OwnerInfo'
 
 export default {
-  name: 'ListingInfo',
+  name: 'AssetDetailsListingInfo',
   components: {
     OwnerInfo
   },

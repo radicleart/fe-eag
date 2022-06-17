@@ -2,9 +2,13 @@
 <div v-if="loaded" class="ml-5 bg-light">
   <CollectionNavigation :loopRun="loopRun" :asset="gaiaAsset" :filter="'asset'"/>
   <b-container style="height: auto;" fluid class="px-5 mt-5">
-    <div v-if="gaiaAsset && loopRun" :key="componentKey">
-      <SftDisplay v-if="loopRun.type === 'SIP-013'" v-on="$listeners" :gaiaAsset="gaiaAsset" :events="events" :loopRun="loopRun"/>
-      <NftDisplay v-else v-on="$listeners" :gaiaAsset="gaiaAsset" :events="events" :loopRun="loopRun"/>
+    <div class="d-flex justify-content-between">
+      <div class="my-auto"><b-link :to="prevNft()"><b-icon icon="chevron-left" font-scale="2"></b-icon></b-link></div>
+      <div style="width: 100%" v-if="gaiaAsset && loopRun" :key="componentKey">
+        <SftDisplay v-if="loopRun.type === 'SIP-013'" v-on="$listeners" :gaiaAsset="gaiaAsset" :events="mintEvents" :loopRun="loopRun"/>
+        <NftDisplay v-else v-on="$listeners" :gaiaAsset="gaiaAsset" :events="events" :loopRun="loopRun"/>
+      </div>
+      <div class="my-auto"><b-link :to="nextNft()"><b-icon icon="chevron-right" font-scale="2"></b-icon></b-link></div>
     </div>
   </b-container>
 </div>
@@ -26,6 +30,7 @@ export default {
   data: function () {
     return {
       nftIndex: null,
+      mintEvents: [],
       commissions: null,
       assetHash: null,
       loaded: false,
@@ -44,6 +49,16 @@ export default {
     this.loadPage()
   },
   methods: {
+    nextNft () {
+      const parts = this.$route.fullPath.split('/')
+      const nftIndex = (this.nftIndex === this.loopRun.versionLimit) ? 1 : (this.nftIndex + 1)
+      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
+    },
+    prevNft () {
+      const parts = this.$route.fullPath.split('/')
+      const nftIndex = (this.nftIndex === 1) ? this.loopRun.versionLimit : (this.nftIndex - 1)
+      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
+    },
     loadPage (components) {
       this.contractId = this.$route.params.contractId
       this.nftIndex = Number(this.$route.params.nftIndex)
@@ -86,10 +101,12 @@ export default {
         nftIndex: nftIndex,
         unanchored: true
       }
-      this.$store.dispatch('stacksApiStore/fetchMintEvents', data)
-      this.$store.dispatch('stacksApiStore/fetchTotalSupply', data).then((totalSupply) => {
-        this.gaiaAsset.totalSupply = totalSupply
-        this.loaded = true
+      this.$store.dispatch('stacksApiStore/fetchMintEvents', data).then((mintEvents) => {
+        this.mintEvents = mintEvents.filter((o) => o.nftIndex === this.nftIndex)
+        this.$store.dispatch('stacksApiStore/fetchTotalSupply', data).then((totalSupply) => {
+          this.gaiaAsset.totalSupply = totalSupply
+          this.loaded = true
+        })
       })
     },
     parseRunKey (gaiaAsset) {
@@ -113,7 +130,7 @@ export default {
   },
   computed: {
     events () {
-      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS]
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.nftIndex)
     },
     profile () {
       const profile = this.$store.getters['rpayAuthStore/getMyProfile']

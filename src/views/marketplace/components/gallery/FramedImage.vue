@@ -53,7 +53,7 @@ img {
 }
 
 .frame {
-  background-color:#ddc;
+  background-color:#fbfbfb;
   border:solid 1.5vmin #eee;
   border-bottom-color:#fff;
   border-left-color:#eee;

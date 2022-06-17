@@ -22,12 +22,66 @@
 </div>
 </template>
 
-<script>
+<script lang="js">
 import TestPayments from './components/TestPayments'
 import Vue from 'vue'
+import { APP_CONSTANTS } from '@/app-constants'
 
 const appId = process.env.VUE_APP_SQUARE_APPLICATION_ID
 const locationId = process.env.VUE_APP_SQUARE_LOCATION_ID
+const bigModeCardStyle = {
+  '.input-container': {
+    borderColor: '#2D2D2D',
+    borderRadius: '6px'
+  },
+  input: {
+    fontSize: '16px',
+    color: '#000'
+  },
+  'input::placeholder': {
+    color: '#666'
+  }
+}
+const darkModeCardStyle = {
+  '.input-container': {
+    borderColor: '#2D2D2D',
+    borderRadius: '6px'
+  },
+  '.input-container.is-focus': {
+    borderColor: '#006AFF'
+  },
+  '.input-container.is-error': {
+    borderColor: '#ff1600'
+  },
+  '.message-text': {
+    color: '#999999'
+  },
+  '.message-icon': {
+    color: '#999999'
+  },
+  '.message-text.is-error': {
+    color: '#ff1600'
+  },
+  '.message-icon.is-error': {
+    color: '#ff1600'
+  },
+  input: {
+    backgroundColor: '#2D2D2D',
+    color: '#FFFFFF',
+    fontFamily: 'helvetica neue, sans-serif'
+  },
+  'input::placeholder': {
+    color: '#999999'
+  },
+  'input.is-error': {
+    color: '#ff1600'
+  },
+  '@media screen and (max-width: 600px)': {
+    input: {
+      fontSize: '12px'
+    }
+  }
+}
 
 export default {
   name: 'SquareWebFormPaymentScreen',
@@ -42,7 +96,7 @@ export default {
       loaded: false,
       errors: [],
       paying: false,
-      showSpinner: false,
+      showSpinner: true,
       showTestPayments: false,
       applePay: false,
       masterpass: false,
@@ -62,13 +116,17 @@ export default {
     if (!window.Square) {
       throw new Error('Square.js failed to load properly')
     }
+    const $self = this
+    setTimeout(function () {
+    }, 2000)
     try {
       // LA14YJ0CQM53A
       this.amountFiat = this.configuration.payment.amountFiat * this.configuration.payment.creditAttributes.start * 100
       const payments = window.Square.payments(appId, locationId)
-      const $self = this
+      const cardStyle = (this.amountFiat) ? bigModeCardStyle : darkModeCardStyle
       Vue.nextTick(function () {
-        payments.card().then((card) => {
+        payments.card({ style: cardStyle }).then((card) => {
+          $self.showSpinner = false
           $self.card = card
           $self.loaded = true
           card.attach('#card-container')
@@ -83,6 +141,41 @@ export default {
     }
   },
   methods: {
+    transactionUrl: function (paymentResults) {
+      try {
+        const resp = JSON.parse(paymentResults.transactionData.stacksmateResponse)
+        // if (typeof resp === 'object') resp = resp.txid
+        if (!resp.txid.startsWith('0x')) resp.txid = '0x' + resp.txid
+        // return resp.txid
+        return 'https://explorer.stacks.co/txid/' + resp.txid + '?chain=' + process.env.VUE_APP_NETWORK
+      } catch (e) {
+        return null
+      }
+    },
+    sendEmail (paymentResults) {
+      const template = this.$store.getters[APP_CONSTANTS.KEY_EMAIL_TEMPLATE]
+      let message = ''
+      if (paymentResults.status === 'paid') {
+        message = '<p>Payment received with thanks <a href="' + paymentResults.receiptUrl + '">click here for receipt!</a></p>'
+        message += '<p style="padding-top: 20px;">NFT is being sent to your stacks wallet. You can <a href="' + this.transactionUrl(paymentResults) + '">track transaction on blockchain explorer</a> and once it confirms you will see your NFT in your Stacks Wallet and on Stacks marketplaces.</p>'
+        message += '<p style="padding-top: 20px;">Your <a href="' + location.origin + '/account/invoices/' + paymentResults.transactionData.paymentId + '">invoice</a> contains full details of the transaction</p>'
+        message += '<p style="padding-top: 50px;">Kind regards,</p>'
+        message += '<p style="padding-top: 10px;">EAG Team</p>'
+      } else {
+        message = '<p>Payment failed!</p>'
+        return
+      }
+      const data = {
+        status: 5,
+        domain: location.href,
+        emailContent: template.replace('CLIENT_TEXT1', message),
+        email: paymentResults.transactionData.email,
+        stxAddress: this.profile.stxAddress
+      }
+      this.$store.dispatch('contentStore/sendEmail', data).then((data) => {
+        // this.$notify({ type: 'success', title: 'Subscribed', text: data })
+      })
+    },
     handlePaymentMethodSubmission (event) {
       event.preventDefault()
       // disable the submit button as we await tokenization and make a payment request.
@@ -90,6 +183,7 @@ export default {
       this.tokenize(this.card).then((token) => {
         this.createPayment(token).then((paymentResults) => {
           this.disabled = false
+          this.sendEmail(paymentResults)
           this.displayPaymentResults('SUCCESS')
           console.debug('Payment Success', paymentResults)
           paymentResults.opcode = 'fiat-payment-success'
@@ -175,6 +269,10 @@ export default {
     }
   },
   computed: {
+    profile () {
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
+      return profile
+    },
     formattedFiat () {
       const configuration = this.configuration
       // const amountFiat = (configuration.payment) ? configuration.payment.amountFiat : '0'

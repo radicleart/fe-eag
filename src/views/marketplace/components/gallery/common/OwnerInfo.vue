@@ -1,5 +1,6 @@
 <template>
 <div v-if="!context">
+    <span class="text-upper">{{label}}</span>
     <span ref="flashee" class="mr-3">{{getAddress}}</span>
     <a v-if="owner" href="#" class="pointer" v-b-tooltip.hover="{ variant: 'dark' }" :title="'Copy full stacks address'" @click.prevent="copyAddress('stx')"><b-icon icon="file-earmark"/></a>
     <input class="mr-3 fake-input" id="copy-stx-address" readonly v-model="owner"/>
@@ -16,7 +17,7 @@ export default {
   name: 'OwnerInfo',
   components: {
   },
-  props: ['owner', 'context'],
+  props: ['owner', 'context', 'label'],
   data () {
     return {
       stxAddress: null
@@ -63,7 +64,8 @@ export default {
 </script>
 <style scoped>
 .flasher {
-  border-bottom: 2pt solid #FFCE00;
+  border-bottom: 2pt solid #ccc;
+  padding-bottom: 3px;
 }
 
 </style>

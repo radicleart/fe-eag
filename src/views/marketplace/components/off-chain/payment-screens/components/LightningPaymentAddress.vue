@@ -123,9 +123,8 @@ export default {
 </script>
 <style lang="scss" >
 .flasher {
-  font-size: 16px;
-  border: 2pt solid #FFCE00;
-  border-radius: 10px;
+  border-bottom: 2pt solid #ccc;
+  padding-bottom: 3px;
 }
 .copyAddress {
   text-align: left;

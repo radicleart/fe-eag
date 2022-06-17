@@ -6,7 +6,7 @@
       <div>
         <Pagination @changePage="gotoPage" :pagingData="pagingData" v-if="pagingData.numberOfItems > 0"/>
         <b-row v-if="resultSet && resultSet.length > 0">
-          <div class="col-lg-6 col-md-6 col-xs-12" v-for="(asset, index) of resultSet" :key="index">
+          <div class="col-lg-4 col-md-4 col-xs-6" v-for="(asset, index) of resultSet" :key="index">
             <MyNftImage v-on="$listeners" :loopRun="loopRun" :asset="asset"/>
           </div>
         </b-row>

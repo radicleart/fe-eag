@@ -2,14 +2,16 @@
 <div v-if="loadedInFlights">
   <div class="mt-0" v-if="!inFlightPayments || inFlightPayments.length < loopRun.spinsPerDay">
     <div class="w-100 ml-1">
-      <b-button class="w-50" variant="outline-dark" @click="showAddress">BUY NOW</b-button>
+      <b-button class="w-50 btn-asset-details" variant="outline-dark" @click="showAddress">BUY NOW</b-button>
     </div>
   </div>
+  <!--
   <div class="d-flex mt-4" v-if="inFlightPayments && inFlightPayments.length > 0">
     <div class="w-50 ml-1">
       <b-link class="text-xsmall" @click="showInflightPayments"><b-icon icon="cart"/> open cart</b-link>
     </div>
   </div>
+  -->
 
   <b-modal size="lg" id="payment-begun-modal" centered>
     <p>Payment begun</p>
@@ -50,6 +52,7 @@ export default {
       loadedInFlights: false,
       inFlightPayments: [],
       recipient: null,
+      email: null,
       payment: null
     }
   },
@@ -86,11 +89,15 @@ export default {
       } else if (data.opcode.indexOf('-payment-cancelled') > -1) {
         this.$notify({ type: 'warning', title: 'Payments', text: 'Payment cancelled.' })
       } else if (data.opcode.indexOf('-payment-success') > -1) {
-        this.payment = data
+        this.$bvModal.hide('in-flight-modal')
+        this.$bvModal.hide('payment-modal')
+        this.$router.push('/account/invoices/' + data.id)
+        /**
         this.fetchInFlightTransactions()
         this.$notify({ type: 'warning', title: 'NFT Transfer', text: 'Thank you - your NFT will be delivered to your wallet soon.' })
         this.$bvModal.hide('payment-modal')
         this.$bvModal.show('in-flight-modal')
+        **/
       }
     },
     fetchInFlightTransactions () {
@@ -133,6 +140,7 @@ export default {
         this.$emit('update', data)
         return
       }
+      this.email = data.email
       this.recipient = data.recipient
       if (!this.recipient) {
         this.$notify({ type: 'error', title: 'Purchase Error', text: 'An address is needed as this is where we send the artwork!' })
@@ -152,6 +160,7 @@ export default {
         this.$notify({ type: 'error', title: 'Address Error', text: 'Expecting a stacks testnet address!' })
         return
       }
+      this.transactionData.email = this.email
       this.transactionData.recipient = this.recipient
       this.$bvModal.show('payment-modal')
       this.$bvModal.hide('stacks-address-modal')

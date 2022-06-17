@@ -12,7 +12,7 @@ import { APP_CONSTANTS } from '@/app-constants'
 import StatementList from '@/views/accounts/components/StatementList'
 
 export default {
-  name: 'PurchaseSummary',
+  name: 'Invoices',
   components: {
     StatementList
   },

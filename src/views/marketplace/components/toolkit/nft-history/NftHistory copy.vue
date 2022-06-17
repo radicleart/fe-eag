@@ -72,7 +72,7 @@ const subscribeApiNews = function (that) {
 }
 
 export default {
-  name: 'NFTHistroy',
+  name: 'NFTHistory',
   components: {
   },
   props: ['nftIndex', 'assetHash', 'loopRun'],
@@ -285,7 +285,7 @@ export default {
 
 <style>
 .flasher {
-  border-bottom: 2pt solid #FFCE00;
-  padding: 0px;
+  border-bottom: 2pt solid #ccc;
+  padding-bottom: 3px;
 }
 </style>
