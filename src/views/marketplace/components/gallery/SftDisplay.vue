@@ -30,9 +30,9 @@
             <b-button :disabled="true" variant="outline-dark" class="w-50 btn-asset-details">SOLD</b-button>
           </b-col>
         </b-row>
-        <b-row v-if="events">
+        <b-row v-if="mintEvents">
           <b-col md="12" align-self="end">
-            <NftHistory class="text-small mt-5" @setPending="setPending" :events="events" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>
+            <NftHistory class="text-small mt-5" @setPending="setPending" :events="mintEvents" :gaiaAsset="gaiaAsset" :loopRun="loopRun"/>
           </b-col>
         </b-row>
       </b-col>
@@ -60,7 +60,6 @@ export default {
     NftHistory,
     MediaItemGeneral
   },
-  props: ['gaiaAsset', 'loopRun', 'events'],
   data () {
     return {
       nftIndex: -1,
@@ -73,6 +72,7 @@ export default {
     }
   },
   mounted () {
+    this.contractId = this.$route.params.contractId
     this.nftIndex = Number(this.$route.params.nftIndex)
     const $self = this
     this.loadMempoolTransactions()
@@ -106,7 +106,8 @@ export default {
         type: 'admin-mint-sft',
         batchOption: 1,
         price: this.loopRun.mintPrice,
-        amount: (100 - this.gaiaAsset.totalSupply - this.amount),
+        maxAmount: (100 - this.gaiaAsset.totalSupply - this.amount),
+        amount: this.amount,
         contractId: this.loopRun.contractId,
         nftIndex: this.nftIndex,
         recipient: null,
@@ -179,8 +180,17 @@ export default {
     }
   },
   computed: {
+    gaiaAsset () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET]
+    },
+    loopRun () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_CURRENT_COLLECTION]
+    },
+    mintEvents () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.nftIndex)
+    },
     canMint () {
-      return !this.events || this.events.length === 0
+      return !this.mintEvents || this.mintEvents.length === 0
     },
     transactionUrl: function () {
       if (!this.gaiaAsset.mintInfo || !this.gaiaAsset.mintInfo.txId) return '#'
@@ -207,13 +217,13 @@ export default {
       return videoOptions
     },
     mySupply () {
-      if (!this.events || this.events.length === 0) return false
-      const event = this.events.find((o) => o.recipient === this.profile.stxAddress)
+      if (!this.mintEvents || this.mintEvents.length === 0) return false
+      const event = this.mintEvents.find((o) => o.recipient === this.profile.stxAddress)
       return (event) ? event.balance : 0
     },
     hasSupply () {
-      if (!this.events || this.events.length === 0) return false
-      return this.events.filter((o) => o.recipient === this.profile.stxAddress).length > 0
+      if (!this.mintEvents || this.mintEvents.length === 0) return false
+      return this.mintEvents.filter((o) => o.recipient === this.profile.stxAddress).length > 0
     },
     owner () {
       return this.gaiaAsset.contractAsset.owner

@@ -28,11 +28,19 @@ const setNftTupleKeys = function (events) {
 const stacksApiStore = {
   namespaced: true,
   state: {
+    currentCollection: null,
+    gaiaAsset: null,
     mintEvents: null
   },
   getters: {
     getMintEvents: (state) => {
       return state.mintEvents
+    },
+    getCurrentCollection: (state) => {
+      return state.currentCollection
+    },
+    getGaiaAsset: (state) => {
+      return state.gaiaAsset
     },
     getMintEventsForToken: (state) => nftIndex => {
       if (!state.mintEvents) return
@@ -40,11 +48,45 @@ const stacksApiStore = {
     }
   },
   mutations: {
-    saveMintEvents (state, data) {
+    setMintEvents (state, data) {
       state.mintEvents = data
+    },
+    setCurrentCollection (state, currentCollection) {
+      state.currentCollection = currentCollection
+    },
+    setGaiaAsset (state, gaiaAsset) {
+      state.gaiaAsset = gaiaAsset
     }
   },
   actions: {
+    initAssetDetails ({ dispatch, commit }, data) {
+      return new Promise((resolve) => {
+        dispatch('rpayCategoryStore/fetchLoopRunByContractId', data.contractId, { root: true }).then((currentCollection) => {
+          commit('setCurrentCollection', currentCollection)
+          dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', { contractId: data.contractId, nftIndex: data.nftIndex }, { root: true }).then((gaiaAsset) => {
+            if (!gaiaAsset.contractAsset) {
+              const ipfsUrl = currentCollection.punkImageIPFSUrl
+              gaiaAsset.contractAsset = {
+                contractId: currentCollection.contractId,
+                nftIndex: data.nftIndex,
+                tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, data.nftIndex) }
+              }
+            }
+            dispatch('rpayManageCacheStore/cacheUpdate', { contractId: data.contractId, nftIndex: data.nftIndex }, { root: true })
+            data.asset_identifier = data.contractId + '::' + currentCollection.assetName
+            data.unanchored = true
+            dispatch('fetchMintEvents', data).then((mintEvents) => {
+              commit('setMintEvents', mintEvents)
+              dispatch('fetchTotalSupply', data).then((totalSupply) => {
+                gaiaAsset.totalSupply = totalSupply
+                commit('setGaiaAsset', gaiaAsset)
+                resolve(true)
+              })
+            })
+          })
+        })
+      })
+    },
     fetchMempoolTxsByAddress ({ dispatch }, data) {
       return new Promise((resolve) => {
         const path = '/extended/v1/tx/mempool?sender_address=' + data.stxAddress
@@ -79,7 +121,7 @@ const stacksApiStore = {
         dispatch('rpayStacksStore/callApi', txOptions, { root: true }).then((result) => {
           if (result.results && result.results.length > 0) {
             const mintEvents = setNftTupleKeys(result.results)
-            // commit('saveMintEvents', mintEvents)
+            // commit('setMintEvents', mintEvents)
             const events = []
             const fbData = {
               contractId: data.contractId
@@ -91,7 +133,7 @@ const stacksApiStore = {
               dispatch('fetchBalance', fbData).then((result) => {
                 event.balance = result
                 events.push(event)
-                commit('saveMintEvents', events)
+                commit('setMintEvents', events)
               })
             })
           } else {

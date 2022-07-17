@@ -1,5 +1,5 @@
 <template>
-<div v-if="!loading" class="ml-5 bg-light">
+<div v-if="loaded" class="ml-5 bg-light">
   <CollectionsNavigationMyNfts v-if="loopRun" :context="'item-preview'" :loopRun="loopRun" :asset="item" :filter="'asset'"/>
   <b-container style="height: auto;" fluid class="px-5 mt-5">
     <b-row :key="componentKey" style="min-height: 50vh;" >
@@ -61,20 +61,18 @@ export default {
   },
   data: function () {
     return {
-      loading: true,
-      showHash: false,
-      loopRun: null,
+      loaded: true,
       contractId: null,
       componentKey: 0,
       nftIndex: null,
       notCount: 0,
       assetHash: null,
       pending: null,
-      item: null,
       message: 'No item available...'
     }
   },
   mounted () {
+    this.nftIndex = Number(this.$route.params.nftIndex)
     this.contractId = this.$route.params.contractId
     this.state = this.$route.query.state
     this.fetchItem()
@@ -86,14 +84,9 @@ export default {
           $self.componentKey++
           // save transaction but not on gaia asset
           if (data.txId && data.txStatus === 'success') {
+            const item = $self.item
             if (data.functionName === 'mint-token' || data.functionName === 'collection-mint-token') {
-              const item = $self.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](data.assetHash)
               $self.saveMintingInfo(item, data)
-            } else if (data.assetHashes && (data.functionName === 'mint-token-twenty' || data.functionName === 'collection-mint-token-twenty')) {
-              data.assetHashes.forEach((o) => {
-                const item = $self.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](o)
-                $self.saveMintingInfo(item, data)
-              })
             }
           }
           $self.setPending(data)
@@ -113,23 +106,12 @@ export default {
       this.$store.dispatch('rpayMyItemStore/quickSaveItem', item)
     },
     fetchItem () {
-      this.nftIndex = Number(this.$route.params.nftIndex)
-      const data = { contractId: this.contractId, nftIndex: this.nftIndex }
-      this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', data).then((item) => {
-        this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.contractId).then((loopRun) => {
-          this.loopRun = loopRun
-          data.stxAddress = this.profile.stxAddress
-          data.asset_identifier = this.loopRun.contractId + '::' + this.loopRun.assetName
-          data.unanchored = true
-          this.$store.dispatch('stacksApiStore/fetchMintEvents', data).then((result) => {
-            this.$store.dispatch('stacksApiStore/fetchBalance', data).then((result) => {
-              this.item = item
-              this.item.contractAsset.balance = result
-              this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex })
-              this.loading = false
-            })
-          })
-        })
+      const data = {
+        contractId: this.contractId,
+        nftIndex: this.nftIndex
+      }
+      this.$store.dispatch('stacksApiStore/initAssetDetails', data).then(() => {
+        this.loaded = true
       })
     },
     setPending (result) {
@@ -180,10 +162,6 @@ export default {
     update () {
       this.fetchItem()
     },
-    getMediaItem () {
-      const attributes = this.$store.getters[APP_CONSTANTS.KEY_MEDIA_ATTRIBUTES](this.item)
-      return attributes
-    },
     deleteMediaItem: function (mediaId) {
       this.$store.dispatch('rpayMyItemStore/deleteMediaItem', { item: this.item, id: mediaId }).then(() => {
         this.$emit('delete-cover')
@@ -191,34 +169,18 @@ export default {
     },
     preserveWhiteSpace: function (content) {
       return '<span class="text-description" style="white-space: break-spaces;">' + content + '</span>'
-    },
-    parseRunKey (gaiaAsset) {
-      if (gaiaAsset && gaiaAsset.properties && gaiaAsset.properties.collectionId) {
-        if (gaiaAsset.properties.collectionId.indexOf('/') > -1) {
-          return gaiaAsset.properties.collectionId.split('/')[1]
-        } else {
-          return gaiaAsset.properties.collectionId
-        }
-      }
-      if (gaiaAsset.contractAsset) {
-        const runKey = this.$store.getters[APP_CONSTANTS.KEY_RUN_KEY_FROM_META_DATA_URL](gaiaAsset.contractAsset)
-        if (runKey && runKey.indexOf('.json') === -1) {
-          return runKey
-        }
-      } else if (gaiaAsset.currentRunKey) {
-        if (gaiaAsset.currentRunKey.indexOf('/') === -1) {
-          return gaiaAsset.currentRunKey
-        } else {
-          return gaiaAsset.currentRunKey.split('/')[0]
-        }
-      }
-      return process.env.VUE_APP_DEFAULT_LOOP_RUN
-    },
-    targetItem: function () {
-      return this.$store.getters[APP_CONSTANTS.KEY_TARGET_FILE_FOR_DISPLAY](this.item)
     }
   },
   computed: {
+    item () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET]
+    },
+    loopRun () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_CURRENT_COLLECTION]
+    },
+    mintEvents () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.nftIndex)
+    },
     mintedMessage () {
       if (this.item.contractAsset && this.loopRun && this.loopRun.type === 'punks') {
         return this.loopRun.currentRun + ' #' + this.item.contractAsset.nftIndex

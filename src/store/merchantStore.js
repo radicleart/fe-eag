@@ -504,6 +504,9 @@ const merchantStore = {
       let config = state.configuration
       config.commission.amount = data.amount
       config = setAmounts(state.tickerRates, config)
+      if (config.transactionData) {
+        config.transactionData.amount = data.amount
+      }
       commit('updateConfiguration', config)
     },
     stopListening ({ commit }) {

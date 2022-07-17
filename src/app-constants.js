@@ -9,6 +9,8 @@ export const APP_CONSTANTS = {
   KEY_WEB_WALLET_LINK_CHROME: 'getWebWalletLinkChrome',
   KEY_WEB_WALLET_LINK_FIREFOX: 'getWebWalletLinkFirefox',
 
+  KEY_SAS_GAIA_ASSET: 'stacksApiStore/getGaiaAsset',
+  KEY_SAS_CURRENT_COLLECTION: 'stacksApiStore/getCurrentCollection',
   KEY_SAS_MINT_EVENTS: 'stacksApiStore/getMintEvents',
   KEY_SAS_MINT_EVENTS_FOR_TOKEN: 'stacksApiStore/getMintEventsForToken',
 

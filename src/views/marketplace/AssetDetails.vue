@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between">
       <div class="my-auto"><b-link :to="prevNft()"><b-icon icon="chevron-left" font-scale="2"></b-icon></b-link></div>
       <div style="width: 100%" v-if="gaiaAsset && loopRun" :key="componentKey">
-        <SftDisplay v-if="loopRun.type === 'SIP-013'" v-on="$listeners" :gaiaAsset="gaiaAsset" :events="mintEvents" :loopRun="loopRun"/>
+        <SftDisplay v-if="loopRun.type === 'SIP-013'" v-on="$listeners"/>
         <NftDisplay v-else v-on="$listeners" :gaiaAsset="gaiaAsset" :events="events" :loopRun="loopRun"/>
       </div>
       <div class="my-auto"><b-link :to="nextNft()"><b-icon icon="chevron-right" font-scale="2"></b-icon></b-link></div>
@@ -30,12 +30,7 @@ export default {
   data: function () {
     return {
       nftIndex: null,
-      mintEvents: [],
-      commissions: null,
-      assetHash: null,
       loaded: false,
-      gaiaAsset: null,
-      loopRun: null,
       contractId: null,
       componentKey: 0
     }
@@ -49,6 +44,18 @@ export default {
     this.loadPage()
   },
   methods: {
+    loadPage (components) {
+      this.contractId = this.$route.params.contractId
+      this.nftIndex = Number(this.$route.params.nftIndex)
+      const data = {
+        contractId: this.contractId,
+        nftIndex: this.nftIndex
+      }
+      this.$store.dispatch('stacksApiStore/initAssetDetails', data).then(() => {
+        if (components) this.componentKey++
+        this.loaded = true
+      })
+    },
     nextNft () {
       const parts = this.$route.fullPath.split('/')
       const nftIndex = (this.nftIndex === this.loopRun.versionLimit) ? 1 : (this.nftIndex + 1)
@@ -58,78 +65,16 @@ export default {
       const parts = this.$route.fullPath.split('/')
       const nftIndex = (this.nftIndex === 1) ? this.loopRun.versionLimit : (this.nftIndex - 1)
       return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
-    },
-    loadPage (components) {
-      this.contractId = this.$route.params.contractId
-      this.nftIndex = Number(this.$route.params.nftIndex)
-      this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.contractId).then((loopRun) => {
-        this.loopRun = loopRun
-        this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex }).then((gaiaAsset) => {
-          this.gaiaAsset = gaiaAsset
-          if (!gaiaAsset.contractAsset) this.gaiaAsset.contractAsset = this.getToken(loopRun)
-          this.$store.dispatch('rpayManageCacheStore/cacheUpdate', { contractId: this.contractId, nftIndex: this.nftIndex })
-          this.loadNFTMints(loopRun, this.nftIndex)
-          if (components) this.componentKey++
-        })
-      })
-    },
-    getToken (loopRun) {
-      const ipfsUrl = loopRun.punkImageIPFSUrl
-      return {
-        contractId: loopRun.contractId,
-        nftIndex: this.nftIndex,
-        tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, this.nftIndex) }
-      }
-    },
-    loadCommissions (loopRun) {
-      const data = {
-        stxAddress: this.profile.stxAddress,
-        contractId: loopRun.contractId,
-        contractAddress: loopRun.contractId.split('.')[0],
-        contractName: loopRun.contractId.split('.')[1],
-        currentRunKey: this.$route.params.collection
-      }
-      this.$store.dispatch('rpayMarketGenFungStore/getCommissionTokensByContract', data).then((commissions) => {
-        this.commissions = commissions
-        this.loadNFTMints(this.loopRun, this.nftIndex)
-      })
-    },
-    loadNFTMints: function (loopRun, nftIndex) {
-      const data = {
-        contractId: this.loopRun.contractId,
-        asset_identifier: loopRun.contractId + '::' + loopRun.assetName,
-        nftIndex: nftIndex,
-        unanchored: true
-      }
-      this.$store.dispatch('stacksApiStore/fetchMintEvents', data).then((mintEvents) => {
-        this.mintEvents = mintEvents.filter((o) => o.nftIndex === this.nftIndex)
-        this.$store.dispatch('stacksApiStore/fetchTotalSupply', data).then((totalSupply) => {
-          this.gaiaAsset.totalSupply = totalSupply
-          this.loaded = true
-        })
-      })
-    },
-    parseRunKey (gaiaAsset) {
-      if (gaiaAsset && gaiaAsset.properties && gaiaAsset.properties.collectionId) {
-        if (gaiaAsset.properties.collectionId.indexOf('/') > -1) {
-          return gaiaAsset.properties.collectionId.split('/')[1]
-        } else {
-          return gaiaAsset.properties.collectionId
-        }
-      }
-      const runKey = this.$store.getters[APP_CONSTANTS.KEY_RUN_KEY_FROM_META_DATA_URL](gaiaAsset.contractAsset)
-      if (runKey && runKey.indexOf('.json') === -1) {
-        return runKey
-      }
-      return process.env.VUE_APP_DEFAULT_LOOP_RUN
-    },
-    getArtistPrismicId () {
-      const artistId = this.$store.getters[APP_CONSTANTS.KEY_CONTENT_ARTIST_ID](this.gaiaAsset.artist)
-      return artistId
     }
   },
   computed: {
-    events () {
+    gaiaAsset () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET]
+    },
+    loopRun () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_CURRENT_COLLECTION]
+    },
+    mintEvents () {
       return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.nftIndex)
     },
     profile () {
