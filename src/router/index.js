@@ -65,13 +65,13 @@ const routes = [
     meta: { title: 'Marketplace for NFTs by the Electric Art Gallery Team Secured by Bitcoin' }
   },
   {
-    path: '/nft-collection/:collectionId',
+    path: '/nft-collection/:contractId',
     name: 'collection',
     components: { default: NftCollection, header: MainNavbar, footer: MainFooter },
     meta: { title: 'Marketplace for NFTs by EAG Secured by Bitcoin' }
   },
   {
-    path: '/nft-collection/:collectionId/:offset/:pageSize',
+    path: '/nft-collection/:contractId/:offset/:pageSize',
     name: 'collection',
     components: { default: NftCollection, header: MainNavbar, footer: MainFooter },
     meta: { title: 'Marketplace for NFTs by EAG Secured by Bitcoin' }

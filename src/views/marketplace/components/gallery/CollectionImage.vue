@@ -4,7 +4,7 @@
     <div class="box">
       <b-row>
         <b-col cols="11">
-          <b-link :to="'/nft-collection/' + loopRun.currentRunKey">
+          <b-link :to="'/nft-collection/' + loopRun.contractId">
             <CollectionPopover :loopRun="loopRun" :index="index"/>
             <FramedImage :options="{ 'max-width': '400px', 'max-height': '400px' }" :id="'popover-image-' + index" :imageSrc="getCollectionImageUrl(loopRun)"/>
           </b-link>

@@ -10,12 +10,8 @@
     <b-row v-if="collection" class="border-bottom">
       <b-col cols="12" class="py-2 text-lower">
         <div class="d-flex justify-content-between">
-          <div class="pointer" @click="showDetails = ! showDetails">
-            {{collection.makerName}}
-          </div>
-          <div class="pointer" @click="showDetails = ! showDetails">
-            <b-icon v-if="showDetails" class="text-primary" font-scale="1.5" icon="arrow-down-right-circle"/>
-            <b-icon v-else class="text-primary" font-scale="1.5" icon="arrow-up-right-circle"/>
+          <div class="">
+            By: {{collection.makerName}}
           </div>
         </div>
       </b-col>
@@ -23,13 +19,15 @@
     <b-row v-if="!collection" class="border-bottom">
       <b-col cols="12" class="py-2 text-lower">
         <div class="d-flex justify-content-between">
-          <div class="pointer" @click="showDetails = ! showDetails">
+          <div class="pointer">
             {{asset.contractAsset.contractId.split('.')[1]}} #{{asset.contractAsset.nftIndex}}
           </div>
+          <!--
           <div class="pointer" @click="showDetails = ! showDetails">
             <b-icon v-if="showDetails" class="text-primary" font-scale="1.5" icon="arrow-down-right-circle"/>
             <b-icon v-else class="text-primary" font-scale="1.5" icon="arrow-up-right-circle"/>
           </div>
+          -->
         </div>
       </b-col>
     </b-row>
@@ -48,25 +46,25 @@
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
-      <b-col cols="12" class="py-2 text-center" v-if="loopRun.type === 'SIP-013'">
-        NFT fractions available <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light' }" :title="'Artist is selling percentages of this artwork'" class="ml-2" variant="outline-success"><b-icon icon="question-circle"/></b-link>
-      </b-col>
-    </b-row>
-    <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
       <b-col cols="12" class="py-2">
-        {{getMintPriceFormatted()}} STX
+        {{getMintPriceFormatted()}} STX - {{100 - balance}} % Available
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'collection'">
-      <b-col cols="6" class="py-2 text-lower"></b-col>
-      <b-col cols="6" class="py-2 bg-darkish text-white text-center">
+      <b-col cols="12" class="py-2 bg-darkish text-white text-center">
         <b-link :to="'/artwork/' + loopRun.contractId + '/' + asset.contractAsset.nftIndex">BUY NOW</b-link>
+      </b-col>
+    </b-row>
+    <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
+      <b-col cols="12" class="py-2 text-left" v-if="loopRun.type === 'SIP-013'">
+        NFT fractions available <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light' }" :title="'Artist is selling percentages of this artwork'" class="ml-2" variant="outline-success"><b-icon icon="question-circle"/></b-link>
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="isListedOrUnMinted() && $route.name !== 'my-nfts'">
       <b-col cols="6" class="py-2 text-lower">{{getPriceFormatted()}}</b-col>
       <b-col cols="6" class="py-2 bg-darkish text-white text-center">
-        <span class="pt-3 pointer" :title="ttBiddingHelp" @click="openPurchaceDialog()">BUY NOW</span>
+        <span v-if="balance > 0" class="pt-3 pointer" :title="ttBiddingHelp" @click="openPurchaceDialog()">BUY NOW</span>
+        <span v-else class="pt-3 pointer" :title="ttBiddingHelp" @click="openPurchaceDialog()">SOLD</span>
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="isListedOrUnMinted() && $route.name === 'my-nfts'">
@@ -103,7 +101,7 @@ export default {
   data () {
     return {
       loaded: false,
-      showDetails: false,
+      showDetails: true,
       collection: null
     }
   },
@@ -153,6 +151,18 @@ export default {
     }
   },
   computed: {
+    balance () {
+      const me = this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.asset.contractAsset.nftIndex)
+      if (!me || me.length === 0) {
+        return 0
+      } else {
+        let count = 0
+        me.forEach((o) => {
+          count += o.balance
+        })
+        return count
+      }
+    },
     profile () {
       const profile = this.$store.getters['rpayAuthStore/getMyProfile']
       return profile

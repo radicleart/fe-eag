@@ -37,16 +37,16 @@ export default {
   },
   watch: {
     '$route' () {
-      this.loadPage(true)
+      this.loadCollection(true)
     }
   },
   mounted () {
-    this.loadPage()
+    this.contractId = this.$route.params.contractId
+    this.nftIndex = Number(this.$route.params.nftIndex)
+    this.loadCollection()
   },
   methods: {
-    loadPage (components) {
-      this.contractId = this.$route.params.contractId
-      this.nftIndex = Number(this.$route.params.nftIndex)
+    loadCollection (components) {
       const data = {
         contractId: this.contractId,
         nftIndex: this.nftIndex

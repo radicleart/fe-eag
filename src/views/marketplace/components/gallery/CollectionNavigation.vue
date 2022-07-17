@@ -3,7 +3,7 @@
   <div class="d-flex text-primary">
     <div :class="(!filter) ? 'bg-white' : ''" class="py-2 px-4 "><b-link to="/nft-collections">Collections</b-link></div>
     <div v-if="loopRun">
-      <div :class="(filter ===  'collection') ? 'bg-white' : ''" class="py-2 px-4 mx-0 "><b-link :to="'/nft-collection/' + loopRun.currentRunKey">| {{loopRun.currentRun}} |</b-link></div>
+      <div :class="(filter ===  'collection') ? 'bg-white' : ''" class="py-2 px-4 mx-0 "><b-link :to="'/nft-collection/' + loopRun.contractId">| {{loopRun.currentRun}} |</b-link></div>
     </div>
     <div v-if="asset">
       <div :class="(filter ===  'asset') ? 'bg-white' : ''" class="py-2 px-4 mx-0 ">| # {{asset.contractAsset.nftIndex}} |</div>

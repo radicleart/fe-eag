@@ -43,7 +43,6 @@ export default {
         offset: 1,
         numberOfItems: 0
       },
-      mintEvents: null,
       resultSet: null,
       componentKey: 0,
       loaded: false,
@@ -60,19 +59,19 @@ export default {
         sortField: 'nftIndex',
         sortDir: 'sortDown'
       },
-      loopRun: null,
       minted: false,
       numbTokens: 0
     }
   },
   mounted () {
+    this.contractId = this.$route.params.contractId
+    this.loadCollection()
     if (this.$route.params.offset) this.pagingData.offset = Number(this.$route.params.offset)
     if (this.$route.params.pageSize) this.pagingData.pageSize = Number(this.$route.params.pageSize)
     if (this.pagingData.pageSize > 100) this.pagingData.pageSize = 50
     const $self = this
     let resizeTimer
     if (this.loopRun) this.pagingData.numberOfItems = this.loopRun.tokenCount
-    this.loadNFTMints()
 
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer)
@@ -87,29 +86,22 @@ export default {
     }
   },
   methods: {
-    loadNFTMints: function (loopRun) {
-      this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.$route.params.collectionId).then((loopRun) => {
-        if (!loopRun) {
-          this.$router.push('/')
-        }
-        this.loopRun = loopRun
-        const data = {
-          contractId: this.loopRun.contractId,
-          asset_identifier: loopRun.contractId + '::' + loopRun.assetName
-        }
-        this.$store.dispatch('stacksApiStore/fetchMintEvents', data).then((mintEvents) => {
-          this.mintEvents = mintEvents
-          this.reload(loopRun)
-        })
+    loadCollection () {
+      const data = {
+        contractId: this.contractId,
+        nftIndex: 1
+      }
+      this.$store.dispatch('stacksApiStore/initAssetDetails', data).then(() => {
+        this.reload(this.loopRun)
       })
     },
     updateResults (data) {
       this.defQuery = data.query
-      this.$router.push('/nft-collection/' + this.loopRun.currentRunKey + '?' + this.getQueryString(this.defQuery))
+      this.$router.push('/nft-collection/' + this.loopRun.contractId + '?' + this.getQueryString(this.defQuery))
       this.fetchPage(this.pagingData.offset - 1, true, this.defQuery)
     },
     gotoPage (page) {
-      this.$router.push('/nft-collection/' + this.loopRun.currentRunKey + '/' + page + '/' + this.pagingData.pageSize)
+      this.$router.push('/nft-collection/' + this.loopRun.contractId + '/' + page + '/' + this.pagingData.pageSize)
       this.fetchPage(page - 1, true, this.defQuery)
     },
     fetchPage (page, reset, query) {
@@ -221,6 +213,16 @@ export default {
     }
   },
   computed: {
+    loopRun () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_CURRENT_COLLECTION]
+    },
+    mintEvents () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.nftIndex)
+    },
+    profile () {
+      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      return profile
+    }
   }
 }
 </script>

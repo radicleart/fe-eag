@@ -1,6 +1,6 @@
 <template>
 <div class="bg-light" style="height: 100%;">
-  <div class="text-upper p-1 px-3 mb-1 bg-darkish text-white"><b-link class="text-white" :to="'/nft-collection/' + loopRun.currentRunKey">{{loopRun.currentRun}}</b-link></div>
+  <div class="text-upper p-1 px-3 mb-1 bg-darkish text-white"><b-link class="text-white" :to="'/nft-collection/' + loopRun.contractId">{{loopRun.currentRun}}</b-link></div>
   <div class="text-upper p-1 px-3 mb-1 bg-white d-flex justify-content-between">
     <div><span class="text-secondary"></span> {{loopRun.makerName}}</div>
     <div @click="showAdditional = !showAdditional" class="pointer">

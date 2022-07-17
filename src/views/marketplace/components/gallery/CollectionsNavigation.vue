@@ -7,7 +7,7 @@
           <b-link to="/nft-collections"><span>Collections</span></b-link>
         </template>
         <b-dropdown-item style="list-style: none;" class="no-focus-outline pl-0 m-0" v-for="(lr, index) in allLoopRuns" :key="index">
-          <div :class="(loopRun && loopRun.currentRunKey ===  lr.currentRunKey) ? 'bg-white' : ''" class=""><b-link :to="'/nft-collection/' + lr.currentRunKey">{{lr.currentRun}}</b-link></div>
+          <div :class="(loopRun && loopRun.currentRunKey ===  lr.currentRunKey) ? 'bg-white' : ''" class=""><b-link :to="'/nft-collection/' + lr.contractId">{{lr.currentRun}}</b-link></div>
         </b-dropdown-item>
       </b-nav-item-dropdown>
       <div class="d-flex text-primary mx-3" v-if="!loopRun">
