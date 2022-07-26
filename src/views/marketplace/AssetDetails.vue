@@ -1,5 +1,5 @@
 <template>
-<div v-if="loaded" class="ml-5 bg-light">
+<div v-if="loaded" class="ml-5 bg-light" :key="componentKey">
   <CollectionNavigation :loopRun="loopRun" :asset="gaiaAsset" :filter="'asset'"/>
   <b-container style="height: auto;" fluid class="px-5 mt-5">
     <div class="d-flex justify-content-between">
@@ -37,7 +37,16 @@ export default {
   },
   watch: {
     '$route' () {
-      this.loadCollection(true)
+      // this.loadCollection(true)
+      this.nftIndex = Number(this.$route.params.nftIndex)
+      this.componentKey++
+      if (!this.gaiaAsset.totalSupply) {
+        const data = {
+          contractId: this.contractId,
+          nftIndex: this.nftIndex
+        }
+        this.$store.dispatch('stacksApiStore/fetchTotalSupply', data)
+      }
     }
   },
   mounted () {
@@ -52,7 +61,6 @@ export default {
         nftIndex: this.nftIndex
       }
       this.$store.dispatch('stacksApiStore/initAssetDetails', data).then(() => {
-        if (components) this.componentKey++
         this.loaded = true
       })
     },
@@ -69,7 +77,7 @@ export default {
   },
   computed: {
     gaiaAsset () {
-      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET]
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET](this.nftIndex)
     },
     loopRun () {
       return this.$store.getters[APP_CONSTANTS.KEY_SAS_CURRENT_COLLECTION]

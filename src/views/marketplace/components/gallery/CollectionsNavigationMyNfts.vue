@@ -1,7 +1,7 @@
 <template>
 <b-container id="col-nav" fluid class="py-0 mx-0 px-0 bg-light">
   <div class="d-flex text-primary">
-    <div id="popover-my-nfts" :class="(!loopRun) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link to="/my-nfts">My NFTs</b-link></div>
+    <div id="popover-my-nfts" :class="(!loopRun) ? 'bg-white' : ''" class="py-2 px-4 border-right"><b-link to="/my-nfts">My Collections</b-link></div>
     <MyNftData/>
     <div v-if="loopRun">
       <div :class="(filter ===  'collection') ? 'bg-white' : ''" class="py-2 px-4 mx-0 border-right"><b-link :to="'/my-nfts/' + loopRun.currentRunKey">{{loopRun.currentRun}}</b-link></div>

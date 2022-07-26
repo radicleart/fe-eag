@@ -8,6 +8,7 @@
     <b-col cols="2" class="py-2 mb-2 bg-light text-upper"><b-link @click="checkTransaction()">refresh</b-link></b-col>
     <b-col cols="4">Reference:</b-col><b-col cols="8">{{invoice.id}}</b-col>
     <b-col cols="4">Created:</b-col><b-col cols="8">{{getCreated}}</b-col>
+    <b-col cols="4">Paid:</b-col><b-col cols="8">{{getPricePaid}}</b-col>
     <b-col cols="4">Amount:</b-col><b-col cols="8">{{getAmount}}</b-col>
     <b-col cols="4">Status:</b-col><b-col cols="8">{{getStatus}}</b-col>
   </b-row>
@@ -106,13 +107,14 @@ export default {
     },
     getAmount () {
       const inv = this.$store.getters[APP_CONSTANTS.KEY_HISTORIC_INVOICE](this.invoice.id)
-      const precision = 100000000
+      return inv.transactionData.amount + '% (' + inv.transactionData.price + ' STX per percentage)'
+    },
+    getPricePaid () {
+      const inv = this.$store.getters[APP_CONSTANTS.KEY_HISTORIC_INVOICE](this.invoice.id)
       let amountStr = null
-      if (inv.currency === 'BTC') {
-        amountStr = Math.round(inv.amount * precision) / precision / precision + ' BTC'
-      } else {
-        amountStr = Math.round(inv.amountFiat * 100) / 10000 + ' ' + inv.currency
-      }
+      if (inv.transactionData.amountFiat > 0) amountStr = inv.transactionData.amountFiat + ' ' + inv.currency
+      if (inv.transactionData.amountBtc > 0) amountStr += ' / ' + inv.transactionData.amountBtc + ' BTC'
+      amountStr += ' / ' + inv.transactionData.amountStx + ' STX'
       return amountStr
     },
     getStatus () {

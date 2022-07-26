@@ -84,8 +84,7 @@ export default {
       } else if (data.opcode.indexOf('-payment-begun') > -1) {
         this.$bvModal.show('payment-begun-modal')
       } else if (data.opcode.indexOf('-payment-error') > -1) {
-        this.$notify({ type: 'danger', title: 'Payments', text: 'Payment was not recieved due to an unexpected error.' })
-        this.$bvModal.show('in-flight-modal')
+        // this.$notify({ type: 'danger', title: 'Payments', text: 'Payment was not recieved due to an unexpected error.' })
       } else if (data.opcode.indexOf('-payment-cancelled') > -1) {
         this.$notify({ type: 'warning', title: 'Payments', text: 'Payment cancelled.' })
       } else if (data.opcode.indexOf('-payment-success') > -1) {

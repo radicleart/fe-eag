@@ -1,5 +1,5 @@
 <template>
-<div :class="classes" class="sub-menu" style="min-width: 200px;">
+<div :class="classes" class="sub-menu" style="min-width: 200px;" v-if="loaded">
   <b-container>
     <b-row v-if="collection" class="border">
       <b-col cols="12" class="py-2 bg-light border">{{collection.currentRun}} #{{asset.contractAsset.nftIndex}}</b-col>
@@ -52,11 +52,11 @@
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'collection'">
       <b-col cols="12" class="py-2 bg-darkish text-white text-center">
-        <b-link :to="'/artwork/' + loopRun.contractId + '/' + asset.contractAsset.nftIndex">BUY NOW</b-link>
+        <b-link :to="'/artwork/' + collection.contractId + '/' + asset.contractAsset.nftIndex">BUY NOW</b-link>
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
-      <b-col cols="12" class="py-2 text-left" v-if="loopRun.type === 'SIP-013'">
+      <b-col cols="12" class="py-2 text-left" v-if="collection.type === 'SIP-013'">
         NFT fractions available <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light' }" :title="'Artist is selling percentages of this artwork'" class="ml-2" variant="outline-success"><b-icon icon="question-circle"/></b-link>
       </b-col>
     </b-row>
@@ -78,9 +78,9 @@
         </div>
       </b-col>
     </b-row>
-    <b-row class="border" v-if="loopRun.status !== 'unrevealed'">
+    <b-row class="border" v-if="collection.status !== 'unrevealed'">
       <b-col cols="12" class="border bg-white py-2">
-        <div><a class="text-primary" :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
+        <div><a class="text-primary" :href="transactionUrl()" target="_blank">show on explorer <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
       </b-col>
     </b-row>
   </b-container>
@@ -133,7 +133,7 @@ export default {
       return formatUtils.fmtAmount(this.asset.contractAsset.listingInUstx.price, 'stx') + ' ' + this.asset.contractAsset.listingInUstx.symbol
     },
     getMintPriceFormatted () {
-      return formatUtils.fmtAmount(this.loopRun.mintPrice * 100, 'stx')
+      return formatUtils.fmtAmount(this.collection.mintPrice * 100, 'stx')
     },
     formatNumber: function (number) {
       return utils.formatNumber(number)

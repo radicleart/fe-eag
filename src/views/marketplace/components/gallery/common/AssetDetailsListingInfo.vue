@@ -78,7 +78,7 @@
     </b-row>
     <b-row class="border" v-if="loopRun.status !== 'unrevealed'">
       <b-col cols="12" class="border bg-white py-2">
-        <div><a class="text-primary" :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
+        <div><a class="text-primary" :href="transactionUrl()" target="_blank">show on explorer <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
       </b-col>
     </b-row>
   </b-container>

@@ -1,7 +1,7 @@
 <template>
 <div>
   <div v-if="!loading">
-    <h1 class="pointer mb-4 border-bottom"><b-icon font-scale="0.6" icon="chevron-right"/> {{tokenCount}} NFTs</h1>
+    <h1 class="pointer mb-4 border-bottom">My {{loopRun.currentRun}} NFTs</h1>
     <div class="mb-4" v-if="resultSet && resultSet.length > 0">
       <div>
         <Pagination @changePage="gotoPage" :pagingData="pagingData" v-if="pagingData.numberOfItems > 0"/>

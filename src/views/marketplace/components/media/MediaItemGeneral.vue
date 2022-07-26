@@ -17,7 +17,7 @@
   </div>
   <div v-else-if="contentType === 'image'">
     <!-- <img :class="classes" v-on="$listeners" :src="image()" @error="imageError()"> -->
-    <FramedDisplayImage v-on="$listeners" :imageSrc="image()"/>
+    <FramedDisplayImage v-on="$listeners" :imageSrc="image"/>
   </div>
 </div>
 </template>
@@ -39,24 +39,23 @@ export default {
       mediaObjects: [],
       waitingImage: 'https://images.prismic.io/radsoc/f60d92d0-f733-46e2-9cb7-c59e33a15fc1_download.jpeg?auto=compress,format',
       missing: '/img/logo/logo.png',
-      contentType: null
+      contentType: 'image',
+      image: null
     }
   },
   mounted () {
-    if (this.asset) {
-      this.image()
-      this.contentType = 'image'
-      if (this.asset.properties && this.asset.properties.animation_url) {
-        if (this.asset.properties.animation_url.endsWith('pdf')) {
-          this.contentType = 'document'
-        } else if (this.asset.properties.animation_url.endsWith('mp4')) {
-          this.contentType = 'video'
-        } else if (this.asset.properties.animation_url.endsWith('mp3')) {
-          this.contentType = 'audio'
-        } else if (this.asset.properties.animation_url.endsWith('gltf') || this.asset.properties.animation_url.endsWith('glb')) {
-          this.contentType = 'threed'
+    if (this.asset.image) {
+      this.image = this.asset.image
+      // this.image()
+      this.loaded = true
+    } else {
+      this.$store.dispatch('stacksApiStore/fetchMetaData', this.asset).then((metaData) => {
+        if (metaData) {
+          this.image = metaData.image
         }
-      }
+        this.loaded = true
+        // this.image()
+      })
     }
   },
   computed: {
@@ -65,7 +64,21 @@ export default {
     setAltImg: function (event) {
       event.target.src = this.waitingImage
     },
-    image () {
+    image1 () {
+      if (this.asset) {
+        this.contentType = 'image'
+        if (this.asset.properties && this.asset.properties.animation_url) {
+          if (this.asset.properties.animation_url.endsWith('pdf')) {
+            this.contentType = 'document'
+          } else if (this.asset.properties.animation_url.endsWith('mp4')) {
+            this.contentType = 'video'
+          } else if (this.asset.properties.animation_url.endsWith('mp3')) {
+            this.contentType = 'audio'
+          } else if (this.asset.properties.animation_url.endsWith('gltf') || this.asset.properties.animation_url.endsWith('glb')) {
+            this.contentType = 'threed'
+          }
+        }
+      }
       return this.$store.getters[APP_CONSTANTS.KEY_ASSET_IMAGE_URL](this.asset)
     },
     dimensions: function () {

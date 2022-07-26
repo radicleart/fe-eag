@@ -10,11 +10,10 @@
   </div>
   <div v-if="showAdditional">
     <div class="d-flex justify-content-between">
-      <div class="w-50 p-1 mr-1 px-3 mb-1 bg-white">AVAILABLE</div>
-      <div class="w-50 p-1 ml-0 px-3 mb-1 bg-white">{{loopRun.versionLimit - mintCounter}} of {{loopRun.versionLimit}}</div>
+      <div class="w-100 p-1 ml-0 px-3 mb-1 bg-white">{{loopRun.versionLimit - mintCounter}} of {{loopRun.versionLimit}} AVAILABLE</div>
     </div>
     <div class="p-1 px-3 mb-1 bg-white" v-if="commission">PRICE {{commission.price}} {{getSymbol(commission.sipTenToken)}}</div>
-    <div class="p-1 px-3 mb-1 bg-white"><a class="text-primary" :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
+    <div class="p-1 px-3 mb-1 bg-white"><a class="text-primary" :href="transactionUrl()" target="_blank">Show on Explorer <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
   </div>
 </div>
 </template>

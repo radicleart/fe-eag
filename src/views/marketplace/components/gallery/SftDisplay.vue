@@ -140,7 +140,8 @@ export default {
         unanchored: true
       }
       this.$store.dispatch('stacksApiStore/fetchMempoolTransactions', data).then((mintEvents) => {
-        if (mintEvents) this.pending = mintEvents.filter((o) => o.value.indexOf('u' + this.nftIndex + ')') > -1)
+        // no value if tx is pending..
+        if (mintEvents) this.pending = mintEvents.filter((o) => o.value && o.value.indexOf('u' + this.nftIndex + ')') > -1)
       })
     },
     updateCacheByNftIndex (data) {
@@ -181,7 +182,7 @@ export default {
   },
   computed: {
     gaiaAsset () {
-      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET]
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET](this.nftIndex)
     },
     loopRun () {
       return this.$store.getters[APP_CONSTANTS.KEY_SAS_CURRENT_COLLECTION]

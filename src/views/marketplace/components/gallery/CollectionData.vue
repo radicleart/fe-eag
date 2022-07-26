@@ -1,10 +1,10 @@
 <template>
 <div class="bg-light" style="height: 100%;">
   <div class="p-2 px-3 bg-light" style="margin-bottom: 0.1rem;"><b-link class="text-primary" :to="'/nft-collection/' + loopRun.contractId">{{loopRun.currentRun}}</b-link></div>
-  <div class="text-lower p-1 px-3 bg-white" style="margin-bottom: 0.1rem;"><span class="text-secondary">by:</span> {{loopRun.makerName}}</div>
-  <div class="text-lower p-1 px-3 bg-white" style="margin-bottom: 0.1rem;">LIMIT: {{loopRun.versionLimit}}</div>
-  <div class="text-lower p-1 px-3 bg-white" style="margin-bottom: 0.1rem;">MINTED: {{mintCounter}}</div>
-  <div class="p-1 px-3 bg-white" style="margin-bottom: 0.1rem;"><a class="text-primary" :href="transactionUrl()" target="_blank">EXPLORER <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
+  <div class="p-1 px-3 bg-white" style="margin-bottom: 0.1rem;"><span class="text-secondary">By:</span> {{loopRun.makerName}}</div>
+  <div class="p-1 px-3 bg-white" style="margin-bottom: 0.1rem;">Collection of {{loopRun.versionLimit}}</div>
+  <!--<div class="p-1 px-3 bg-white" style="margin-bottom: 0.1rem;">Minted: {{mintCounter}}</div>-->
+  <div class="p-1 px-3 bg-white" style="margin-bottom: 0.1rem;"><a class="text-secondary" :href="transactionUrl()" target="_blank">Show on Explorer <!--<b-icon class="text-info" font-scale="1.5" icon="arrow-up-right-circle"/>--></a></div>
 </div>
 </template>
 

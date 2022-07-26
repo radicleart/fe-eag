@@ -34,12 +34,17 @@ export default {
     }
   },
   mounted () {
-    this.$store.dispatch('stacksApiStore/fetchMetaData', this.asset).then((metaData) => {
-      if (metaData) {
-        this.image = metaData.image
-      }
+    if (this.asset.image) {
+      this.image = this.asset.image
       this.loaded = true
-    })
+    } else {
+      this.$store.dispatch('stacksApiStore/fetchMetaData', this.asset).then((metaData) => {
+        if (metaData) {
+          this.image = metaData.image
+        }
+        this.loaded = true
+      })
+    }
   },
   methods: {
   },

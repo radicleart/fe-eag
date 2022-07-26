@@ -111,7 +111,7 @@ export default {
       } else if (data.opcode === 'payment-restart') {
         this.paymentExpired()
       } else if (data.opcode.indexOf('-payment-error') > -1) {
-        this.$notify({ type: 'danger', title: 'Payments', text: 'Payment was not recieved due to an unexpected error.' })
+        // this.$notify({ type: 'danger', title: 'Payments', text: 'Payment was not recieved due to an unexpected error.' })
       } else if (data.opcode.indexOf('-payment-cancelled') > -1) {
         this.$notify({ type: 'warning', title: 'Payments', text: this.errorMessage })
       } else if (data.opcode === 'change-payment-method') {

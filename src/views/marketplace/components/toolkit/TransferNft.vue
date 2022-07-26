@@ -1,9 +1,9 @@
 <template>
   <div class="mx-auto">
     <b-card-group>
-      <b-card class="border-dark p-3" style="width: 100%;" bg-variant="dark" header-tag="header" footer-tag="footer">
+      <b-card class="border-dark p-3" style="width: 100%;" header-tag="header" footer-tag="footer">
         <!-- <SellingHeader :allowEdit="true"/> -->
-        <b-card-text class="text-whiter">
+        <b-card-text class="">
           <div class="row mb-4">
             <div class="col-12">Transfer this NFT to another address</div>
           </div>
@@ -22,7 +22,7 @@
             </div>
             <div class="col-12 text-right" v-if="showTransferButton">
               <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'danger' }" :title="'Transfer this NFT to another address - can\'t be undone!'" class="text-white mr-3" variant="outline-success"><b-icon class="ml-2" icon="question-circle"/></b-link>
-              <b-button variant="outline-warning" style="width: 170px;" @click="transferNft()">Transfer NFT</b-button>
+              <b-button variant="outline-primary" style="width: 170px;" @click="transferNft()">Transfer NFT</b-button>
             </div>
           </div>
         </b-card-text>

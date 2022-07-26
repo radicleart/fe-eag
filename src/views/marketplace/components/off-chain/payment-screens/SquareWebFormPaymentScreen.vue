@@ -194,6 +194,7 @@ export default {
           console.error(e.message)
           const paymentResults = { opcode: 'fiat-payment-error' }
           this.$emit('rpayEvent', paymentResults)
+          this.$notify({ type: 'warning', title: 'Payments', text: 'Payment was not taken - only UK based payment cards are accepted.' })
         })
       }).catch(e => {
         this.disabled = false

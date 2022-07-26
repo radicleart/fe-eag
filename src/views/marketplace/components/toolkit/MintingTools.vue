@@ -13,20 +13,19 @@
       </div>
     </div>
     <div id="my-nft-tabs" v-else class="mt-5">
-      <b-tabs justified content-class="bg-black text-white p-4 border mt-3">
+      <b-tabs justified content-class="py-4 border-bottom mt-3">
         <b-tab active title="Listings">
           <div v-if="items[0].contractAsset.listingInUstx && items[0].contractAsset.listingInUstx.price > 0">
+            <div>De-list your token for sale on the secondary marketplace</div>
             <UnlistAsset @cancel="cancel" :loopRun="loopRun" :contractAsset="items[0].contractAsset" v-if="items[0].contractAsset && isListed()"/>
           </div>
           <div v-else>
-            <div><b-button class="btn-action" variant="outline-warning" @click="openSaleDataDialog()">List Item</b-button></div>
+            <div>List your token for sale on the secondary marketplace</div>
+            <div class="mt-4"><b-button class="btn-action" variant="outline-primary" @click="openSaleDataDialog()">List Item</b-button></div>
           </div>
         </b-tab>
         <b-tab title="Transfer">
           <TransferNft :loopRun="loopRun" :item="items[0]"/>
-        </b-tab>
-        <b-tab title="Operator">
-          <ApprovalFlow :loopRun="loopRun" :item="items[0]"/>
         </b-tab>
       </b-tabs>
     </div>
@@ -54,7 +53,6 @@ import ListAsset from './sell-setup/ListAsset'
 import UnlistAsset from './sell-setup/UnlistAsset'
 import { APP_CONSTANTS } from '@/app-constants'
 import TransferNft from '@/views/marketplace/components/toolkit/TransferNft'
-import ApprovalFlow from '@/views/marketplace/components/toolkit/approvals/ApprovalFlow'
 
 const STX_CONTRACT_NAME_V2 = process.env.VUE_APP_STACKS_CONTRACT_NAME_V2
 
@@ -65,8 +63,7 @@ export default {
     MintingFlowV2,
     ListAsset,
     UnlistAsset,
-    TransferNft,
-    ApprovalFlow
+    TransferNft
   },
   props: ['items', 'loopRun', 'mintAllocations'],
   data: function () {

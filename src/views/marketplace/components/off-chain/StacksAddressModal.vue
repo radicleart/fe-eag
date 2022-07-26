@@ -96,7 +96,7 @@ export default {
     paymentMessage () {
       const configuration = this.$store.getters[APP_CONSTANTS.KEY_PURCHASE_CONFIGURATION]
       let msg = 'You are buying ' + this.amount + '% of <span class="text-grey">' + this.loopRun.currentRun + ' #' + this.transactionData.nftIndex + '</span>'
-      if (this.amount > 0) msg += ' For ' + (this.amount * configuration.payment.amountStx) + ' STX (' + configuration.payment.amountFiat + ' ' + configuration.payment.currency + ' / ' + configuration.payment.amountBtc + ' BTC)'
+      if (this.amount > 0) msg += ' For ' + (this.amount * this.loopRun.mintPrice) + ' STX (' + configuration.payment.amountFiat + ' ' + configuration.payment.currency + ' / ' + configuration.payment.amountBtc + ' BTC)'
       return msg
     },
     profile () {

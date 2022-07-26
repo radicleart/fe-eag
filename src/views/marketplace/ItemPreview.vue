@@ -61,7 +61,7 @@ export default {
   },
   data: function () {
     return {
-      loaded: true,
+      loaded: false,
       contractId: null,
       componentKey: 0,
       nftIndex: null,
@@ -173,7 +173,7 @@ export default {
   },
   computed: {
     item () {
-      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET]
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_GAIA_ASSET](this.nftIndex)
     },
     loopRun () {
       return this.$store.getters[APP_CONSTANTS.KEY_SAS_CURRENT_COLLECTION]

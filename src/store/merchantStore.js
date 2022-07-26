@@ -7,10 +7,11 @@ import { APP_CONSTANTS } from '@/app-constants'
 let socket = null
 let stompClient = null
 const precision = 100000000
-const precisionStx = 1000000
+// const precisionStx = 1000000
 const setAmounts = function (tickerRates, configuration) {
   try {
     const rate = tickerRates.find((o) => o.currency === configuration.payment.currency)
+    configuration.payment.amountStx = configuration.commission.price * configuration.commission.amount
     let amountFiat = configuration.payment.amountFiat
     if (configuration.commission) amountFiat = (configuration.commission.price * configuration.commission.amount * rate.stxPrice)
     if (configuration.payment.allowMultiples) {
@@ -22,7 +23,13 @@ const setAmounts = function (tickerRates, configuration) {
     configuration.payment.amountBtc = Math.round(amountBtc * precision) / precision
     configuration.payment.amountSat = Math.round(amountBtc * precision)
     configuration.payment.amountEth = Math.round((amountFiat / rate.ethPrice) * precision) / precision
-    configuration.payment.amountStx = Math.round((amountFiat / rate.stxPrice) * precisionStx) / precisionStx
+    if (configuration.transactionData) {
+      configuration.transactionData.amount = configuration.commission.amount
+      configuration.transactionData.currency = configuration.payment.currency
+      configuration.transactionData.amountFiat = configuration.payment.amountFiat
+      configuration.transactionData.amountBtc = configuration.payment.amountBtc
+      configuration.transactionData.amountStx = configuration.payment.amountStx
+    }
     return configuration
   } catch {
     return configuration
@@ -386,12 +393,11 @@ const merchantStore = {
         const configuration = state.configuration
         axios.get(process.env.VUE_APP_RISIDIO_API + '/mesh/v1/rates/ticker').then(response => {
           commit('setTickerRates', response.data)
-          setAmounts(state.tickerRates, configuration)
-          commit('updateConfiguration', configuration)
           if (transactionData) {
             configuration.transactionData = transactionData
-            commit('updateConfiguration', configuration)
           }
+          setAmounts(state.tickerRates, configuration)
+          commit('updateConfiguration', configuration)
           const profile = rootGetters['rpayAuthStore/getMyProfile']
           dispatch('fetchPurchases', { stxAddress: profile.stxAddress }).then((payments) => {
             if (payments) {
@@ -504,9 +510,6 @@ const merchantStore = {
       let config = state.configuration
       config.commission.amount = data.amount
       config = setAmounts(state.tickerRates, config)
-      if (config.transactionData) {
-        config.transactionData.amount = data.amount
-      }
       commit('updateConfiguration', config)
     },
     stopListening ({ commit }) {
