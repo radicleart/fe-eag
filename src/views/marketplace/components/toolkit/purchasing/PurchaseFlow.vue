@@ -59,8 +59,7 @@ export default {
         return
       }
       if (!profile.loggedIn) {
-        this.$store.dispatch('rpayAuthStore/startLogin').then(() => {
-          this.$store.dispatch('rpayCategoryStore/fetchLatestLoopRunForStxAddress', { currentRunKey: process.env.VUE_APP_DEFAULT_LOOP_RUN, stxAddress: profile.stxAddress }, { root: true })
+        this.$store.dispatch('stacksAuthStore/startLogin').then(() => {
         }).catch((err) => {
           console.log(err)
           // https://www.hiro.so/wallet/install-web

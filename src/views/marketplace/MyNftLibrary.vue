@@ -47,7 +47,7 @@ export default {
         this.loaded = true
         if (reset) this.componentKey++
       } else {
-        this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.currentRunKey).then((loopRun) => {
+        this.$store.dispatch('stacksApiStore/fetchLoopRun', this.currentRunKey).then((loopRun) => {
           this.loopRun = loopRun
           this.loaded = true
           if (reset) this.componentKey++

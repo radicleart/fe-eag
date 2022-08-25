@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     startLogout () {
-      this.$store.dispatch('rpayAuthStore/startLogout').then(() => {
+      this.$store.dispatch('stacksAuthStore/startLogout').then(() => {
         // localStorage.clear()
         // sessionStorage.clear()
         if (this.$route.name !== 'splash') {
@@ -34,7 +34,7 @@ export default {
       })
     },
     startLogin () {
-      this.$store.dispatch('rpayAuthStore/startLogin').then(() => {
+      this.$store.dispatch('stacksAuthStore/startLogin').then(() => {
         if (this.$route.name !== 'my-nfts') {
           this.$router.push('/my-nfts')
         }

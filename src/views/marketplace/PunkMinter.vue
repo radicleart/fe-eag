@@ -32,7 +32,6 @@
 </template>
 
 <script>
-import { APP_CONSTANTS } from '@/app-constants'
 import CollectionsNavigationMinting from '@/views/marketplace/components/gallery/CollectionsNavigationMinting'
 import PunkMintHelper from '@/views/marketplace/components/minting/PunkMintHelper'
 import CollectionImage from '@/views/marketplace/components/gallery/CollectionImage'
@@ -70,7 +69,7 @@ export default {
   mounted () {
     this.makerUrlKey = this.$route.params.maker
     this.currentRunKey = this.$route.params.collection
-    this.$store.dispatch('rpayCategoryStore/fetchLoopRun', this.currentRunKey).then((loopRun) => {
+    this.$store.dispatch('stacksApiStore/fetchLoopRun', this.currentRunKey).then((loopRun) => {
       this.loopRun = loopRun
       let data = {
         asset_identifier: loopRun.contractId + '::' + loopRun.assetName,
@@ -115,20 +114,11 @@ export default {
           $self.$bvModal.hide('minting-modal')
           $self.transaction = data
           if (data.txStatus === 'success') {
-            $self.$store.dispatch('rpayCategoryStore/fetchLoopRun', $self.currentRunKey).then((loopRun) => {
+            $self.$store.dispatch('stacksApiStore/fetchLoopRun', $self.currentRunKey).then((loopRun) => {
               $self.loopRun = loopRun
               $self.mintImage = $self.loopRun.mintImage1 || $self.loopRun.image
               $self.componentKey++
             })
-            if (data.functionName === 'mint-token' || data.functionName === 'collection-mint-token') {
-              const item = $self.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](data.assetHash)
-              $self.saveMintingInfo(item, data)
-            } else if (data.assetHashes && (data.functionName === 'mint-token-twenty' || data.functionName === 'collection-mint-token-twenty')) {
-              data.assetHashes.forEach((o) => {
-                const item = $self.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](o)
-                $self.saveMintingInfo(item, data)
-              })
-            }
           } else if (data.txStatus === 'pending') {
             $self.mintImage = $self.loopRun.mintImage2 || $self.loopRun.image
           } else {
@@ -171,8 +161,6 @@ export default {
   },
   computed: {
     mintCounter () {
-      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
       const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter
@@ -181,7 +169,7 @@ export default {
       return this.loopRun.versionLimit - this.mintCounter
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     }
   }

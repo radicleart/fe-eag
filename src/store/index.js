@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import axios from 'axios'
-import { APP_CONSTANTS } from '@/app-constants'
+import stacksAuthStore from './stacksAuthStore'
 import storeUtils from './storeUtils'
 import contentStore from './contentStore'
 import merchantStore from './merchantStore'
 import stacksApiStore from './stacksApiStore'
+import stacksPurchaseStore from './stacksPurchaseStore'
 
 Vue.use(Vuex)
 
@@ -13,7 +13,9 @@ export default new Vuex.Store({
   modules: {
     contentStore,
     merchantStore,
-    stacksApiStore
+    stacksApiStore,
+    stacksPurchaseStore,
+    stacksAuthStore
   },
   state: {
     configuration: {}
@@ -42,33 +44,14 @@ export default new Vuex.Store({
   actions: {
     initApplication ({ rootGetters, dispatch }) {
       return new Promise((resolve) => {
-        dispatch('rpayAuthStore/fetchMyAccount').then((profile) => {
+        dispatch('stacksAuthStore/fetchMyAccount').then((profile) => {
+          dispatch('stacksApiStore/fetchLoopRuns')
           if (profile.loggedIn) {
-            const authHeaders = rootGetters[APP_CONSTANTS.KEY_AUTH_HEADERS]
-            axios.interceptors.request.use(function (config) {
-              config.headers.Authorization = authHeaders.headers.Authorization
-              config.headers.IdentityAddress = authHeaders.headers.IdentityAddress
-              config.headers.STX_ADDRESS = profile.stxAddress
-              return config
-            })
-            dispatch('rpayStacksContractStore/fetchFullRegistry')
-            const data = { stxAddress: 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG', mine: true }
-            if (process.env.VUE_APP_NETWORK !== 'local') {
-              data.stxAddress = profile.stxAddress
-            } else {
-              dispatch('rpayStacksStore/fetchMacSkyWalletInfo')
-            }
-            dispatch('rpayMarketGenFungStore/sipTenTokenFindBy').then(() => {
-              dispatch('rpayCategoryStore/fetchLoopRuns')
-              dispatch('rpayCategoryStore/fetchLatestLoopRunForStxAddress', { currentRunKey: process.env.VUE_APP_DEFAULT_LOOP_RUN, stxAddress: profile.stxAddress }, { root: true })
-              // dispatch('rpayMyItemStore/initSchema').then(rootFile => {
-              dispatch('rpayAuthStore/fetchAccountInfo', { stxAddress: profile.stxAddress, force: true }).then(account => {
+            dispatch('stacksApiStore/sipTenTokenFindBy').then(() => {
+              dispatch('stacksAuthStore/fetchAccountInfo', { stxAddress: profile.stxAddress, force: true }).then(account => {
                 resolve(account)
               })
             })
-            // })
-          } else {
-            dispatch('rpayCategoryStore/fetchLoopRuns')
           }
           resolve(profile)
         })

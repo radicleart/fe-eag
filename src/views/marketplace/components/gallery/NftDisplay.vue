@@ -250,15 +250,6 @@ export default {
       const stacksApiUrl = process.env.VUE_APP_STACKS_EXPLORER
       return stacksApiUrl + '/txid/' + this.gaiaAsset.mintInfo.txId + '?chain=' + process.env.VUE_APP_NETWORK
     },
-    txPending () {
-      let transactions = []
-      if (this.gaiaAsset.contractAsset) {
-        transactions = this.$store.getters[APP_CONSTANTS.KEY_TX_PENDING_BY_TX_ID](this.gaiaAsset.contractAsset.nftIndex)
-      } else {
-        transactions = this.$store.getters[APP_CONSTANTS.KEY_TX_PENDING_BY_ASSET_HASH](this.gaiaAsset.assetHash)
-      }
-      return transactions
-    },
     editionsAvailable: function () {
       return this.gaiaAsset.contractAsset.tokenInfo.edition === 1 && this.gaiaAsset.contractAsset.tokenInfo.maxEditions > 1 && this.gaiaAsset.contractAsset.editionCounter < this.gaiaAsset.contractAsset.tokenInfo.maxEditions
     },

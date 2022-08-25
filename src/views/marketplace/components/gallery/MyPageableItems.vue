@@ -43,7 +43,7 @@ export default {
       },
       trait: '',
       clicked: false,
-      resultSet: [],
+      // resultSet: [],
       tokenCount: null,
       loading: true,
       doPaging: true,
@@ -87,20 +87,15 @@ export default {
       const data = {
         contractId: (this.loopRun) ? this.loopRun.contractId : null,
         stxAddress: this.profile.stxAddress,
+        assetName: this.loopRun.assetName,
         type: this.loopRun.type,
         asc: true,
-        page: page,
-        pageSize: this.pagingData.pageSize
+        offset: page,
+        limit: this.pagingData.pageSize,
+        tx_metadata: false
       }
-      if (process.env.VUE_APP_NETWORK === 'local') {
-        data.stxAddress = 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG'
-      }
-      let method = 'rpayStacksContractStore/fetchMyTokensCPSV2'
-      if (this.loopRun.type === 'SIP-013') {
-        method = 'rpayStacksContractStore/fetchMyTokensSip013'
-      }
-      this.$store.dispatch(method, data).then((result) => {
-        this.resultSet = result.gaiaAssets // this.resultSet.concat(results)
+      this.$store.dispatch('stacksApiStore/fetchMyHoldings', data).then((result) => {
+        // this.resultSet = result.gaiaAssets // this.resultSet.concat(results)
         this.tokenCount = result.tokenCount
         this.pagingData.numberOfItems = result.gaiaAssets.length
         this.loading = false
@@ -111,6 +106,11 @@ export default {
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       return profile
+    },
+    resultSet () {
+      if (this.contractId) return this.$store.getters[APP_CONSTANTS.KEY_SAS_MY_HOLDINGS_FOR_CONTRACT](this.contractId)
+      const resultSet = this.$store.getters[APP_CONSTANTS.KEY_SAS_MY_HOLDINGS]
+      return resultSet
     }
   }
 }

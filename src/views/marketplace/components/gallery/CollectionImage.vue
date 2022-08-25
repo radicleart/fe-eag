@@ -51,7 +51,7 @@ export default {
       return this.numbLoopRuns > this.index + 1
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     }
   }

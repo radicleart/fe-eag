@@ -3,13 +3,16 @@
   <div class="text-white" v-if="item && item.contractAsset">
     <b-alert class="text-small" show :variant="variant()">
       <b-row class="text-small">
-        <b-col cols="12">
+        <b-col cols="12" class="py-2 text-small text-bold">
           <span class="text-small text-bold">NFT #{{item.contractAsset.nftIndex}}
             <!-- : Edition {{item.contractAsset.tokenInfo.edition}} of {{item.contractAsset.tokenInfo.maxEditions}} -->
           </span>
         </b-col>
-        <b-col cols="12">
+        <b-col cols="12" class="py-2 text-small text-bold">
           <span class="">{{item.contractAsset.owner}} <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'warning' }"  :title="'The owning stacks address'"><b-icon class="ml-2" font-scale="1.3" icon="question-circle"/></b-link></span>
+        </b-col>
+        <b-col cols="12" v-if="mySupply > 0" class="py-2 text-small text-bold">
+          You own {{mySupply}}% of this artwork
         </b-col>
       </b-row>
       <b-row v-if="showRoyalties">
@@ -54,6 +57,12 @@ export default {
     }
   },
   computed: {
+    mintEvents () {
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.item.contractAsset.nftIndex)
+    },
+    mySupply () {
+      return this.item.balance
+    },
     minted: function () {
       return !this.item.contractAsset && this.item.mintInfo && this.item.mintInfo.txId && this.item.mintInfo.txStatus === 'success'
     },
@@ -65,7 +74,7 @@ export default {
       return (this.$route.name === 'asset-by-hash' || this.$route.name === 'asset-by-index')
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     },
     iAmOwner () {

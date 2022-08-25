@@ -122,7 +122,7 @@ export default {
       return 'height: auto, width: ' + width + 'px;'
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     },
     iAmOwner () {

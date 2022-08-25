@@ -45,7 +45,7 @@ export default {
   },
   mounted () {
     this.$store.commit(APP_CONSTANTS.SET_DISPLAY_CARD, 100)
-    const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](this.items[0].assetHash)
+    const item = this.items[0]
     const configuration = this.$store.getters['rpayStore/getConfiguration']
     // const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
     // configuration.minter.beneficiariesV2[1].chainAddress = profile.stxAddress
@@ -62,7 +62,7 @@ export default {
       // this.errorMessage = 'Minting non fungible token - takes a minute or so..'
       // the post condition applies to the address the funds are going to not from!!!
       // when minting the funds go to the contract admin.
-      const contractAsset = this.$store.getters[APP_CONSTANTS.KEY_ASSET_FROM_CONTRACT_BY_HASH](this.items[0].assetHash)
+      const contractAsset = this.items[0].contractAddress
       if (contractAsset) {
         return
       }
@@ -87,7 +87,7 @@ export default {
         functionName: 'mint-token'
       }
       this.$store.dispatch('rpayPurchaseStore/mintToken', data).then((result) => {
-        const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](result.assetHash)
+        const item = this.items[0]
         if (result.txId) {
           item.mintInfo = {
             txId: result.txId,
@@ -103,7 +103,7 @@ export default {
       })
     },
     mintTwentyTokens: function () {
-      const contractAsset = this.$store.getters[APP_CONSTANTS.KEY_ASSET_FROM_CONTRACT_BY_HASH](this.items[0].assetHash)
+      const contractAsset = this.items[0].contractAddress
       if (contractAsset) {
         return
       }
@@ -153,7 +153,7 @@ export default {
         functionName: 'mint-token-twenty'
       }
       this.$store.dispatch('rpayPurchaseStore/mintTwentyTokens', data).then((result) => {
-        const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](result.assetHash)
+        const item = this.items[0]
         if (result.txId) {
           item.mintInfo = {
             txId: result.txId,
@@ -234,7 +234,7 @@ export default {
       }
     },
     updateItem () {
-      const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](this.items[0].assetHash)
+      const item = this.items[0]
       item.contractId = this.loopRun.contractId
       item.beneficiaries = this.beneficiaries
       this.$store.dispatch('rpayMyItemStore/saveItem', item).then((item) => {
@@ -252,7 +252,7 @@ export default {
   },
   computed: {
     item () {
-      const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](this.items[0].assetHash)
+      const item = this.items[0]
       return item
     },
     isMinted () {

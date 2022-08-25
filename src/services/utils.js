@@ -19,6 +19,7 @@ const utils = {
     }
     let part1 = value.repr.split('owner ')[1]
     part1 = part1.split(')')[0]
+    if (part1.startsWith('\'')) part1 = part1.substring(1)
     let part2 = value.repr.split('token-id ')[1]
     part2 = Number(part2.split(')')[0].substring(1))
     return { owner: part1, nftIndex: part2 }
@@ -364,6 +365,116 @@ const utils = {
       }
       request.send()
     })
+  },
+  resolvePrincipalsTokens: function (network, tokens, sipTenTokens) {
+    const resolvedTokens = []
+    if (!tokens) return resolvedTokens
+    tokens.forEach((token) => {
+      resolvedTokens.push(this.resolvePrincipalsToken(network, token, sipTenTokens))
+    })
+    return resolvedTokens
+  },
+  resolvePrincipalsGaiaToken: function (network, gaiaAsset, sipTenTokens) {
+    gaiaAsset.contractAsset = this.resolvePrincipalsToken(network, gaiaAsset.contractAsset, sipTenTokens)
+    return gaiaAsset
+  },
+  resolvePrincipalsGaiaTokens: function (network, gaiaAssets, sipTenTokens) {
+    if (!gaiaAssets) return null
+    gaiaAssets.forEach((gaiaAsset) => {
+      gaiaAsset.contractAsset = this.resolvePrincipalsToken(network, gaiaAsset.contractAsset, sipTenTokens)
+    })
+    return gaiaAssets
+  },
+  convertAddressInt: function (network, address) {
+    try {
+      return this.convertAddress(network, address)
+    } catch (err) {
+      // c32address fails if the address is already converted - use this to prevent
+      return address
+    }
+  },
+  resolvePrincipalsToken: function (network, token, sipTenTokens) {
+    if (!token) return null
+    token.owner = this.convertAddressInt(network, token.owner)
+    token.tokenInfo.editionCost = this.fromMicroAmount(token.tokenInfo.editionCost)
+    if (token.offerHistory) {
+      token.offerHistory.forEach((offer) => {
+        offer.offerer = this.convertAddressInt(network, offer.offerer)
+        offer.amount = this.fromMicroAmount(offer.amount)
+      })
+    }
+    if (token.transferHistory) {
+      token.transferHistory.forEach((transfer) => {
+        transfer.from = this.convertAddressInt(network, transfer.from)
+        transfer.to = this.convertAddressInt(network, transfer.to)
+        transfer.amount = this.fromMicroAmount(transfer.amount)
+      })
+    }
+    if (token.listingInUstx && token.listingInUstx.price > 0) {
+      token.listingInUstx.commission = this.convertAddressInt(network, token.listingInUstx.commission)
+      token.listingInUstx.price = this.fromMicroAmount(token.listingInUstx.price)
+      if (sipTenTokens && token.listingInUstx.token) {
+        token.listingInUstx.token = this.convertAddressInt(network, token.listingInUstx.token)
+        const sipTen = sipTenTokens.find((o) => o.token === token.listingInUstx.token)
+        if (sipTen) {
+          token.listingInUstx.price = this.fromMicroAmount(token.listingInUstx.price, sipTen.decimals)
+        }
+      }
+    }
+    if (token.saleData) {
+      token.saleData.buyNowOrStartingPrice = this.fromMicroAmount(token.saleData.buyNowOrStartingPrice)
+      token.saleData.incrementPrice = this.fromMicroAmount(token.saleData.incrementPrice)
+      token.saleData.reservePrice = this.fromMicroAmount(token.saleData.reservePrice)
+    }
+    if (token.beneficiaries) {
+      let idx = 0
+      if (!token.beneficiaries.secondaries) {
+        token.beneficiaries.secondaries = []
+      }
+      token.beneficiaries.shares.forEach((share) => {
+        token.beneficiaries.shares[idx].value = this.fromMicroAmount(share.value) / 100
+        token.beneficiaries.addresses[idx].valueHex = this.convertAddressInt(network, token.beneficiaries.addresses[idx].valueHex)
+        if (token.beneficiaries.secondaries[idx]) {
+          const secondary = token.beneficiaries.secondaries[idx]
+          secondary.value = this.fromMicroAmount(secondary.value) / 100
+        } else {
+          token.beneficiaries.secondaries[idx] = 0
+        }
+        idx++
+      })
+    }
+    if (token.bidHistory && token.bidHistory.length > 0) {
+      const cycledBidHistory = []
+      token.bidHistory.forEach((bid) => {
+        bid.amount = this.fromMicroAmount(bid.amount)
+        bid.bidder = this.convertAddressInt(network, bid.bidder)
+        if (token.saleData.saleCycleIndex === bid.saleCycle) {
+          cycledBidHistory.push(bid)
+        }
+      })
+      token.cycledBidHistory = cycledBidHistory
+    }
+    return token
+  },
+  resolvePrincipals: function (registry, network) {
+    if (!registry || !registry.administrator) return
+    try {
+      registry.administrator = this.convertAddressInt(network, registry.administrator)
+    } catch (err) {
+      // c32address fails if the address is already converted - use this to prevent
+      // double conversions
+      return registry
+    }
+    if (registry.applications) {
+      registry.applications.forEach((app) => {
+        app.owner = this.convertAddressInt(network, app.owner)
+        if (app.tokenContract) {
+          app.tokenContract.administrator = this.convertAddressInt(network, app.tokenContract.administrator)
+          app.tokenContract.mintPrice = this.fromMicroAmount(app.tokenContract.mintPrice)
+        }
+      })
+    }
+    return registry
   }
 }
 export default utils

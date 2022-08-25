@@ -23,11 +23,14 @@
           <a target="_blank" :href="cacheUrl()">read from cache</a>
         </p>
         -->
-        <p v-if="item.description" class="pt-4 text-small" v-html="preserveWhiteSpace(item.description)"></p>
-        <MintInfo v-if="loopRun.currentRunKey" :item="item" :loopRun="loopRun"/>
-        <PendingTransactionInfo v-if="pending && pending.txStatus === 'pending'" :pending="pending"/>
-        <div v-else-if="iAmOwner">
-          <MintingTools v-if="loopRun.currentRunKey" class="w-100" :items="[item]" :loopRun="loopRun" @update="update"/>
+        <div v-if="item.balance === 0">You no longer own this item</div>
+        <div v-else>
+          <p v-if="item.description" class="pt-4 text-small" v-html="preserveWhiteSpace(item.description)"></p>
+          <MintInfo v-if="loopRun.currentRunKey" :item="item" :loopRun="loopRun"/>
+          <PendingTransactionInfo v-if="pending && pending.txStatus === 'pending'" :pending="pending"/>
+          <div v-else-if="iAmOwner">
+            <MintingTools v-if="loopRun.currentRunKey" class="w-100" :items="[item]" :loopRun="loopRun" @update="update"/>
+          </div>
         </div>
         <div>
           <NftHistory v-if="loopRun.currentRunKey" class="mt-5" @update="update" @setPending="setPending" :loopRun="loopRun"  :gaiaAsset="item"/>
@@ -108,9 +111,10 @@ export default {
     fetchItem () {
       const data = {
         contractId: this.contractId,
-        nftIndex: this.nftIndex
+        nftIndex: this.nftIndex,
+        stxAddress: this.profile.stxAddress
       }
-      this.$store.dispatch('stacksApiStore/initAssetDetails', data).then(() => {
+      this.$store.dispatch('stacksApiStore/initSingleAsset', data).then(() => {
         this.loaded = true
       })
     },
@@ -185,10 +189,10 @@ export default {
       if (this.item.contractAsset && this.loopRun && this.loopRun.type === 'punks') {
         return this.loopRun.currentRun + ' #' + this.item.contractAsset.nftIndex
       }
-      if (this.item.contractAsset) {
+      if (this.item.contractAsset && this.item.name) {
         return '#' + this.item.contractAsset.nftIndex + ' ' + this.item.name
       }
-      return this.item.name
+      return '#' + this.item.contractAsset.nftIndex
     },
     runKey () {
       const defaultLoopRun = process.env.VUE_APP_DEFAULT_LOOP_RUN
@@ -204,15 +208,6 @@ export default {
       let txId = this.item.mintInfo.txId
       if (!txId.startsWith('0x')) txId = '0x' + txId
       return stacksApiUrl + '/txid/' + txId + '?chain=' + process.env.VUE_APP_NETWORK
-    },
-    txPending () {
-      let transactions = []
-      if (this.item.contractAsset) {
-        transactions = this.$store.getters[APP_CONSTANTS.KEY_TX_PENDING_BY_TX_ID](this.item.contractAsset.nftIndex)
-      } else {
-        transactions = this.$store.getters[APP_CONSTANTS.KEY_TX_PENDING_BY_ASSET_HASH](this.item.assetHash)
-      }
-      return transactions
     },
     options () {
       const videoOptions = {
@@ -232,24 +227,8 @@ export default {
       }
       return videoOptions
     },
-    /**
-    item1 () {
-      // get the item from my uploads - then try my nfts
-      if (this.nftIndex !== null && typeof this.nftIndex !== 'undefined' && this.nftIndex > -1) {
-        return this.$store.getters[APP_CONSTANTS.KEY_ASSET_FROM_NFT_INDEX](Number(this.nftIndex))
-      }
-      let item = this.$store.getters[APP_CONSTANTS.KEY_GAIA_ASSET_BY_HASH_EDITION]({ assetHash: this.assetHash, edition: 1 })
-      if (!item) {
-        item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](this.assetHash)
-      }
-      if (this.edition > 1) {
-        item = this.$store.getters[APP_CONSTANTS.KEY_GAIA_ASSET_BY_HASH_EDITION]({ assetHash: this.assetHash, edition: this.edition })
-      }
-      return item
-    },
-    **/
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     },
     iAmOwner () {
@@ -259,7 +238,7 @@ export default {
       return this.item.contractAsset && this.item.contractAsset.owner === this.profile.stxAddress
     },
     minted () {
-      // const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      // const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       // return !this.item.contractAsset && this.item.contractAsset.owner === profile.stxAddress
       return this.item.contractAsset
     },

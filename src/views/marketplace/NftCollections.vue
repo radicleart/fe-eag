@@ -88,7 +88,7 @@ export default {
       return utils.sortLoopRuns(loopRuns)
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     }
   }

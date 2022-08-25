@@ -66,7 +66,7 @@ export default {
     sendPayment () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       if (!profile.loggedIn) {
-        this.$store.dispatch('rpayAuthStore/startLogin').then((profile) => {
+        this.$store.dispatch('stacksAuthStore/startLogin').then((profile) => {
           this.transfer()
         }).catch((err) => {
           console.log(err)

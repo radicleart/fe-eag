@@ -24,7 +24,7 @@
             <PaymentTrigger class="w-100" @update="update" :gaiaAsset="gaiaAsset" :loopRun="loopRun" :transactionData="transactionDataSft()"/>
           </b-col>
           <b-col md="12" align-self="end" v-else-if="hasSupply">
-            <b-button variant="outline-dark" to="/my-nfts" class="w-50 btn-asset-details">YOU OWN {{mySupply}}% - MANAGE</b-button>
+            <b-button variant="outline-dark" :to="'/nft-preview/' + gaiaAsset.contractAsset.contractId + '/' + gaiaAsset.contractAsset.nftIndex" class="w-50 btn-asset-details">YOU OWN {{mySupply}}% - MANAGE</b-button>
           </b-col>
           <b-col md="12" align-self="end" v-else>
             <b-button :disabled="true" variant="outline-dark" class="w-50 btn-asset-details">SOLD</b-button>
@@ -230,7 +230,7 @@ export default {
       return this.gaiaAsset.contractAsset.owner
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     }
   }

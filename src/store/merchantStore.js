@@ -2,7 +2,6 @@ import lsatHelper from './lsatHelper'
 import axios from 'axios'
 import SockJS from 'sockjs-client'
 import Stomp from '@stomp/stompjs'
-import { APP_CONSTANTS } from '@/app-constants'
 
 let socket = null
 let stompClient = null
@@ -360,7 +359,7 @@ const merchantStore = {
             sender: null
           }
         }
-        dispatch('rpayStacksStore/callApi', txOptions, { root: true }).then((result) => {
+        dispatch('stacksApiStore/callApiDirect', txOptions, { root: true }).then((result) => {
           invoice.transactionData.txStatus = result.tx_status
           commit('setHistoricInvoice', invoice)
           resolve(result)
@@ -398,7 +397,7 @@ const merchantStore = {
           }
           setAmounts(state.tickerRates, configuration)
           commit('updateConfiguration', configuration)
-          const profile = rootGetters['rpayAuthStore/getMyProfile']
+          const profile = rootGetters['stacksAuthStore/getMyProfile']
           dispatch('fetchPurchases', { stxAddress: profile.stxAddress }).then((payments) => {
             if (payments) {
               const invoice = payments.find((o) => o.status === 'unpaid' && !lsatHelper.lsatExpired(o))
@@ -481,8 +480,7 @@ const merchantStore = {
           description: (configuration.payment.description) ? configuration.payment.description : 'Stacksmate STX swap',
           transactionData: configuration.transactionData
         }
-        const authHeaders = rootGetters[APP_CONSTANTS.KEY_AUTH_HEADERS]
-        axios.post(process.env.VUE_APP_RISIDIO_API + '/mesh/v2/fetchPayment', data, authHeaders).then(response => {
+        axios.post(process.env.VUE_APP_RISIDIO_API + '/mesh/v2/fetchPayment', data).then(response => {
           const invoice = response.data
           subscribePayment(commit, invoice.id)
           checkPayment(resolve, reject, state, commit, invoice.id)

@@ -62,7 +62,7 @@ export default {
     }
     this.fetchInFlightTransactions()
     this.recipient = this.profile.stxAddress
-    this.$store.dispatch('rpayAuthStore/fetchAccountInfo', data)
+    this.$store.dispatch('stacksAuthStore/fetchAccountInfo', data)
     data.stxAddress = this.profile.stxAddress
     if (this.$route.query && this.$route.query.stxAddress) {
       this.recipient = this.$route.query.stxAddress
@@ -167,8 +167,6 @@ export default {
   },
   computed: {
     mintCounter () {
-      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
       const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter

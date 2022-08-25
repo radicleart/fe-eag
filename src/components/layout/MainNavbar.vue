@@ -122,24 +122,24 @@ export default {
     },
     startLogout () {
       // this.$emit('updateEventCode', { eventCode: 'connect-logout' })
-      this.$store.dispatch('rpayAuthStore/startLogout').catch((err) => {
+      this.$store.dispatch('stacksAuthStore/startLogout').catch((err) => {
         console.log(err)
         this.$store.commit(APP_CONSTANTS.SET_WEB_WALLET_NEEDED)
       })
     },
     startLogin () {
       // this.$emit('updateEventCode', { eventCode: 'connect-login' })
-      const myProfile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const myProfile = this.$store.getters['stacksAuthStore/getMyProfile']
       if (myProfile.loggedIn) {
         // this.$emit('connect-login', myProfile)
-        this.$store.dispatch('rpayAuthStore/startLogout').then(() => {
-          this.$store.dispatch('rpayAuthStore/startLogin').catch(() => {
+        this.$store.dispatch('stacksAuthStore/startLogout').then(() => {
+          this.$store.dispatch('stacksAuthStore/startLogin').catch(() => {
             // https://www.hiro.so/wallet/install-web
             this.$store.commit(APP_CONSTANTS.SET_WEB_WALLET_NEEDED)
           })
         })
       } else {
-        this.$store.dispatch('rpayAuthStore/startLogin').catch(() => {
+        this.$store.dispatch('stacksAuthStore/startLogin').catch(() => {
           // https://www.hiro.so/wallet/install-web
           this.$store.commit(APP_CONSTANTS.SET_WEB_WALLET_NEEDED)
         })

@@ -130,7 +130,7 @@ export default {
         this.marketplaceMint(data, 'rpayMarketGenFungStore/mintWithToken')
       } else {
         data.mintPrice = this.loopRun.mintPrice
-        this.marketplaceMint(data, 'rpayPurchaseStore/cpsMintToken')
+        this.marketplaceMint(data, 'stacksPurchaseStore/cpsMintToken')
       }
     },
     marketplaceMint: function (data, method) {
@@ -148,10 +148,6 @@ export default {
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       return profile
-    },
-    isMinted () {
-      const asset = this.$store.getters[APP_CONSTANTS.KEY_ASSET_FROM_CONTRACT_BY_HASH](this.gaiaAssets[0].assetHash)
-      return asset
     },
     displayCard () {
       const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]

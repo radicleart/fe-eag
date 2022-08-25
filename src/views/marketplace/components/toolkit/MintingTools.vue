@@ -25,7 +25,8 @@
           </div>
         </b-tab>
         <b-tab title="Transfer">
-          <TransferNft :loopRun="loopRun" :item="items[0]"/>
+          <TransferSft v-if="loopRun.type === 'SIP-013'" :loopRun="loopRun" :item="items[0]"/>
+          <TransferNft v-else :loopRun="loopRun" :item="items[0]"/>
         </b-tab>
       </b-tabs>
     </div>
@@ -53,6 +54,7 @@ import ListAsset from './sell-setup/ListAsset'
 import UnlistAsset from './sell-setup/UnlistAsset'
 import { APP_CONSTANTS } from '@/app-constants'
 import TransferNft from '@/views/marketplace/components/toolkit/TransferNft'
+import TransferSft from '@/views/marketplace/components/toolkit/TransferSft'
 
 const STX_CONTRACT_NAME_V2 = process.env.VUE_APP_STACKS_CONTRACT_NAME_V2
 
@@ -63,7 +65,8 @@ export default {
     MintingFlowV2,
     ListAsset,
     UnlistAsset,
-    TransferNft
+    TransferNft,
+    TransferSft
   },
   props: ['items', 'loopRun', 'mintAllocations'],
   data: function () {
@@ -90,7 +93,7 @@ export default {
   },
   methods: {
     isListed () {
-      return this.items[0].contractAsset.listingInUstx && this.items[0].contractAsset.listingInUstx.price > 0
+      return this.items[0]?.contractAsset?.listingInUstx?.price > 0
     },
     isTheV2Contract () {
       return this.loopRun && this.loopRun.contractId.indexOf(STX_CONTRACT_NAME_V2) > -1
@@ -123,13 +126,11 @@ export default {
   },
   computed: {
     txPending () {
-      let transactions
-      if (this.items[0].contractAsset) {
-        transactions = this.$store.getters[APP_CONSTANTS.KEY_TX_PENDING_BY_TX_ID](this.items[0].contractAsset.nftIndex)
-      } else {
-        transactions = this.$store.getters[APP_CONSTANTS.KEY_TX_PENDING_BY_ASSET_HASH](this.items[0].assetHash)
-      }
-      return transactions
+      // let transactions
+      // if (this.items[0].contractAsset) {
+      //   transactions = this.$store.getters[APP_CONSTANTS.KEY_TX_PENDING_BY_TX_ID](this.items[0].contractAsset.nftIndex)
+      // }
+      return false
     },
     transaction () {
       const transaction = this.$store.getters[APP_CONSTANTS.KEY_TRANSACTION](this.items[0].mintInfo.txId)
@@ -138,10 +139,6 @@ export default {
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       return profile
-    },
-    application () {
-      const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](process.env.VUE_APP_STACKS_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_STACKS_CONTRACT_NAME)
-      return application
     },
     configuration () {
       const configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
@@ -154,12 +151,7 @@ export default {
       return 'List'
     },
     isValid: function () {
-      if (this.items[0].cryptoPunk) {
-        return this.items[0].name && this.items[0].image
-      } else {
-        const invalidItems = this.$store.getters[APP_CONSTANTS.KEY_ITEM_VALIDITY](this.items[0])
-        return invalidItems.length === 0
-      }
+      return true
     }
   }
 }

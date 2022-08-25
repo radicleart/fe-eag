@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     profile () {
-      return this.$store.getters['rpayAuthStore/getMyProfile']
+      return this.$store.getters['stacksAuthStore/getMyProfile']
     },
     image () {
       if (!this.item) {

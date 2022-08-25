@@ -86,11 +86,6 @@ export default {
               $self.mintAllocations.forEach((ma) => {
                 punkIndexes.push(ma.punkIndex)
               })
-              const bean = {
-                punkIndexes: punkIndexes,
-                currentRunKey: $self.loopRun.currentRunKey
-              }
-              $self.$store.dispatch('rpayCategoryStore/clearMintAllocations', bean)
               $self.$notify({ type: 'error', title: 'Tx Failed', text: 'Probably a post condition failure - not enough stacks to pay the minting fee?' })
             } else if (data.txStatus.indexOf('replace') > -1) {
               $self.$notify({ type: 'warning', title: 'Tx Replaced', text: 'We may have lost the tx id - if so your token is still safe and will be reconnected once confirmed.' })
@@ -118,7 +113,7 @@ export default {
         this.marketplaceMint(data, 'rpayMarketGenFungStore/mintWithToken')
       } else {
         data.mintPrice = this.loopRun.mintPrice
-        this.marketplaceMint(data, 'rpayPurchaseStore/cpsMintToken')
+        this.marketplaceMint(data, 'stacksPurchaseStore/cpsMintToken')
       }
     },
     marketplaceMint: function (data, method) {

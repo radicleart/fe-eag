@@ -100,30 +100,17 @@ export default {
       return options
     },
     startMinting: function () {
-      const data = {
-        stxAddress: this.profile.stxAddress,
-        contractId: this.loopRun.contractId,
-        currentRunKey: this.loopRun.currentRunKey
-      }
-      this.$store.dispatch('rpayCategoryStore/checkGuestList', data).then((result) => {
-        if (result) {
-          this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'minting-flow' })
-          this.$store.commit('merchantStore/setDisplayCard', 100)
-          this.$bvModal.show('minting-modal')
-        } else {
-          this.$notify({ type: 'warning', title: 'Mint Pass Expired', text: 'New allow list in operation' })
-        }
-      })
+      this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'minting-flow' })
+      this.$store.commit('merchantStore/setDisplayCard', 100)
+      this.$bvModal.show('minting-modal')
     }
   },
   computed: {
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     },
     mintCounter () {
-      // const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
-      // const counter = (application && application.tokenContract) ? application.tokenContract.mintCounter : 0
       const counter = this.loopRun.tokenCount
       if (this.loopRun.offset === 0) return counter + 1
       return counter

@@ -105,7 +105,7 @@ export default {
   },
   mounted () {
     if (!this.loopRun) {
-      this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.asset.contractAsset.contractId).then((loopRun) => {
+      this.$store.dispatch('stacksApiStore/fetchLoopRunByContractId', this.asset.contractAsset.contractId).then((loopRun) => {
         this.collection = loopRun
         // this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex })
         this.loaded = true
@@ -150,21 +150,8 @@ export default {
   },
   computed: {
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
-    },
-    usdAmount () {
-      try {
-        const tickerRates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES]
-        const rate = tickerRates.find((o) => o.currency === 'USD')
-        const offer = this.$store.getters[APP_CONSTANTS.KEY_HIGHEST_OFFER_ON_ASSET](this.asset.contractAsset.tokenInfo.assetHash)
-        const currentOffer = (offer && offer.amount) ? offer.amount : 0
-        const minimumOffer = Math.max(currentOffer, (this.asset.contractAsset.saleData.reservePrice))
-        const amountUsd = Number(utils.toDecimals(rate.stxPrice * minimumOffer)).toLocaleString()
-        return 'Current highest offer: ' + amountUsd + ' USD'
-      } catch (e) {
-        return null
-      }
     },
     ttBiddingHelp () {
       const tooltip = this.$store.getters[APP_CONSTANTS.KEY_TOOL_TIP]('tt-bidding-help')

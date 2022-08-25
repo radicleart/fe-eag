@@ -36,7 +36,6 @@ import { APP_CONSTANTS } from '@/app-constants'
 import RoyaltyScreen from './minting-screens/RoyaltyScreen'
 import AddBeneficiaryScreen from './minting-screens/AddBeneficiaryScreen'
 import ItemDisplay from './minting-screens/ItemDisplay'
-import utils from '@/services/utils'
 
 export default {
   name: 'MintingFlow',
@@ -77,7 +76,7 @@ export default {
       // when minting the funds go to the contract admin.
       const contractAsset = this.$store.getters[APP_CONSTANTS.KEY_ASSET_FROM_CONTRACT_BY_HASH](this.items[0].assetHash)
       if (contractAsset) {
-        return
+        // return
       }
       /**
       const keys1 = {
@@ -96,8 +95,9 @@ export default {
       }
       **/
       // const hashOfMessage = utils.sha256(this.items[0].assetHash)
-      const hashOfMessage = utils.buildHash(this.items[0].assetHash)
+      // const hashOfMessage = utils.buildHash(this.items[0].assetHash)
       // const sig = utils.signPayloadEC(this.items[0].assetHash, keys1.privateKey)
+      /**
       this.$store.dispatch('rpayPurchaseStore/stacksmateSignme', this.items[0].assetHash).then((signature) => {
         const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
         const application = this.$store.getters[APP_CONSTANTS.KEY_APPLICATION_FROM_REGISTRY_BY_CONTRACT_ID](this.loopRun.contractId)
@@ -106,7 +106,6 @@ export default {
         mintPrice = Math.max(application.tokenContract.mintPrice, defaultMintPrice)
         if (!this.items[0].attributes.buyNowPrice) this.items[0].attributes.buyNowPrice = 0
         const data = {
-          // message: keys1.publicKey,
           message: hashOfMessage,
           sig: signature,
           buyNowPrice: this.items[0].attributes.buyNowPrice,
@@ -124,7 +123,7 @@ export default {
           functionName: 'mint-token'
         }
         this.$store.dispatch('rpayPurchaseStore/mintTokenV3', data).then((result) => {
-          const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](result.assetHash)
+          const item = this.items[0]
           if (result.txId) {
             item.mintInfo = {
               txId: result.txId,
@@ -139,6 +138,7 @@ export default {
           this.errorMessage = 'Minting error: ' + err
         })
       })
+      **/
       // const keys2 = utils.makeKeys()
       // if (keys1) return
       // this.sig = utils.signPayloadEC(message, keys.privateKey)
@@ -195,7 +195,7 @@ export default {
         functionName: 'mint-token-twenty'
       }
       this.$store.dispatch('rpayPurchaseStore/mintTwentyTokens', data).then((result) => {
-        const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](result.assetHash)
+        const item = this.items[0]
         if (result.txId) {
           item.mintInfo = {
             txId: result.txId,
@@ -276,7 +276,7 @@ export default {
       }
     },
     updateItem () {
-      const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](this.items[0].assetHash)
+      const item = this.items[0]
       item.contractId = this.loopRun.contractId
       item.beneficiaries = this.beneficiaries
       this.$store.dispatch('rpayMyItemStore/saveItem', item).then((item) => {
@@ -294,11 +294,11 @@ export default {
   },
   computed: {
     item () {
-      const item = this.$store.getters[APP_CONSTANTS.KEY_MY_ITEM](this.items[0].assetHash)
+      const item = this.items[0]
       return item
     },
     isMinted () {
-      const asset = this.$store.getters[APP_CONSTANTS.KEY_ASSET_FROM_CONTRACT_BY_HASH](this.items[0].assetHash)
+      const asset = this.items[0]
       return asset
     },
     displayCard () {

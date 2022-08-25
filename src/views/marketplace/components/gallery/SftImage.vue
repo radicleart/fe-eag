@@ -53,7 +53,7 @@ export default {
       return this.asset.contractAsset.listingInUstx && this.asset.contractAsset.listingInUstx.price > 0
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     },
     getImageUrl () {

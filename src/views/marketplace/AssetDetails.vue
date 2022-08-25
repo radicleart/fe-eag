@@ -60,7 +60,7 @@ export default {
         contractId: this.contractId,
         nftIndex: this.nftIndex
       }
-      this.$store.dispatch('stacksApiStore/initAssetDetails', data).then(() => {
+      this.$store.dispatch('stacksApiStore/initSingleAsset', data).then(() => {
         this.loaded = true
       })
     },
@@ -86,7 +86,7 @@ export default {
       return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.nftIndex)
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     }
   }

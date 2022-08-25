@@ -26,7 +26,6 @@
 
 <script>
 import ListBeneficiary from '@/views/marketplace/components/toolkit/ListBeneficiary'
-import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
   name: 'ListBeneficiaries',
@@ -68,17 +67,6 @@ export default {
           }
         }
         this.loading = false
-      } else {
-        this.$store.dispatch('rpayCategoryStore/fetchRoyalties', currentRunKey).then((royalties) => {
-          // this.minteficaries = royalties.mintRoyalties
-          if (royalties.saleRoyalties) {
-            this.beneficiaries = royalties.saleRoyalties
-          } else {
-            const configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
-            this.beneficiaries = configuration.minter.beneficiaries
-          }
-          this.loading = false
-        })
       }
     }
   },

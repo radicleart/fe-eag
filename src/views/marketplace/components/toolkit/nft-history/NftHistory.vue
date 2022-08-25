@@ -107,7 +107,7 @@ export default {
           // timestamp: DateTime.fromMillis(transaction.timestamp).toLocaleString({ weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
           event: transaction.asset_event_type,
           'amount%': transaction.balance,
-          from: '',
+          from: (transaction.sender) ? $self.truncAddress(transaction.sender) : '',
           to: (transaction.recipient) ? $self.truncAddress(transaction.recipient) : '',
           Status: $self.truncAddress(transaction.tx_id)
         }
@@ -117,7 +117,7 @@ export default {
   },
   computed: {
     events () {
-      return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.gaiaAsset.contractAsset.nftIndex)
+      return this.$store.getters[APP_CONSTANTS.KEY_SAS_NFT_EVENTS_FOR_TOKEN](this.gaiaAsset.contractAsset.nftIndex)
     }
   }
 }

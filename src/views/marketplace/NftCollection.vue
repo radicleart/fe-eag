@@ -95,6 +95,27 @@ export default {
         this.reload(this.loopRun)
       })
     },
+    reload (loopRun) {
+      if (loopRun.status === 'unrevealed') {
+        this.resultSet = []
+        const ipfsUrl = loopRun.punkImageIPFSUrl
+        for (let i = 1; i <= loopRun.versionLimit; i++) {
+          this.resultSet.push({
+            contractAsset: {
+              contractId: loopRun.contractId,
+              nftIndex: i,
+              tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, i) }
+            }
+          })
+        }
+        this.tokenCount = loopRun.versionLimit
+        this.pagingData.numberOfItems = loopRun.versionLimit
+        this.$emit('tokenCount', { numbTokens: loopRun.versionLimit })
+        this.loaded = true
+      } else {
+        this.fetchPage(this.pagingData.offset - 1, false, this.defQuery)
+      }
+    },
     updateResults (data) {
       this.defQuery = data.query
       this.$router.push('/nft-collection/' + this.loopRun.contractId + '?' + this.getQueryString(this.defQuery))
@@ -140,27 +161,6 @@ export default {
     filterMints (mintEvents, nftIndex) {
       if (!mintEvents) return
       return mintEvents.filter((o) => o.nftIndex === nftIndex)
-    },
-    reload (loopRun) {
-      if (loopRun.status === 'unrevealed') {
-        this.resultSet = []
-        const ipfsUrl = loopRun.punkImageIPFSUrl
-        for (let i = 1; i <= loopRun.versionLimit; i++) {
-          this.resultSet.push({
-            contractAsset: {
-              contractId: loopRun.contractId,
-              nftIndex: i,
-              tokenInfo: { metaDataUrl: ipfsUrl.replace(/\{id\}/, i) }
-            }
-          })
-        }
-        this.tokenCount = loopRun.versionLimit
-        this.pagingData.numberOfItems = loopRun.versionLimit
-        this.$emit('tokenCount', { numbTokens: loopRun.versionLimit })
-        this.loaded = true
-      } else {
-        this.fetchPage(this.pagingData.offset - 1, false, this.defQuery)
-      }
     },
     getQueryString (query) {
       let queryStr = '?'
@@ -220,7 +220,7 @@ export default {
       return this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.nftIndex)
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
     }
   }

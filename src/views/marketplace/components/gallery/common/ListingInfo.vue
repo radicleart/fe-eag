@@ -47,7 +47,7 @@
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'collection' || $route.name === 'artwork-by-index' || $route.name === 'asset-by-index'">
       <b-col cols="12" class="py-2">
-        {{getMintPriceFormatted()}} STX - {{100 - balance}} % Available
+        {{getMintPriceFormatted}} STX - {{100 - balance}} % Available
       </b-col>
     </b-row>
     <b-row class="border-bottom" v-if="$route.name === 'collection'">
@@ -107,7 +107,7 @@ export default {
   },
   mounted () {
     if (!this.loopRun) {
-      this.$store.dispatch('rpayCategoryStore/fetchLoopRunByContractId', this.asset.contractAsset.contractId).then((loopRun) => {
+      this.$store.dispatch('stacksApiStore/fetchLoopRunByContractId', this.asset.contractAsset.contractId).then((loopRun) => {
         this.collection = loopRun
         // this.$store.dispatch('rpayStacksContractStore/updateCacheByNftIndex', { contractId: this.contractId, nftIndex: this.nftIndex })
         this.loaded = true
@@ -132,9 +132,6 @@ export default {
     getPriceFormatted () {
       return formatUtils.fmtAmount(this.asset.contractAsset.listingInUstx.price, 'stx') + ' ' + this.asset.contractAsset.listingInUstx.symbol
     },
-    getMintPriceFormatted () {
-      return formatUtils.fmtAmount(this.collection.mintPrice * 100, 'stx')
-    },
     formatNumber: function (number) {
       return utils.formatNumber(number)
     },
@@ -151,6 +148,9 @@ export default {
     }
   },
   computed: {
+    getMintPriceFormatted () {
+      return formatUtils.fmtAmount((this.collection?.mintPrice * 100 || 0), 'stx')
+    },
     balance () {
       const me = this.$store.getters[APP_CONSTANTS.KEY_SAS_MINT_EVENTS_FOR_TOKEN](this.asset.contractAsset.nftIndex)
       if (!me || me.length === 0) {
@@ -164,21 +164,8 @@ export default {
       }
     },
     profile () {
-      const profile = this.$store.getters['rpayAuthStore/getMyProfile']
+      const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
-    },
-    usdAmount () {
-      try {
-        const tickerRates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES]
-        const rate = tickerRates.find((o) => o.currency === 'USD')
-        const offer = this.$store.getters[APP_CONSTANTS.KEY_HIGHEST_OFFER_ON_ASSET](this.asset.contractAsset.tokenInfo.assetHash)
-        const currentOffer = (offer && offer.amount) ? offer.amount : 0
-        const minimumOffer = Math.max(currentOffer, (this.asset.contractAsset.saleData.reservePrice))
-        const amountUsd = Number(utils.toDecimals(rate.stxPrice * minimumOffer)).toLocaleString()
-        return 'Current highest offer: ' + amountUsd + ' USD'
-      } catch (e) {
-        return null
-      }
     },
     ttBiddingHelp () {
       const tooltip = this.$store.getters[APP_CONSTANTS.KEY_TOOL_TIP]('tt-bidding-help')

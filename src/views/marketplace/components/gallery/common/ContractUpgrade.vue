@@ -232,7 +232,7 @@ export default {
         recipient: 'SP000000000000000000002Q6VF78',
         assetName: 'my-nft'
       }
-      return this.$store.dispatch('rpayPurchaseStore/transferAsset', data).then((result) => {
+      return this.$store.dispatch('stacksPurchaseStore/transferAsset', data).then((result) => {
         this.clicked = true
         this.result = result
         this.$notify({ type: 'success', title: 'Upgrade in Progress', text: 'Check the explorer - your upgrade will be ready soon!' })
