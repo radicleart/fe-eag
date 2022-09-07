@@ -6,8 +6,8 @@
           <div class="row mb-4">
             <div class="col-12">Transfer this NFT to another address</div>
           </div>
-          <div class="row mb-4" v-if="trackingUrl">
-            <div class="col-12">Transferring - <a :href="trackingUrl" target="_blank">track progress here...</a></div>
+          <div class="row mb-4" v-if="transactionUrl">
+            <div class="col-12">Transferring - <a :href="transactionUrl" target="_blank">track progress here...</a></div>
           </div>
           <div class="row mb-4" v-else-if="transferring">
             <div class="col-12">Transfer begun</div>
@@ -104,9 +104,10 @@ export default {
     showTransferButton () {
       return (this.toAddress && this.toAddress.length > 10)
     },
-    trackingUrl () {
+    transactionUrl: function () {
       if (!this.result || !this.result.txId) return
-      return this.result.txId
+      const stacksApiUrl = process.env.VUE_APP_STACKS_EXPLORER
+      return stacksApiUrl + '/txid/' + this.result.txId + '?chain=' + process.env.VUE_APP_NETWORK
     }
   }
 }

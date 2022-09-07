@@ -47,7 +47,7 @@ export default {
   },
   mounted () {
     if (this.loopRun.marketplaceVersion > 2) {
-      this.$store.dispatch('rpayMarketGenFungStore/sipTenTokenFindBy').then((sipTenTokens) => {
+      this.$store.dispatch('stacksApiStore/sipTenTokenFindBy').then((sipTenTokens) => {
         if (sipTenTokens) {
           this.sipTenTokens = sipTenTokens
           this.sipTenToken = sipTenTokens[0]
@@ -67,9 +67,9 @@ export default {
         contractName: this.contractAsset.contractId.split('.')[1],
         nftIndex: this.contractAsset.nftIndex
       }
-      let method = 'rpayMarketStore/unlistInUstx'
-      if (this.loopRun.marketplaceVersion === 3) {
-        method = 'rpayMarketGenFungStore/unlistInToken'
+      let method = 'stacksPurchaseStore/unlistInToken'
+      if (this.loopRun.type === 'SIP-013') {
+        method = 'stacksPurchaseStore/unlistSFTInToken'
       }
       this.$store.dispatch(method, data).then((result) => {
         this.result = result

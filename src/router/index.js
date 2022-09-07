@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import Admin from '../views/Admin.vue'
 import MainNavbar from '@/components/layout/MainNavbar.vue'
 import MainFooter from '@/components/layout/MainFooter.vue'
 const Information = () => import('@/views/Information.vue')
@@ -21,6 +22,11 @@ const routes = [
     path: '/',
     name: 'home',
     components: { default: Home, header: MainNavbar, footer: MainFooter }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    components: { default: Admin, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/about',

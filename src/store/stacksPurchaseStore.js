@@ -4,8 +4,13 @@ import {
   listCV,
   uintCV,
   tupleCV,
+  someCV,
+  noneCV,
+  trueCV,
+  falseCV,
   stringAsciiCV,
   standardPrincipalCV,
+  contractPrincipalCV,
   makeStandardSTXPostCondition,
   FungibleConditionCode,
   NonFungibleConditionCode,
@@ -19,6 +24,7 @@ import {
   StacksTestnet,
   StacksMainnet
 } from '@stacks/network'
+import { APP_CONSTANTS } from '@/app-constants'
 
 const getSaleRoyalties = function (data) {
   const addressList = []
@@ -77,7 +83,7 @@ const getSerialisedNftTuple = function (data) {
   return tupCV
 }
 
-const getGFTMintPostConds = function (data) {
+const getSftTransferPostConds = function (data) {
   const postConditionAddress = data.owner
   const postConditionCode = FungibleConditionCode.Equal
   const postConditionAmount = new BigNum(data.amount)
@@ -130,11 +136,6 @@ const getCPSMintPostConds = function (rootGetters, data) {
     ))
   }
   return postConds
-}
-
-const getProvider = function (data) {
-  if (!data || !data.provider) return 'risidio'
-  return data.provider
 }
 
 const stacksPurchaseStore = {
@@ -236,8 +237,7 @@ const stacksPurchaseStore = {
         if (configuration.network === 'local' && data.sendAsSky) {
           callData.sendAsSky = true
         }
-        const methos = (configuration.network === 'local') ? 'rpayStacksStore/callContractRisidio' : 'rpayStacksStore/callContractBlockstack'
-        dispatch(methos, callData, { root: true }).then((result) => {
+        dispatch('stacksPurchaseStore/callContractBlockstack', callData, { root: true }).then((result) => {
           resolve(result)
         }).catch((error) => {
           reject(error)
@@ -246,13 +246,11 @@ const stacksPurchaseStore = {
     },
     setCollectionRoyalties ({ dispatch, rootGetters }, data) {
       return new Promise((resolve, reject) => {
-        const configuration = rootGetters['rpayStore/getConfiguration']
         const saleRoyalties = getSaleRoyalties(data)
         const mintRoyalties = getMintRoyalties(data)
         data.functionName = 'set-collection-royalties'
         data.functionArgs = [mintRoyalties.addresses, mintRoyalties.shares, saleRoyalties.addresses, saleRoyalties.shares, saleRoyalties.secondaries]
-        const methos = (configuration.network === 'local') ? 'rpayStacksStore/callContractRisidio' : 'rpayStacksStore/callContractBlockstack'
-        dispatch((data.methos || methos), data, { root: true }).then((result) => {
+        dispatch('stacksPurchaseStore/callContractBlockstack', data, { root: true }).then((result) => {
           result.opcode = 'stx-transaction-sent'
           resolve(result)
         }).catch((error) => {
@@ -279,12 +277,7 @@ const stacksPurchaseStore = {
         data.functionName = 'transfer'
         data.postConditions = [standardNonFungiblePostCondition]
         data.functionArgs = [uintCV(data.nftIndex), standardPrincipalCV(data.owner), standardPrincipalCV(data.recipient)]
-        const configuration = rootGetters['rpayStore/getConfiguration']
-        const methos = (configuration.network === 'local') ? 'rpayStacksStore/callContractRisidio' : 'rpayStacksStore/callContractBlockstack'
-        if (getProvider(data) === 'risidio') {
-          data.sendAsSky = (data.owner === 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG')
-        }
-        dispatch(methos, data, { root: true }).then((result) => {
+        dispatch('stacksPurchaseStore/callContractBlockstack', data, { root: true }).then((result) => {
           resolve(result)
         }).catch((error) => {
           reject(error)
@@ -294,11 +287,11 @@ const stacksPurchaseStore = {
     transferSft ({ dispatch }, data) {
       return new Promise((resolve, reject) => {
         data.postConditionMode = PostConditionMode.Deny
-        data.postConditions = getGFTMintPostConds(data)
+        data.postConditions = getSftTransferPostConds(data)
         data.functionName = 'transfer'
         data.network = (process.env.VUE_APP_NETWORK === 'mainnet') ? new StacksMainnet() : new StacksTestnet()
         data.functionArgs = [uintCV(data.nftIndex), uintCV(data.amount), standardPrincipalCV(data.owner), standardPrincipalCV(data.recipient)]
-        dispatch('rpayStacksStore/callContractBlockstack', data, { root: true }).then((result) => {
+        dispatch('stacksPurchaseStore/callContractBlockstack', data, { root: true }).then((result) => {
           resolve(result)
         }).catch((error) => {
           reject(error)
@@ -310,45 +303,25 @@ const stacksPurchaseStore = {
         data.functionName = 'update-meta-data-url'
         const metaDataUrl = stringAsciiCV(data.metaDataUrl)
         data.functionArgs = [uintCV(data.nftIndex), metaDataUrl]
-        dispatch('rpayStacksStore/callContractBlockstack', data, { root: true }).then((result) => {
+        dispatch('stacksPurchaseStore/callContractBlockstack', data, { root: true }).then((result) => {
           resolve(result)
         }).catch((error) => {
           reject(error)
         })
       })
     },
-    buyNow ({ dispatch, rootGetters }, data) {
+    listInToken ({ dispatch, rootGetters }, data) {
       return new Promise((resolve, reject) => {
-        const functionArgs = [uintCV(data.nftIndex), standardPrincipalCV(data.owner), standardPrincipalCV(data.recipient)]
-        const profile = rootGetters['stacksAuthStore/getMyProfile']
-        const postCondAddress = profile.stxAddress
-        let postConds = []
-        const amount = new BigNum(utils.toOnChainAmount(data.buyNowOrStartingPrice))
-        if (data.postConditions) {
-          postConds = data.postConditions
-        } else {
-          postConds.push(makeStandardSTXPostCondition(
-            postCondAddress,
-            FungibleConditionCode.LessEqual, // less or equal - if the buyer is one of the royalties payment is skipped.
-            amount
-          ))
-          const nonFungibleAssetInfo = createAssetInfo(
-            data.contractAddress,
-            data.contractName,
-            data.contractName.split('-')[0]
-          )
-          postConds.push(makeStandardNonFungiblePostCondition(
-            data.owner,
-            NonFungibleConditionCode.DoesNotOwn,
-            nonFungibleAssetInfo,
-            uintCV(data.nftIndex)
-          ))
-        }
+        // nft-asset-contract <sft-trait>
+        // listing {token-id: uint, amount: uint, unit-price: uint, expiry: uint, taker: (optional principal)}
+        // com <commission-trait>
+        // payment-token <ft-trait>
+        const functionArgs = [uintCV(data.nftIndex), uintCV(utils.toOnChainAmount(data.price, data.decimals)), contractPrincipalCV(data.commissionContractAddress, data.commissionContractName), contractPrincipalCV(data.tokenContractAddress, data.tokenContractName)]
         const callData = {
-          postConditions: postConds,
+          postConditions: [],
           contractAddress: data.contractAddress,
           contractName: data.contractName,
-          functionName: 'buy-now',
+          functionName: 'list-in-token',
           functionArgs: functionArgs,
           sendAsSky: data.sendAsSky
         }
@@ -359,7 +332,116 @@ const stacksPurchaseStore = {
         })
       })
     },
-    callContractBlockstack ({ dispatch, commit, rootGetters, state }, data) {
+    listSFTInToken ({ dispatch, rootGetters }, data) {
+      return new Promise((resolve, reject) => {
+        // nft-asset-contract <sft-trait>
+        // listing {token-id: uint, amount: uint, unit-price: uint, expiry: uint, taker: (optional principal)}
+        // com <commission-trait>
+        // payment-token <ft-trait>
+        const tipHeight = rootGetters[APP_CONSTANTS.KEY_STACKS_TIP_HEIGHT]
+        const listing = tupleCV({
+          'token-id': uintCV(data.nftIndex),
+          amount: uintCV(data.amount),
+          'unit-price': uintCV(utils.toOnChainAmount(data.unitPrice, data.decimals)),
+          expiry: uintCV(tipHeight + 10000),
+          taker: data.taker ? someCV(data.principal(data.taker)) : noneCV()
+        })
+        const functionArgs = [
+          contractPrincipalCV(data.contractAddress, data.contractName),
+          listing,
+          contractPrincipalCV(data.commissionContractAddress, data.commissionContractName),
+          contractPrincipalCV(data.tokenContractAddress, data.tokenContractName)
+        ]
+        const callData = {
+          postConditionMode: PostConditionMode.Deny,
+          postConditions: getSftTransferPostConds(data),
+          contractAddress: process.env.VUE_APP_REGISTRY_CONTRACT_ADDRESS,
+          contractName: 'thirteen-market',
+          functionName: 'list-in-token',
+          functionArgs: functionArgs
+        }
+        dispatch('stacksPurchaseStore/callContractBlockstack', callData, { root: true }).then((result) => {
+          resolve(result)
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+    },
+    unlistInToken ({ dispatch }, data) {
+      return new Promise((resolve, reject) => {
+        const functionArgs = [uintCV(data.nftIndex)]
+        const callData = {
+          postConditions: [],
+          contractAddress: data.contractAddress,
+          contractName: data.contractName,
+          functionName: 'unlist-in-token',
+          functionArgs: functionArgs,
+          sendAsSky: data.sendAsSky
+        }
+        dispatch('stacksPurchaseStore/callContractBlockstack', callData, { root: true }).then((result) => {
+          resolve(result)
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+    },
+    buyInToken ({ dispatch, rootGetters }, data) {
+      return new Promise((resolve, reject) => {
+        const functionArgs = [uintCV(data.nftIndex), contractPrincipalCV(data.commissionContractAddress, data.commissionContractName), contractPrincipalCV(data.tokenContractAddress, data.tokenContractName)]
+        let postConds = []
+        if (data.postConditions) {
+          postConds = data.postConditions
+        } else {
+          const profile = rootGetters['rpayAuthStore/getMyProfile']
+          const postCondAddress = profile.stxAddress
+          const postConditionAmount = new BigNum(utils.toOnChainAmount(data.price, data.decimals))
+          if (data.tokenContractName === 'stx-token' || data.tokenContractName === 'unwrapped-stx-token') {
+            postConds.push(makeStandardSTXPostCondition(postCondAddress, FungibleConditionCode.LessEqual, postConditionAmount))
+          } else {
+            const fungibleAssetInfo = createAssetInfo(data.tokenContractAddress, data.tokenContractName, data.tokenAssetName)
+            const standardFungiblePostCondition = makeStandardFungiblePostCondition(postCondAddress, FungibleConditionCode.LessEqual, postConditionAmount, fungibleAssetInfo)
+            postConds.push(standardFungiblePostCondition)
+          }
+          const nonFungibleAssetInfo = createAssetInfo(data.contractAddress, data.contractName, data.assetName)
+          postConds.push(makeStandardNonFungiblePostCondition(data.owner, NonFungibleConditionCode.DoesNotOwn, nonFungibleAssetInfo, uintCV(data.nftIndex)))
+        }
+        const callData = {
+          postConditions: postConds,
+          contractAddress: data.contractAddress,
+          contractName: data.contractName,
+          functionName: 'buy-in-token',
+          functionArgs: functionArgs,
+          sendAsSky: data.sendAsSky
+        }
+        dispatch('stacksPurchaseStore/callContractBlockstack', callData, { root: true }).then((result) => {
+          resolve(result)
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+    },
+    allowList ({ dispatch }, data) {
+      return new Promise((resolve, reject) => {
+        let allow = trueCV()
+        if (!data.allow) {
+          allow = falseCV()
+        }
+        const functionArgs = [contractPrincipalCV(data.contractAddress, data.contractName), allow]
+        const callData = {
+          postConditions: [],
+          contractAddress: process.env.VUE_APP_REGISTRY_CONTRACT_ADDRESS,
+          contractName: 'thirteen-market',
+          functionName: 'set-allowed',
+          functionArgs: functionArgs
+        }
+        dispatch('stacksPurchaseStore/callContractBlockstack', callData, { root: true }).then((result) => {
+          resolve(result)
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+    },
+    callContractBlockstack ({ state }, data) {
       return new Promise((resolve, reject) => {
         const txOptions = {
           contractAddress: data.contractAddress,

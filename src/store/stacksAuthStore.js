@@ -92,7 +92,6 @@ const stacksAuthStore = {
     },
     accountApi: null,
     accountInfo: null,
-    bnsNames: null,
     authHeaders: null,
     accounts: [],
     webWalletNeeded: false
@@ -115,9 +114,6 @@ const stacksAuthStore = {
     getAccountInfo: state => {
       return state.accountInfo
     },
-    getBnsNames: state => {
-      return state.bnsNames
-    },
     getAccounts: state => {
       return state.accounts
     }
@@ -128,9 +124,6 @@ const stacksAuthStore = {
     },
     myProfile (state, myProfile) {
       state.myProfile = myProfile
-    },
-    accountInfo (state, accountInfo) {
-      state.accountInfo = accountInfo
     },
     setAuthHeaders (state, authHeaders) {
       state.authHeaders = authHeaders
@@ -143,24 +136,9 @@ const stacksAuthStore = {
     },
     setAccountInfo (state, accountInfo) {
       state.accountInfo = accountInfo
-    },
-    setBnsNames (state, bnsNames) {
-      state.bnsNames = bnsNames
     }
   },
   actions: {
-    fetchBnsNames ({ commit }, stxAddresses) {
-      return new Promise((resolve, reject) => {
-        const path = process.env.VUE_APP_CLARITYLAB_API + '/mesh/v2/nft-events/bns'
-        axios.post(path, stxAddresses).then((response) => {
-          const bnsNames = response.data
-          commit('setBnsNames', bnsNames)
-          resolve(bnsNames)
-        }).catch((error) => {
-          reject(error)
-        })
-      })
-    },
     fetchUserAuthorisation ({ commit }, data) {
       return new Promise((resolve, reject) => {
         const authHeaders = defAuthHeaders()

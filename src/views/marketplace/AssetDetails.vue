@@ -3,12 +3,12 @@
   <CollectionNavigation :loopRun="loopRun" :asset="gaiaAsset" :filter="'asset'"/>
   <b-container style="height: auto;" fluid class="px-5 mt-5">
     <div class="d-flex justify-content-between">
-      <div class="my-auto"><b-link :to="prevNft()"><b-icon icon="chevron-left" font-scale="2"></b-icon></b-link></div>
+      <div class="my-auto"><b-link :to="prevNft"><b-icon icon="chevron-left" font-scale="2"></b-icon></b-link></div>
       <div style="width: 100%" v-if="gaiaAsset && loopRun" :key="componentKey">
         <SftDisplay v-if="loopRun.type === 'SIP-013'" v-on="$listeners"/>
         <NftDisplay v-else v-on="$listeners" :gaiaAsset="gaiaAsset" :events="events" :loopRun="loopRun"/>
       </div>
-      <div class="my-auto"><b-link :to="nextNft()"><b-icon icon="chevron-right" font-scale="2"></b-icon></b-link></div>
+      <div class="my-auto"><b-link :to="nextNft"><b-icon icon="chevron-right" font-scale="2"></b-icon></b-link></div>
     </div>
   </b-container>
 </div>
@@ -39,7 +39,7 @@ export default {
     '$route' () {
       // this.loadCollection(true)
       this.nftIndex = Number(this.$route.params.nftIndex)
-      this.componentKey++
+      this.loadCollection()
       if (!this.gaiaAsset.totalSupply) {
         const data = {
           contractId: this.contractId,
@@ -62,17 +62,8 @@ export default {
       }
       this.$store.dispatch('stacksApiStore/initSingleAsset', data).then(() => {
         this.loaded = true
+        this.componentKey++
       })
-    },
-    nextNft () {
-      const parts = this.$route.fullPath.split('/')
-      const nftIndex = (this.nftIndex === this.loopRun.versionLimit) ? 1 : (this.nftIndex + 1)
-      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
-    },
-    prevNft () {
-      const parts = this.$route.fullPath.split('/')
-      const nftIndex = (this.nftIndex === 1) ? this.loopRun.versionLimit : (this.nftIndex - 1)
-      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
     }
   },
   computed: {
@@ -88,6 +79,16 @@ export default {
     profile () {
       const profile = this.$store.getters['stacksAuthStore/getMyProfile']
       return profile
+    },
+    nextNft () {
+      const parts = this.$route.fullPath.split('/')
+      const nftIndex = (this.nftIndex === this.loopRun.versionLimit) ? 1 : (this.nftIndex + 1)
+      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
+    },
+    prevNft () {
+      const parts = this.$route.fullPath.split('/')
+      const nftIndex = (this.nftIndex === 1) ? this.loopRun.versionLimit : (this.nftIndex - 1)
+      return '/' + parts[1] + '/' + parts[2] + '/' + nftIndex
     }
   }
 }

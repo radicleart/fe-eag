@@ -98,8 +98,7 @@ export default {
   computed: {
     sufficientFunds () {
       if (this.configuration.risidioCardMode.indexOf('nft-') > -1) return true
-      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
-      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO]
       return (wallet && wallet.accountInfo.balance >= (this.configuration.payment.amountStx * 4))
     },
     currentOption () {

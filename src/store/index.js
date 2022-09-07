@@ -42,8 +42,9 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    initApplication ({ rootGetters, dispatch }) {
+    initApplication ({ dispatch }) {
       return new Promise((resolve) => {
+        dispatch('stacksApiStore/fetchBlockchainInfo')
         dispatch('stacksAuthStore/fetchMyAccount').then((profile) => {
           dispatch('stacksApiStore/fetchLoopRuns')
           if (profile.loggedIn) {

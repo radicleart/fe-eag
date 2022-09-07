@@ -105,6 +105,7 @@ export default {
         }
       })
     })
+    /**
     if (window.eventBus && window.eventBus.$on) {
       const $self = this
       window.eventBus.$on('rpayEvent', function (data) {
@@ -127,6 +128,7 @@ export default {
         }
       })
     }
+    **/
   },
   methods: {
     transactionUrl: function () {

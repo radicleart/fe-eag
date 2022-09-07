@@ -11,6 +11,9 @@ import {
   standardPrincipalCV
 } from '@stacks/transactions'
 import { DateTime } from 'luxon'
+import BigNum from 'bn.js'
+import { openSTXTransfer } from '@stacks/connect'
+const precision = 1000000
 
 const setNftTupleKeys = function (events, stxAddress) {
   let mapped = []
@@ -48,27 +51,43 @@ const setNftHistory = function (events, nftIndex, stxAddress) {
 }
 
 const getSerialisedNftTuple = function (data) {
-  const tupCV = tupleCV({
-    'token-id': uintCV(data.nftIndex),
-    owner: standardPrincipalCV(data.stxAddress)
-  })
-  return `0x${serializeCV(tupCV).toString('hex')}`
+  if (data.owner) {
+    const tupCV = tupleCV({
+      'token-id': uintCV(data.nftIndex),
+      owner: (data.owner) ? standardPrincipalCV(data.owner) : ''
+    })
+    return `0x${serializeCV(tupCV).toString('hex')}`
+  } else {
+    return `0x${serializeCV(uintCV(data.nftIndex)).toString('hex')}`
+  }
 }
 
 const stacksApiStore = {
   namespaced: true,
   state: {
     currentCollection: null,
+    bnsNames: null,
+    blockchainInfo: null,
     gaiaAsset: null,
+    gaiaAssets: null,
     mintEvents: null,
     nftEvents: null,
     myHoldings: null,
     loopRuns: [],
-    loopRun: null
+    loopRun: null,
+    waitingImage: 'https://images.prismic.io/dbid/d83c4d94-8684-4df9-a92e-7476e616508a_magicpattern-saRKnTHBEhU-unsplash.jpg?auto=compress,format'
   },
   getters: {
     getMintEvents: (state) => {
       return state.mintEvents
+    },
+    stacksTipHeight (state) {
+      const blockchainInfo = state.blockchainInfo
+      if (!blockchainInfo) return 0
+      return Number(blockchainInfo.stacks_tip_height)
+    },
+    getBlockchainInfo: state => {
+      return state.blockchainInfo
     },
     getLoopRun: (state) => {
       return state.loopRun
@@ -95,9 +114,33 @@ const stacksApiStore = {
     getNftEventsForToken: (state) => nftIndex => {
       if (!state.nftEvents) return
       return state.nftEvents.filter((o) => o.nftIndex === nftIndex)
+    },
+    getBnsNames: state => {
+      return state.bnsNames
+    },
+    getBnsName: state => stxAddress => {
+      return (state.bnsNames) ? state.bnsNames.find((o) => o.stxAddress === stxAddress) : null
+    },
+    getAssetImageUrl: state => item => {
+      if (item.image) {
+        return item.image
+      } else if (item.attributes) {
+        if (item.attributes.artworkFile && item.attributes.artworkFile.fileUrl && item.attributes.artworkFile.type.indexOf('image') > -1) {
+          return item.attributes.artworkFile.fileUrl
+        } else if (item.attributes.coverImage && item.attributes.coverImage.fileUrl) {
+          return item.attributes.coverImage.fileUrl
+        }
+      }
+      return state.waitingImage
     }
   },
   mutations: {
+    setBlockchainInfo (state, blockchainInfo) {
+      state.blockchainInfo = blockchainInfo
+    },
+    setBnsNames (state, bnsNames) {
+      state.bnsNames = bnsNames
+    },
     setLoopRuns (state, loopRuns) {
       state.loopRuns = loopRuns
     },
@@ -520,7 +563,7 @@ const stacksApiStore = {
         dispatch('callContractReadOnly', txOptions).then((result) => {
           try {
             if (result.value) resolve(Number(result.value.value))
-            else resolve(Number(result.result.value.value))
+            else resolve(Number(result.value.value))
           } catch (e) {
             resolve(0)
           }
@@ -557,10 +600,14 @@ const stacksApiStore = {
         }
         dispatch('callContractReadOnly', txOptions).then((result) => {
           try {
-            const ga = state.gaiaAssets.find((a) => a.contractAsset.nftIndex === data.nftIndex)
-            if (ga) ga.totalSupply = Number(result.result.value.value)
+            const val = Number(result.value.value)
+            if (state.gaiaAsset) state.gaiaAsset.totalSupply = val
+            if (state.gaiaAssets) {
+              const ga = state.gaiaAssets.find((a) => a.contractAsset.nftIndex === data.nftIndex)
+              if (ga) ga.totalSupply = val
+            }
             // commit('setGaiaAssets', gaiaAssets)
-            resolve(Number(result.result.value.value))
+            resolve(val)
           } catch (e) {
             resolve(0)
           }
@@ -589,6 +636,48 @@ const stacksApiStore = {
         }).catch(() => {
           const md = { image: rootGetters[APP_CONSTANTS.KEY_ASSET_IMAGE_URL](asset) }
           resolve(md)
+        })
+      })
+    },
+    makeTransferBlockstack ({ state, rootGetters }, data) {
+      return new Promise((resolve, reject) => {
+        const amount = Math.round(data.amountStx * precision)
+        const amountBN = new BigNum(amount)
+        openSTXTransfer({
+          recipient: data.recipient,
+          amount: amountBN,
+          memo: 'Payment for credits',
+          appDetails: {
+            name: state.appName,
+            icon: state.appLogo
+          },
+          finished: result => {
+            resolve({ result: result })
+          }
+        }).catch((err) => {
+          reject(err)
+        })
+      })
+    },
+    fetchBlockchainInfo ({ dispatch, commit }) {
+      return new Promise((resolve) => {
+        const path = '/v2/info'
+        const txOptions = { path: path, httpMethod: 'GET', postData: { arguments: [], sender: null } }
+        dispatch('callApiDirect', txOptions).then((result) => {
+          commit('setBlockchainInfo', result)
+          resolve(result)
+        })
+      })
+    },
+    fetchBnsNames ({ commit }, stxAddresses) {
+      return new Promise((resolve, reject) => {
+        const path = process.env.VUE_APP_RISIDIO_API + '/mesh/v2/nft-events/bns'
+        axios.post(path, stxAddresses).then((response) => {
+          const bnsNames = response.data
+          commit('setBnsNames', bnsNames)
+          resolve(bnsNames)
+        }).catch((error) => {
+          reject(error)
         })
       })
     },

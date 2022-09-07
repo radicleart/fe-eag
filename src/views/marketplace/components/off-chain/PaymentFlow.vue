@@ -153,9 +153,8 @@ export default {
     },
     sufficientFunds () {
       if (this.configuration.risidioCardMode === 'nft-purchase-flow') return true
-      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
-      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
-      return (wallet && wallet.accountInfo.balance >= (this.configuration.payment.amountStx * 4))
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO]
+      return wallet?.accountInfo?.balance >= (this.configuration.payment.amountStx * 4) || 0
     },
     paymentMessage () {
       if (this.transactionData.type === 'admin-mint-sft') {

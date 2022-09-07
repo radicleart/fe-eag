@@ -67,6 +67,10 @@ export default {
   },
   methods: {
     next () {
+      if (!this.profile.loggedIn) {
+        this.$notify({ type: 'warning', title: 'Connect Wallet', text: 'Please connect your wallet before continuing.' })
+        return
+      }
       if (this.amount > 0 && this.isValid(this.email)) {
         this.$emit('showPayment', { recipient: this.nftRecipient, amount: this.amount, email: this.email })
       } else if (this.amount === 0) {

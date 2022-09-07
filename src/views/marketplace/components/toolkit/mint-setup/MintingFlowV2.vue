@@ -34,7 +34,7 @@ export default {
     ItemDisplay,
     AddBeneficiaryScreen
   },
-  props: ['items', 'loopRun', 'mintAllocations'],
+  props: ['items', 'loopRun'],
   data () {
     return {
       loading: true,
@@ -107,13 +107,13 @@ export default {
       if (contractAsset) {
         return
       }
-      if (!this.loopRun.batchMode || !this.mintAllocations || this.loopRun.batchSize === 1) {
+      if (!this.loopRun.batchMode || this.loopRun.batchSize === 1) {
         this.mintToken()
         return
       }
       // const endPointer = this.loopRun.batchPointer + this.loopRun.batchSize
       this.loopRun.batchPointer = this.loopRun.batchSize
-      const bean = { loopRun: this.loopRun, mintAllocations: this.mintAllocations }
+      const bean = { loopRun: this.loopRun }
       this.$store.dispatch('rpayCategoryStore/updateLoopRunAndAllocations', bean).then(() => {
         this.$notify({ type: 'success', title: 'Meta Data', text: 'Meta data created and uploaded!' })
         this.callWallet()

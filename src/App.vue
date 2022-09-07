@@ -1,8 +1,5 @@
 <template>
-<div v-if="!configured" :style="getBackground()">
-  <RisidioPay :configuration="appConfig"/>
-</div>
-<div id="app" v-else :style="getBackground()" class="">
+<div id="app" :style="getBackground()" class="">
   <RouterView name="header" class="" />
   <RouterView :class="(isHomePage) ? '' : 'ml-5 pb-5'" id="page" @openModal="openModal"/>
   <footer class="mt-auto ml-5 bg-light">
@@ -17,14 +14,12 @@
 </template>
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import RisidioPay from 'risidio-pay'
 import MessageTicker from '@/views/marketplace/components/gallery/common/MessageTicker'
 import PurchaseFlow from '@/views/marketplace/components/toolkit/purchasing/PurchaseFlow'
 
 export default {
   name: 'App',
   components: {
-    RisidioPay,
     MessageTicker,
     PurchaseFlow
   },
@@ -33,21 +28,14 @@ export default {
       background: 'url(https://images.prismic.io/radicle/ca78cb01-2a48-44ea-8945-d72e41fdbc96_EAG+-+WEB+banner+assets-03-sm.jpg?auto=compress,format)',
       loading: true,
       tickerId: 'anti-app',
-      configured: false,
       loopRun: null,
       asset: null
     }
   },
   beforeCreate () {
     this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'config-flow', asset: this.gaiaAsset })
-    const $self = this
-    window.eventBus.$on('rpayEvent', function (data) {
-      if (data.opcode === 'configured') {
-        $self.$store.dispatch('initApplication').then(() => {
-          document.getElementById($self.tickerId).style.display = 'none'
-          $self.configured = true
-        })
-      }
+    this.$store.dispatch('initApplication').then(() => {
+      document.getElementById(this.tickerId).style.display = 'none'
     })
   },
   mounted () {

@@ -29,11 +29,11 @@
           <MintInfo v-if="loopRun.currentRunKey" :item="item" :loopRun="loopRun"/>
           <PendingTransactionInfo v-if="pending && pending.txStatus === 'pending'" :pending="pending"/>
           <div v-else-if="iAmOwner">
-            <MintingTools v-if="loopRun.currentRunKey" class="w-100" :items="[item]" :loopRun="loopRun" @update="update"/>
+            <MintingTools v-if="loopRun.currentRunKey" class="w-100" :item="item" :loopRun="loopRun" @processChainEvent="processChainEvent"/>
           </div>
         </div>
         <div>
-          <NftHistory v-if="loopRun.currentRunKey" class="mt-5" @update="update" @setPending="setPending" :loopRun="loopRun"  :gaiaAsset="item"/>
+          <NftHistory v-if="loopRun.currentRunKey" class="mt-5" @update="processChainEvent" @setPending="setPending" :loopRun="loopRun"  :gaiaAsset="item"/>
         </div>
       </b-col>
     </b-row>
@@ -68,7 +68,6 @@ export default {
       contractId: null,
       componentKey: 0,
       nftIndex: null,
-      notCount: 0,
       assetHash: null,
       pending: null,
       message: 'No item available...'
@@ -79,34 +78,16 @@ export default {
     this.contractId = this.$route.params.contractId
     this.state = this.$route.query.state
     this.fetchItem()
-    if (window.eventBus && window.eventBus.$on) {
-      const $self = this
-      window.eventBus.$on('rpayEvent', function (data) {
-        if ($self.$route.name !== 'item-preview' && $self.$route.name !== 'nft-preview') return
-        if (data.opcode === 'stx-transaction-sent') {
-          $self.componentKey++
-          // save transaction but not on gaia asset
-          if (data.txId && data.txStatus === 'success') {
-            const item = $self.item
-            if (data.functionName === 'mint-token' || data.functionName === 'collection-mint-token') {
-              $self.saveMintingInfo(item, data)
-            }
-          }
-          $self.setPending(data)
-        }
-      })
-    }
   },
   methods: {
+    processChainEvent (data) {
+      if (data.opcode !== 'cancel') {
+        this.componentKey++
+        this.setPending(data)
+      }
+    },
     cacheUrl () {
       return process.env.VUE_APP_RISIDIO_API + '/mesh/v2/cache/update-by-index/' + this.loopRun.contractId + '/' + this.item.contractAsset.nftIndex
-    },
-    saveMintingInfo (item, data) {
-      item.mintInfo = {
-        txId: data.txId,
-        txStatus: data.txStatus
-      }
-      this.$store.dispatch('rpayMyItemStore/quickSaveItem', item)
     },
     fetchItem () {
       const data = {
@@ -119,26 +100,18 @@ export default {
       })
     },
     setPending (result) {
-      if (this.pending) {
+      if (result) {
         const data = {
           contractId: this.loopRun.contractId
         }
         if (!result || !result.txStatus || result.txStatus === 'pending') {
           this.pending = result
         } else if (result.txStatus === 'success' && result.functionName.indexOf('mint-token') > -1) {
-          if (result.functionName.indexOf('-twenty') > -1) {
-            data.assetHash = result.assetHashes[0]
-            this.updateCacheByHash(data)
-          } else {
-            data.assetHash = result.assetHash
-            this.updateCacheByHash(data)
-          }
         } else if (result.txStatus === 'success' && result.functionName.indexOf('mint-token') === -1) {
           data.nftIndex = result.nftIndex
           this.updateCacheByNftIndex(data)
         } else {
-          if (this.notCount === 0) this.$notify({ type: 'danger', title: 'Transaction Info', text: 'Transaction failed - check blockchain for cause.' })
-          this.notCount++
+          this.$notify({ type: 'danger', title: 'Transaction Info', text: 'Transaction failed - check blockchain for cause.' })
         }
       }
       this.pending = result
@@ -161,14 +134,6 @@ export default {
         this.$store.dispatch('rpayStacksContractStore/fetchTokenByContractIdAndNftIndex', data).then(() => {
           this.fetchItem()
         })
-      })
-    },
-    update () {
-      this.fetchItem()
-    },
-    deleteMediaItem: function (mediaId) {
-      this.$store.dispatch('rpayMyItemStore/deleteMediaItem', { item: this.item, id: mediaId }).then(() => {
-        this.$emit('delete-cover')
       })
     },
     preserveWhiteSpace: function (content) {

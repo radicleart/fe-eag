@@ -12,7 +12,7 @@
   </b-container>
 </div>
 <b-container v-else>
-  Collection not found.
+  Looking up Collection.
   <span v-if="loopRun && loopRun.status === 'disabled'">This collection can't be shown at the present time.</span>
 </b-container>
 </template>

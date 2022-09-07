@@ -52,7 +52,9 @@ export const APP_CONSTANTS = {
   KEY_HISTORIC_INVOICE: 'merchantStore/getHistoricInvoice',
 
   GET_LOOP_RUNS: 'stacksApiStore/getLoopRuns',
-  KEY_ASSET_IMAGE_URL: 'rpayCategoryStore/getAssetImageUrl',
+  KEY_ASSET_IMAGE_URL: 'stacksApiStore/getAssetImageUrl',
+  KEY_BLOCKCHAIN_INFO: 'stacksApiStore/getBlockchainInfo',
+  KEY_STACKS_TIP_HEIGHT: 'stacksApiStore/stacksTipHeight',
 
   KEY_PROFILE: 'stacksAuthStore/getMyProfile',
   KEY_ACCOUNT_INFO: 'stacksAuthStore/getAccountInfo',

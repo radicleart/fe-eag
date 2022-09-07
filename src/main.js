@@ -11,7 +11,6 @@ import Notifications from 'vue-notification'
 import PrismicVue from 'prismic-vue'
 import linkResolver from './prismic/link-resolver'
 import htmlSerializer from './prismic/html-serializer'
-const RisidioPay = () => import('risidio-pay')
 
 // Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue)
@@ -24,7 +23,6 @@ Vue.use(PrismicVue, {
   linkResolver,
   htmlSerializer
 })
-Vue.use(RisidioPay)
 Vue.use(Vue2TouchEvents)
 Vue.use(Notifications, { closeOnClick: true, duration: 6000 })
 

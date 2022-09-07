@@ -89,22 +89,7 @@ export default {
   mounted () {
     this.assetHash = this.$route.params.assetHash
     this.nftIndex = Number(this.$route.params.nftIndex)
-    const $self = this
     this.resizeContainers()
-    if (window.eventBus && window.eventBus.$on) {
-      window.eventBus.$on('rpayEvent', function (data) {
-        if ($self.$route.name.indexOf('asset-by-') === -1) return
-        $self.componentKey++
-        $self.$bvModal.hide('result-modal')
-        $self.txData = data
-        if (data.opcode.indexOf('stx-transaction-sent') > -1) {
-          if (data.txStatus === 'pending') {
-            // $self.$bvModal.show('result-modal')
-          }
-          $self.update()
-        }
-      })
-    }
     Vue.nextTick(function () {
       const vid = document.getElementById('video-column')
       if (vid) this.videoHeight = vid.clientHeight

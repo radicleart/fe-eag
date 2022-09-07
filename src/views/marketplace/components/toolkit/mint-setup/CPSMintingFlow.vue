@@ -62,7 +62,6 @@ export default {
       loading: true,
       gaiaAssets: [],
       makerUrlKey: null,
-      mintAllocations: [],
       currentRunKey: null,
       errorMessage: null,
       beneficiaries: null,
@@ -94,15 +93,6 @@ export default {
           if (data.opcode === 'stx-transaction-sent') {
             $self.$bvModal.hide('minting-modal')
             if (data.txStatus.indexOf('abort') > -1) {
-              const punkIndexes = []
-              $self.mintAllocations.forEach((ma) => {
-                punkIndexes.push(ma.punkIndex)
-              })
-              const bean = {
-                punkIndexes: punkIndexes,
-                currentRunKey: $self.loopRun.currentRunKey
-              }
-              $self.$store.dispatch('rpayCategoryStore/clearMintAllocations', bean)
               $self.$notify({ type: 'error', title: 'Tx Failed', text: 'Probably a post condition failure - not enough stacks to pay the minting fee?' })
             } else if (data.txStatus.indexOf('replace') > -1) {
               $self.$notify({ type: 'warning', title: 'Tx Replaced', text: 'We may have lost the tx id - if so your token is still safe and will be reconnected once confirmed.' })
