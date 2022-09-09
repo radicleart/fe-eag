@@ -80,7 +80,7 @@ const utils = {
   },
   toOnChainAmount: function (amount, gftPrecision) {
     try {
-      if (!gftPrecision) {
+      if (typeof gftPrecision !== 'number') {
         amount = amount * precision
         return Math.round(amount * precision) / precision
       } else {

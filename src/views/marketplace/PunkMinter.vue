@@ -93,11 +93,11 @@ export default {
         contractName: loopRun.contractId.split('.')[1],
         currentRunKey: this.$route.params.collection
       }
-      this.$store.dispatch('rpayMarketGenFungStore/getCommissionTokensByContract', data).then((commissions) => {
+      this.$store.dispatch('stacksPurchaseStore/getCommissionTokensByContract', data).then((commissions) => {
         this.commissions = commissions
         this.loadMempoolTransactions()
       })
-      this.$store.dispatch('rpayMarketStore/lookupMintPassBalance', data).then((result) => {
+      this.$store.dispatch('stacksPurchaseStore/lookupMintPassBalance', data).then((result) => {
         if (result && result.result.value > 0) {
           this.mintPasses = Number(result.result.value)
         } else {

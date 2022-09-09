@@ -43,12 +43,8 @@ export default {
   },
   mounted () {
     this.errorMessage = null
-    this.$store.dispatch('rpayStacksStore/fetchMacSkyWalletInfo').then(() => {
-      this.$store.commit('merchantStore/setDisplayCard', 100)
-      this.loading = false
-    }).catch(() => {
-      this.loading = false
-    })
+    this.$store.commit('merchantStore/setDisplayCard', 100)
+    this.loading = false
   },
   methods: {
     buyNow: function () {

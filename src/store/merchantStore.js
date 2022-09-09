@@ -154,7 +154,6 @@ const configuration = {
   payment: payment,
   minter: {},
   network: process.env.VUE_APP_NETWORK,
-  risidioProjectId: process.env.VUE_APP_STACKS_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_STACKS_CONTRACT_NAME,
   risidioBaseApi: process.env.VUE_APP_RISIDIO_API,
   risidioStacksApi: process.env.VUE_APP_STACKS_API,
   risidioWalletMac: process.env.VUE_APP_WALLET_MAC,
@@ -428,7 +427,6 @@ const merchantStore = {
     continueOrCreatePayment ({ dispatch, state, commit }) {
       return new Promise((resolve, reject) => {
         const configuration = state.configuration
-        this.dispatch('rpayStacksStore/fetchMacSkyWalletInfo', { root: true })
         commit('addPaymentOptions')
         if (configuration.payment.forceNew) {
           localStorage.removeItem('OP_INVOICE')

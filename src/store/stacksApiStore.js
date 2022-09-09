@@ -8,6 +8,7 @@ import {
   deserializeCV,
   cvToJSON,
   tupleCV,
+  contractPrincipalCV,
   standardPrincipalCV
 } from '@stacks/transactions'
 import { DateTime } from 'luxon'
@@ -553,11 +554,35 @@ const stacksApiStore = {
     fetchBalance ({ dispatch }, data) {
       return new Promise((resolve) => {
         if (!data.nftIndex || !data.stxAddress) return
-        const functionArgs = [`0x${serializeCV(uintCV(data.nftIndex)).toString('hex')}`, `0x${serializeCV(standardPrincipalCV(data.stxAddress)).toString('hex')}`]
+        let functionArgs
+        if (data.stxAddress.indexOf('.') === -1) {
+          functionArgs = [`0x${serializeCV(uintCV(data.nftIndex)).toString('hex')}`, `0x${serializeCV(standardPrincipalCV(data.stxAddress)).toString('hex')}`]
+        } else {
+          functionArgs = [`0x${serializeCV(uintCV(data.nftIndex)).toString('hex')}`, `0x${serializeCV(contractPrincipalCV(data.stxAddress.split('.')[0], data.stxAddress.split('.')[1])).toString('hex')}`]
+        }
         const txOptions = {
           contractAddress: data.contractId.split('.')[0],
           contractName: data.contractId.split('.')[1],
           functionName: 'get-balance',
+          functionArgs: functionArgs
+        }
+        dispatch('callContractReadOnly', txOptions).then((result) => {
+          try {
+            if (result.value) resolve(Number(result.value.value))
+            else resolve(Number(result.value.value))
+          } catch (e) {
+            resolve(0)
+          }
+        })
+      })
+    },
+    fetchDecimals ({ dispatch }, data) {
+      return new Promise((resolve) => {
+        const functionArgs = [`0x${serializeCV(uintCV(1)).toString('hex')}`]
+        const txOptions = {
+          contractAddress: data.contractId.split('.')[0],
+          contractName: data.contractId.split('.')[1],
+          functionName: 'get-decimals',
           functionArgs: functionArgs
         }
         dispatch('callContractReadOnly', txOptions).then((result) => {

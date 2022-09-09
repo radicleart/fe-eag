@@ -62,23 +62,32 @@ export default {
       amount: 0,
       sipTenTokens: null,
       sipTenToken: null,
-      tokenContractId: null
+      tokenContractId: null,
+      sftDecimals: 0,
+      recipientBalance: 0
     }
   },
   mounted () {
-    if (this.loopRun.marketplaceVersion > 2) {
-      this.$store.dispatch('stacksApiStore/sipTenTokenFindBy').then((sipTenTokens) => {
-        if (sipTenTokens) {
-          this.sipTenTokens = sipTenTokens
-          this.sipTenToken = sipTenTokens.find((o) => o.symbol === 'uSTX')
-          this.tokenContractId = this.sipTenToken.contractId
-          this.$notify({ type: 'success', title: 'Available Tokens', text: 'List NFT for x tokens' })
+    this.$store.dispatch('stacksApiStore/sipTenTokenFindBy').then((sipTenTokens) => {
+      if (sipTenTokens) {
+        this.sipTenTokens = sipTenTokens
+        this.sipTenToken = sipTenTokens.find((o) => o.symbol === 'uSTX')
+        this.tokenContractId = this.sipTenToken.contractId
+        this.$notify({ type: 'success', title: 'Available Tokens', text: 'List NFT for x tokens' })
+      }
+      this.$store.dispatch('stacksApiStore/fetchDecimals', { contractId: this.loopRun.contractId }).then((sftDecimals) => {
+        this.sftDecimals = sftDecimals
+        const data = {
+          contractId: this.loopRun.contractId,
+          nftIndex: this.contractAsset.nftIndex,
+          stxAddress: process.env.VUE_APP_MARKETPLACE_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_MARKETPLACE_CONTRACT_NAME
         }
-        this.loading = false
+        this.$store.dispatch('stacksApiStore/fetchBalance', data).then((res) => {
+          this.recipientBalance = res
+          this.loading = false
+        })
       })
-    } else {
-      this.loading = false
-    }
+    })
   },
   methods: {
     isListed () {
@@ -115,8 +124,10 @@ export default {
         balance: this.balance,
         unitPrice: Number(this.unitPrice),
         assetName: this.loopRun.assetName,
-        owner: this.contractAsset.owner
-
+        owner: this.contractAsset.owner,
+        recipient: process.env.VUE_APP_MARKETPLACE_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_MARKETPLACE_CONTRACT_NAME,
+        recipientBalance: this.recipientBalance,
+        sftDecimals: this.sftDecimals
       }
       if (this.tokenContractId) {
         data.tokenContractAddress = this.tokenContractId.split('.')[0]

@@ -8,6 +8,7 @@ import {
   noneCV,
   trueCV,
   falseCV,
+  serializeCV,
   stringAsciiCV,
   standardPrincipalCV,
   contractPrincipalCV,
@@ -17,14 +18,12 @@ import {
   createAssetInfo,
   PostConditionMode,
   makeStandardNonFungiblePostCondition,
+  makeContractNonFungiblePostCondition,
   makeStandardFungiblePostCondition
 } from '@stacks/transactions'
 import { openContractCall } from '@stacks/connect'
-import {
-  StacksTestnet,
-  StacksMainnet
-} from '@stacks/network'
 import { APP_CONSTANTS } from '@/app-constants'
+import axios from 'axios'
 
 const getSaleRoyalties = function (data) {
   const addressList = []
@@ -75,25 +74,41 @@ const getMintRoyalties = function (data) {
   }
 }
 
-const getSerialisedNftTuple = function (data) {
-  const tupCV = tupleCV({
-    'token-id': uintCV(data.nftIndex),
-    owner: standardPrincipalCV(data.owner)
-  })
+const getSerialisedNftTuple = function (nftIndex, owner) {
+  let tupCV
+  if (owner.indexOf('.') === -1) {
+    tupCV = tupleCV({ 'token-id': uintCV(nftIndex), owner: standardPrincipalCV(owner) })
+  } else {
+    tupCV = tupleCV({ 'token-id': uintCV(nftIndex), owner: contractPrincipalCV(owner.split('.')[0], owner.split('.')[1]) })
+  }
   return tupCV
 }
 
-const getSftTransferPostConds = function (data) {
-  const postConditionAddress = data.owner
-  const postConditionCode = FungibleConditionCode.Equal
-  const postConditionAmount = new BigNum(data.amount)
-  const fungibleAssetInfo = createAssetInfo(data.contractAddress, data.contractName, 'edition-token')
+const getNonFungiblePostConditionNotOwns = function (nonFungibleAssetInfo, nftIndex, principal) {
+  if (principal.indexOf('.') === -1) {
+    return makeStandardNonFungiblePostCondition(
+      principal,
+      NonFungibleConditionCode.DoesNotOwn,
+      nonFungibleAssetInfo,
+      getSerialisedNftTuple(nftIndex, principal)
+    )
+  } else {
+    return makeContractNonFungiblePostCondition(
+      principal.split('.')[0],
+      principal.split('.')[1],
+      NonFungibleConditionCode.DoesNotOwn,
+      nonFungibleAssetInfo,
+      getSerialisedNftTuple(nftIndex, principal)
+    )
+  }
+}
 
+const getSftTransferPostConds = function (data) {
   const standardFungiblePostCondition = makeStandardFungiblePostCondition(
-    postConditionAddress,
-    postConditionCode,
-    postConditionAmount,
-    fungibleAssetInfo
+    data.owner,
+    FungibleConditionCode.Equal,
+    new BigNum(utils.toOnChainAmount(data.amount, data.sftDecimals)),
+    createAssetInfo(data.contractAddress, data.contractName, 'edition-token')
   )
 
   const nonFungibleAssetInfo = createAssetInfo(
@@ -101,19 +116,19 @@ const getSftTransferPostConds = function (data) {
     data.contractName,
     (data.assetName) ? data.assetName : data.contractName.split('-')[0]
   )
-  const standardNonFungiblePostConditionNotOwns = makeStandardNonFungiblePostCondition(
-    data.owner,
-    NonFungibleConditionCode.DoesNotOwn,
-    nonFungibleAssetInfo,
-    getSerialisedNftTuple(data)
-  )
-
   const postConds = []
-  if (data.amount >= data.balance) {
-    postConds.push(standardNonFungiblePostConditionNotOwns)
-  } else {
-    postConds.push(standardNonFungiblePostConditionNotOwns)
+
+  // the sender burn event
+  const ownerNonFungiblePostConditionNotOwns = getNonFungiblePostConditionNotOwns(nonFungibleAssetInfo, data.nftIndex, data.owner)
+  postConds.push(ownerNonFungiblePostConditionNotOwns)
+
+  if (data.recipientBalance > 0) {
+    // the recipient burn event if they have non zero balance
+    const recipientNonFungiblePostConditionNotOwns = getNonFungiblePostConditionNotOwns(nonFungibleAssetInfo, data.nftIndex, data.recipient)
+    postConds.push(recipientNonFungiblePostConditionNotOwns)
   }
+
+  // the FT transfer event
   postConds.push(standardFungiblePostCondition)
   return postConds
 }
@@ -201,6 +216,32 @@ const stacksPurchaseStore = {
         })
       })
     },
+    getCommissionTokensByContract: function ({ rootGetters }, data) {
+      return new Promise(function (resolve) {
+        axios.get(process.env.VUE_APP_RISIDIO_API + '/mesh/v2/mint-commissions-by-contract/' + data.contractId).then((response) => {
+          resolve(response.data)
+        }).catch(() => {
+          resolve()
+        })
+      })
+    },
+    lookupMintPassBalance: function ({ dispatch }, data) {
+      return new Promise(function (resolve) {
+        const functionArgs = [`0x${serializeCV(standardPrincipalCV(data.stxAddress)).toString('hex')}`]
+        // const functionArgs = (data.functionArgs) ? data.functionArgs : [standardPrincipalCV(data.stxAddress)]
+        const callData = {
+          contractAddress: data.contractAddress,
+          contractName: data.contractName,
+          functionName: 'get-mint-pass-balance',
+          functionArgs: functionArgs
+        }
+        dispatch('callContractReadOnly', callData).then((result) => {
+          resolve(result)
+        }).catch((e) => {
+          resolve(null)
+        })
+      })
+    },
     freezeMetaData ({ dispatch }, data) {
       return new Promise(function (resolve, reject) {
         const callData = {
@@ -209,7 +250,7 @@ const stacksPurchaseStore = {
           functionName: 'freeze-metadata',
           functionArgs: []
         }
-        dispatch('stacksPurchaseStore/callContractBlockstack', callData, { root: true }).then((result) => {
+        dispatch('callContractBlockstack', callData).then((result) => {
           resolve(result)
         }).catch((error) => {
           reject(error)
@@ -284,20 +325,6 @@ const stacksPurchaseStore = {
         })
       })
     },
-    transferSft ({ dispatch }, data) {
-      return new Promise((resolve, reject) => {
-        data.postConditionMode = PostConditionMode.Deny
-        data.postConditions = getSftTransferPostConds(data)
-        data.functionName = 'transfer'
-        data.network = (process.env.VUE_APP_NETWORK === 'mainnet') ? new StacksMainnet() : new StacksTestnet()
-        data.functionArgs = [uintCV(data.nftIndex), uintCV(data.amount), standardPrincipalCV(data.owner), standardPrincipalCV(data.recipient)]
-        dispatch('stacksPurchaseStore/callContractBlockstack', data, { root: true }).then((result) => {
-          resolve(result)
-        }).catch((error) => {
-          reject(error)
-        })
-      })
-    },
     updateMetaDataUrl ({ dispatch }, data) {
       return new Promise((resolve, reject) => {
         data.functionName = 'update-meta-data-url'
@@ -310,7 +337,7 @@ const stacksPurchaseStore = {
         })
       })
     },
-    listInToken ({ dispatch, rootGetters }, data) {
+    listInToken ({ dispatch }, data) {
       return new Promise((resolve, reject) => {
         // nft-asset-contract <sft-trait>
         // listing {token-id: uint, amount: uint, unit-price: uint, expiry: uint, taker: (optional principal)}
@@ -332,6 +359,20 @@ const stacksPurchaseStore = {
         })
       })
     },
+    transferSft ({ dispatch }, data) {
+      return new Promise((resolve, reject) => {
+        data.postConditionMode = PostConditionMode.Deny
+        data.postConditions = getSftTransferPostConds(data)
+        data.functionName = 'transfer'
+        // data.network = (process.env.VUE_APP_NETWORK === 'mainnet') ? new StacksMainnet() : new StacksTestnet()
+        data.functionArgs = [uintCV(data.nftIndex), uintCV(utils.toOnChainAmount(data.amount, data.sftDecimals)), standardPrincipalCV(data.owner), standardPrincipalCV(data.recipient)]
+        dispatch('callContractBlockstack', data).then((result) => {
+          resolve(result)
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+    },
     listSFTInToken ({ dispatch, rootGetters }, data) {
       return new Promise((resolve, reject) => {
         // nft-asset-contract <sft-trait>
@@ -341,7 +382,7 @@ const stacksPurchaseStore = {
         const tipHeight = rootGetters[APP_CONSTANTS.KEY_STACKS_TIP_HEIGHT]
         const listing = tupleCV({
           'token-id': uintCV(data.nftIndex),
-          amount: uintCV(data.amount),
+          amount: uintCV(utils.toOnChainAmount(data.amount, data.sftDecimals)),
           'unit-price': uintCV(utils.toOnChainAmount(data.unitPrice, data.decimals)),
           expiry: uintCV(tipHeight + 10000),
           taker: data.taker ? someCV(data.principal(data.taker)) : noneCV()
@@ -355,12 +396,12 @@ const stacksPurchaseStore = {
         const callData = {
           postConditionMode: PostConditionMode.Deny,
           postConditions: getSftTransferPostConds(data),
-          contractAddress: process.env.VUE_APP_REGISTRY_CONTRACT_ADDRESS,
-          contractName: 'thirteen-market',
+          contractAddress: process.env.VUE_APP_MARKETPLACE_CONTRACT_ADDRESS,
+          contractName: process.env.VUE_APP_MARKETPLACE_CONTRACT_NAME,
           functionName: 'list-in-token',
           functionArgs: functionArgs
         }
-        dispatch('stacksPurchaseStore/callContractBlockstack', callData, { root: true }).then((result) => {
+        dispatch('callContractBlockstack', callData).then((result) => {
           resolve(result)
         }).catch((error) => {
           reject(error)
@@ -422,15 +463,15 @@ const stacksPurchaseStore = {
     },
     allowList ({ dispatch }, data) {
       return new Promise((resolve, reject) => {
-        let allow = trueCV()
-        if (!data.allow) {
-          allow = falseCV()
+        let allowed = trueCV()
+        if (!data.allowed) {
+          allowed = falseCV()
         }
-        const functionArgs = [contractPrincipalCV(data.contractAddress, data.contractName), allow]
+        const functionArgs = [contractPrincipalCV(data.allowedContractAddress, data.allowedContractName), allowed]
         const callData = {
           postConditions: [],
-          contractAddress: process.env.VUE_APP_REGISTRY_CONTRACT_ADDRESS,
-          contractName: 'thirteen-market',
+          contractAddress: data.contractAddress,
+          contractName: data.contractName,
           functionName: 'set-allowed',
           functionArgs: functionArgs
         }

@@ -2,24 +2,68 @@
 <b-container id="admin-page" style="height: 100vh;">
   <b-row>
     <b-col >
-      <AllowAssetContract />
+      <b-card bg-variant="ligth" header-tag="header" footer-tag="footer">
+        <!-- <SellingHeader :allowEdit="true"/> -->
+        <b-card-text>
+          <label for="targetContractId" class="">Target Contract Id:</label>
+          <b-input-group class="mb-3">
+            <b-form-input id="targetContractId" :value="targetContractId" v-model="targetContractId" class="input"></b-form-input>
+          </b-input-group>
+        </b-card-text>
+      </b-card>
     </b-col>
   </b-row>
+  <b-container>
+    <b-tabs small card left content-class="mt-3 text-small">
+      <b-tab title="Allow List">
+        <UpdateAllowedContracts :contractId="targetContractId"/>
+      </b-tab>
+      <b-tab title="Token URI">
+        <UpdateTokenUri :contractId="targetContractId"/>
+      </b-tab>
+      <b-tab title="Mint Passes">
+        <UpdateMintPass :contractId="targetContractId"/>
+      </b-tab>
+      <!--
+      <b-tab title="Manage Sip Tens">
+        <UpdateSipTenToken :loopRun="loopRun"/>
+      </b-tab>
+      <b-tab title="Mint Commissions">
+        <UpdateMintCommission :loopRun="loopRun"/>
+      </b-tab>
+      <b-tab title="Mint Price">
+        <UpdateMintPrice :loopRun="loopRun"/>
+      </b-tab>
+      <b-tab title="Freeze Meta">
+        <FreezeMetaData :loopRun="loopRun"/>
+      </b-tab>
+      <b-tab title="Signing Key">
+        <UpdateSigningKey :loopRun="loopRun"/>
+      </b-tab>
+      <b-tab title="Admin Mint">
+        <AdminMint :loopRun="loopRun"/>
+      </b-tab>
+      -->
+    </b-tabs>
+  </b-container>
 </b-container>
 </template>
 
 <script>
-import AllowAssetContract from '@/views/admin/AllowAssetContract'
+import UpdateAllowedContracts from '@/views/admin/sandbox/UpdateAllowedContracts'
+import UpdateTokenUri from '@/views/admin/sandbox/UpdateTokenUri'
+import UpdateMintPass from '@/views/admin/sandbox/UpdateMintPass'
 
 export default {
   name: 'Home',
   components: {
-    AllowAssetContract
+    UpdateAllowedContracts,
+    UpdateMintPass,
+    UpdateTokenUri
   },
   data () {
     return {
-      foreground2: 'url(https://images.prismic.io/radicle/f6ceb80b-27d3-42ff-846d-233fd6ed5153_EAG+-+WEB+banner+assets-07-sm.png?auto=compress,format)',
-      foreground1: 'url(https://images.prismic.io/radicle/f093502f-8b27-46bd-ab26-0c4dfbb2cb85_EAG+-+WEB+banner+assets-06-sm.png?auto=compress,format)'
+      targetContractId: process.env.VUE_APP_STACKS_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_STACKS_CONTRACT_NAME
     }
   },
   methods: {

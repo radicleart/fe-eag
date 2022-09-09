@@ -52,7 +52,6 @@ const setup = function (data) {
     payment: payment,
     minter: {},
     network: NETWORK,
-    risidioProjectId: process.env.VUE_APP_STACKS_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_STACKS_CONTRACT_NAME,
     risidioBaseApi: risidioBaseApi,
     risidioStacksApi: process.env.VUE_APP_STACKS_API,
     risidioWalletMac: process.env.VUE_APP_WALLET_MAC,

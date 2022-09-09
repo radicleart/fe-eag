@@ -213,8 +213,7 @@ export default {
         functionName: 'batch-upgrade-v1-to-v2',
         functionArgs: [listCV(upgradeList)]
       }
-      const methos = (process.env.VUE_APP_NETWORK === 'local') ? 'rpayStacksStore/callContractRisidio' : 'rpayStacksStore/callContractBlockstack'
-      this.$store.dispatch(methos, callData).then((result) => {
+      this.$store.dispatch('stacksPurchaseStore/callContractBlockstack', callData).then((result) => {
         this.clicked = true
         this.result = result
         this.$notify({ type: 'success', title: 'Upgrade in Progress', text: 'Check the explorer - your upgrade will be ready soon!' })

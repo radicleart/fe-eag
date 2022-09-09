@@ -17,6 +17,10 @@ Vue.use(BootstrapVue)
 // Optionally install the BootstrapVue icon components plugin
 Vue.use(IconsPlugin)
 
+if (!window.eventBus) {
+  window.eventBus = new Vue()
+}
+
 Vue.config.productionTip = false
 Vue.use(PrismicVue, {
   endpoint: 'https://dbid.cdn.prismic.io/api/v2',

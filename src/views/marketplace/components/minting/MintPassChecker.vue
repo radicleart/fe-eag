@@ -35,7 +35,7 @@ export default {
         contractName: this.loopRun.contractId.split('.')[1],
         currentRunKey: this.loopRun.currentRunKey
       }
-      this.$store.dispatch('rpayMarketStore/lookupMintPassBalance', data).then((result) => {
+      this.$store.dispatch('stacksPurchaseStore/lookupMintPassBalance', data).then((result) => {
         if (result && result.result && result.result.value > 0) {
           this.mintPasses = Number(result.result.value)
         } else {

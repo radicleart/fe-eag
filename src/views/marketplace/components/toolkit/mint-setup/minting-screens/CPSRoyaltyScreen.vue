@@ -49,7 +49,7 @@ export default {
     const data = {
       contractId: this.loopRun.contractId
     }
-    this.$store.dispatch('rpayMarketGenFungStore/getCommissionTokensByContract', data).then((commissions) => {
+    this.$store.dispatch('stacksPurchaseStore/getCommissionTokensByContract', data).then((commissions) => {
       if (commissions) {
         this.tokenContractId = commissions[0].tokenContractId
         this.commissions = commissions
